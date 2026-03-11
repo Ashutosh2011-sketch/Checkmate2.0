@@ -1,0 +1,87 @@
+<div class="page">
+
+  <h1>Checklist Tracker</h1>
+
+  <div class="card-container">
+
+    <div *ngFor="let checklist of checklists" class="card">
+
+      <h3>{{ checklist.name }}</h3>
+      <p><strong>Department:</strong> {{ checklist.department }}</p>
+
+      <div class="progress-bar">
+        <div class="progress-fill"
+             [style.width.%]="getProgress(checklist)">
+        </div>
+      </div>
+
+      <p><strong>{{ getProgress(checklist) }}%</strong> Complete</p>
+
+      <span class="status"
+            [ngClass]="{
+              'pending': getStatus(checklist) === 'Pending',
+              'progress': getStatus(checklist) === 'In Progress',
+              'completed': getStatus(checklist) === 'Completed'
+            }">
+        {{ getStatus(checklist) }}
+      </span>
+
+      <hr>
+
+      <div *ngFor="let task of checklist.tasks">
+
+        <label>
+          <input type="checkbox"
+                 [checked]="task.completed"
+                 (change)="toggleTask(checklist, task)" />
+          {{ task.title }}
+        </label>
+
+        <p>Deadline: {{ task.deadline }}</p>
+
+        <div>
+          <input #commentInput placeholder="Add comment" />
+          <button (click)="addComment(task, commentInput.value); commentInput.value=''">
+            Add
+          </button>
+        </div>
+
+        <div *ngIf="task.comments.length > 0">
+          <p><strong>Comments:</strong></p>
+          <ul>
+            <li *ngFor="let c of task.comments">{{ c }}</li>
+          </ul>
+        </div>
+
+        <div>
+          <input #fileInput placeholder="Attachment name" />
+          <button (click)="addAttachment(task, fileInput.value); fileInput.value=''">
+            Attach
+          </button>
+        </div>
+
+        <div *ngIf="task.attachments.length > 0">
+          <p><strong>Attachments:</strong></p>
+          <ul>
+            <li *ngFor="let a of task.attachments">{{ a }}</li>
+          </ul>
+        </div>
+
+        <hr>
+
+      </div>
+
+      <div *ngIf="checklist.activityLog.length > 0">
+        <h4>Activity Log</h4>
+        <ul>
+          <li *ngFor="let log of checklist.activityLog">
+            {{ log }}
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

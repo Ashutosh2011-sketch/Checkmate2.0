@@ -1,0 +1,23 @@
+<div class="notifications-page">
+
+  <div class="notifications-grid" *ngIf="notificationsList.length > 0">
+    
+    <div class="notif-card" *ngFor="let notif of notificationsList" [style.border-left-color]="notif.borderColor">
+      <div class="card-top">
+        <span class="notif-icon">{{ notif.icon }}</span>
+        <h4 class="notif-title">{{ notif.title }}</h4>
+      </div>
+      <p class="notif-desc">{{ notif.description }}</p>
+    </div>
+
+  </div>
+
+  <div class="empty-state" *ngIf="notificationsList.length === 0">
+    <div class="empty-icon">🎉</div>
+    <h3>All caught up!</h3>
+    <p>You have no new notifications.</p>
+  </div>
+
+  <div class="action-row" *ngIf="notificationsList.length > 0">
+    <button class="mark-read-btn" (click)="markAllAsRead()">Mark All as Read</button>
+  </div>

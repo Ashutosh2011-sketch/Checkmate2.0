@@ -1,0 +1,58 @@
+<div class="main-content" [class.drawer-open]="isAddRoleDrawerOpen">
+  
+  <div class="content-card">
+    <div class="role-list-panel">
+      <h2>Role List</h2>
+      <ul class="role-list">
+        <li *ngFor="let role of roles" 
+            [class.selected]="role === selectedRole"
+            (click)="selectRole(role)">
+          <i class="icon-user-avatar">👤</i>
+          <span>{{ role.name }}</span>
+        </li>
+      </ul>
+      <button class="btn btn-outline-primary add-role-btn" (click)="openAddRoleDrawer()">
+        + Add Role
+      </button>
+    </div>
+
+    <div class="permissions-panel" *ngIf="selectedRole">
+      <h2>Permissions for: {{ selectedRole.name }}</h2>
+      
+      <div class="permission-groups">
+        <div class="permission-group" *ngFor="let category of permissionCategories">
+          <h3>{{ category }}</h3>
+          <div class="permission-item" *ngFor="let permission of groupedPermissions[category]">
+            <span>{{ permission.name }}</span>
+            <label class="switch">
+              <input type="checkbox" 
+                     [checked]="permission.isEnabled"
+                     (change)="onPermissionToggle(permission)">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="unsaved-changes" *ngIf="hasUnsavedChanges">
+          <span class="dot"></span> Unsaved Changes
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-primary" [disabled]="!hasUnsavedChanges" (click)="saveChanges()">Save Changes</button>
+          <button class="btn btn-outline-secondary" (click)="discardChanges()">Discard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<app-add-role-drawer
+  [isOpen]="isAddRoleDrawerOpen"
+  [existingRoles]="roles"
+  (close)="closeAddRoleDrawer()"
+  (roleCreated)="onRoleCreated($event)">
+</app-add-role-drawer>
+
+<div class="overlay" *ngIf="isAddRoleDrawerOpen" (click)="closeAddRoleDrawer()"></div>

@@ -1,0 +1,324 @@
+/* roles-permissions.component.css */
+
+/* Variables (using standard CSS variables for compatibility) */
+:root {
+  --primary-color: #6f42c1;
+  --primary-hover: #5a32a3;
+  --primary-light: #f3f0f9;
+  --text-dark: #212529;
+  --text-muted: #6c757d;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --border-color: #e9ecef;
+  --danger-color: #ffc107;
+}
+
+/* Page Layout */
+.page-container {
+  display: flex;
+  height: 100vh;
+  background-color: var(--bg-main);
+  overflow: hidden;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+  transition: margin-right 0.3s ease-in-out;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+/* Main Content Card */
+.content-card {
+  display: flex;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+/* Left Panel: Role List */
+.role-list-panel {
+  width: 280px;
+  border-right: 1px solid var(--border-color);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+}
+
+.role-list-panel h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-dark);
+}
+
+.role-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.role-list li {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.role-list li:hover {
+  border-color: #d1d5db;
+}
+
+.role-list li.selected {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: var(--text-dark);
+}
+
+.icon-user-avatar {
+  margin-right: 12px;
+  color: #adb5bd;
+  font-style: normal;
+}
+
+.add-role-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Right Panel: Permissions */
+.permissions-panel {
+  flex: 1;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: var(--bg-card);
+}
+
+.permissions-panel h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text-dark);
+}
+
+.permission-groups {
+  flex: 1;
+}
+
+.permission-group {
+  margin-bottom: 32px;
+}
+
+.permission-group h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.permission-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.permission-item:last-child {
+  border-bottom: none;
+}
+
+/* Footer & Actions */
+.panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.unsaved-changes {
+  display: flex;
+  align-items: center;
+  margin-right: 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.unsaved-changes .dot {
+  height: 8px;
+  width: 8px;
+  background-color: var(--danger-color);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  background-color: #ced4da;
+  cursor: not-allowed;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--border-color);
+  background: var(--bg-card);
+}
+
+.btn-outline-primary:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline-secondary {
+  color: var(--text-dark);
+  border-color: var(--border-color);
+  background: var(--bg-card);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--bg-main);
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Overlay for Drawer */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 90;
+}

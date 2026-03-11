@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="content-wrapper" *ngIf="checklist">
+    
+    <div class="header-section">
+      <h1>{{ checklist.title }}</h1>
+      <div class="status-row">
+        <span class="status-pill">{{ checklist.status }}</span>
+        <span class="progress-text">{{ checklist.progress }}% Completed</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="checklist.progress"></div>
+      </div>
+    </div>
+
+    <div class="grid-layout">
+      
+      <div class="left-column">
+        
+        <div *ngFor="let section of checklist.sections" class="section-card">
+          <h3>{{ section.title }}</h3>
+          
+          <div *ngFor="let task of section.tasks" class="task-row">
+            <div class="task-info">
+              <div class="avatar">{{ task.avatar }}</div>
+              <div class="task-text">
+                <div class="task-name">{{ task.name }}</div>
+                <div class="task-meta" *ngIf="task.assignee">Assigned to {{ task.assignee }} • Due: {{ task.due }}</div>
+              </div>
+            </div>
+            <button class="status-btn" [ngClass]="getStatusClass(task.status)">
+              {{ task.status }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        
+        <div class="widget-card">
+          <h4>Collaboration & Activity</h4>
+          <div class="input-box">
+            <span>🔍</span>
+            <input type="text" placeholder="You comment...">
+          </div>
+        </div>
+
+        <div class="widget-card">
+          <h4>Audit Log</h4>
+          <div class="log-item" *ngFor="let log of checklist.auditLogs">
+            <div class="log-icon">{{ log.icon }}</div>
+            
+            <div class="log-text" *ngIf="!log.isFile">
+              <strong>{{ log.user }}</strong> {{ log.action }}
+            </div>
+            
+            <div class="log-text" *ngIf="log.isFile">
+              <span class="file-name-blue">{{ log.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="widget-card">
+          <h4>File Attachments</h4>
+          <div class="file-item" *ngFor="let file of checklist.files">
+            <div class="file-icon">{{ file.icon }}</div>
+            <div class="file-name-blue">{{ file.name }}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+  </div>
+</div>

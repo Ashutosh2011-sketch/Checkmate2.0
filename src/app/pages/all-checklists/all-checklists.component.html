@@ -1,0 +1,53 @@
+<div class="all-checklists-page">
+
+  <div class="controls-section">
+    <div class="filters">
+      <span class="filter-label">Status</span>
+      <button class="filter-btn" [class.active]="currentStatus === 'All'" (click)="setFilter('status', 'All')">All</button>
+      <button class="filter-btn" [class.active]="currentStatus === 'Completed'" (click)="setFilter('status', 'Completed')">Completed</button>
+
+      <span class="filter-label" style="margin-left: 15px;">Priority</span>
+      <button class="filter-btn" [class.active]="currentPriority === 'High'" (click)="setFilter('priority', 'High')">High</button>
+
+      <button class="filter-btn" [class.active]="currentPriority === 'Medium'"  (click)="setFilter('priority', 'Medium')">Medium</button>
+    </div>
+    
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search checklists..." (input)="onSearch($event)">
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    
+    <div class="checklist-card" 
+         *ngFor="let item of filteredChecklists" 
+         (click)="openDetail(item)">
+      
+      <h3 class="card-title">{{ item.title }}</h3>
+      
+      <div class="progress-section">
+        <span class="progress-text">{{ item.progress }}% Completed</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" [style.width.%]="item.progress"></div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="assignee-info">
+          <div class="avatar">👩‍💼</div> <div class="info-text">
+            <span class="label">{{ item.status }}</span>
+            <span class="value">{{ item.assignee }}</span>
+          </div>
+        </div>
+        
+        <div class="deadline-info">
+          <span class="label">Next Deadline</span>
+          <span class="value">{{ item.deadline }}</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

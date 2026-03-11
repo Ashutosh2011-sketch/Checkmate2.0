@@ -1,0 +1,33 @@
+ .outer-bg {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f4f6f9, #e9edf4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.dashboard-wrapper {
+  width: 92%;
+  min-height: 90vh;  
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: visible;  
+}
+
+/* ===== BODY SECTION ===== */
+.body-section {
+  display: flex;
+  flex: 1;
+}
+
+
+.main-content {
+  flex: 1;
+  padding: 50px;
+  background: #f5f7fb;
+  overflow-y: auto;   
+}
+

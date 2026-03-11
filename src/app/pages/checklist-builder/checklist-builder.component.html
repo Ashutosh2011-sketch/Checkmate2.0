@@ -1,0 +1,151 @@
+<div class="builder-container">
+  <div class="header">
+    <h2>Build New Checklist</h2>
+    <p>Design your custom workflow with drag-and-drop flexibility.</p>
+  </div>
+
+  <form [formGroup]="checklistForm" (ngSubmit)="onSubmit()">
+    <div class="card global-settings">
+      <div class="row">
+        <div class="col">
+          <label>Select Template</label>
+          <select [value]="selectedTemplate" (change)="loadTemplate(($any($event.target)).value)">
+            <option value="blank">Blank Checklist</option>
+            <option value="employeeOnboarding">Employee Onboarding</option>
+            <option value="vendorOnboarding">Vendor Onboarding</option>
+          </select>
+        </div>
+        <div class="col"></div>
+      </div>
+      <div class="row mt-3">
+        <div class="col">
+          <label>Checklist Name *</label>
+          <input type="text" formControlName="checklistName" placeholder="e.g. Employee Onboarding">
+        </div>
+        <div class="col">
+          <label>Department *</label>
+          <select formControlName="department">
+            <option value="" disabled selected>Select Department</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{dept}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col">
+          <label>Visibility (Public vs Private)</label>
+          <select formControlName="visibility">
+            <option value="Public">Public (Org-wide)</option>
+            <option value="Private">Private (Specific Teams)</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Workflow Execution</label>
+          <select formControlName="workflowType">
+            <option value="Sequential">Sequential (Step-by-step)</option>
+            <option value="Parallel">Parallel (Simultaneous execution)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div formArrayName="sections">
+      <div *ngFor="let section of sections.controls; let sIndex = index" [formGroupName]="sIndex" class="section-card">
+        
+        <div class="section-header">
+          <input type="text" formControlName="sectionName" class="section-title-input">
+          <button type="button" class="btn-danger-sm" (click)="removeSection(sIndex)">Remove Section</button>
+        </div>
+
+        <div formArrayName="tasks" cdkDropList (cdkDropListDropped)="drop($event, sIndex)">
+          <div *ngFor="let task of tasks(sIndex).controls; let tIndex = index" [formGroupName]="tIndex" cdkDrag class="task-card">
+            
+            <div class="task-basic">
+              <div class="drag-handle" cdkDragHandle>⠿</div>
+              
+              <div class="task-inputs">
+                <input type="text" formControlName="title" placeholder="Task Title" (blur)="updateDependenciesList()">
+                <input type="text" formControlName="description" placeholder="Short description">
+                
+                <select multiple formControlName="assignees" title="Hold CTRL to select multiple owners">
+                  <option *ngFor="let user of availableUsers" [value]="user">{{user}}</option>
+                </select>
+
+                <select formControlName="priority">
+                  <option value="High">🔴 High</option>
+                  <option value="Medium">🟡 Medium</option>
+                  <option value="Low">🟢 Low</option>
+                </select>
+
+                 <div style="display: flex; align-items: center; gap: 5px;" title="Deadline in Days">
+                    <label style="margin: 0; font-size: 12px; color: #7f8c8d;">Due(Days):</label>
+                    <input type="number" formControlName="dueDateDays" min="1" style="width: 60px;">
+                </div>
+              </div>
+
+              <div class="task-actions">
+                <button type="button" class="btn-link" (click)="toggleAdvanced(sIndex, tIndex)">⚙️ Adv. Settings</button>
+                <button type="button" class="btn-delete" (click)="removeTask(sIndex, tIndex)">❌</button>
+              </div>
+            </div>
+
+            <div class="task-advanced" *ngIf="task.value.showAdvanced">
+              <div class="adv-grid">
+                <div>
+                  <label>Depends On (Dependency)</label>
+                  <select formControlName="dependsOn">
+  <option value="None">None</option>
+  <ng-container *ngFor="let dep of availableTasksForDependency">
+    <option *ngIf="dep !== task.value.title" [value]="dep">{{dep}}</option>
+  </ng-container>
+</select>
+                </div>
+                <div style="grid-column: span 2; background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #dfe6e9;">
+  <label style="color: #e67e22;">Show Only If (Conditional Logic) 🔀</label>
+  <div style="display: flex; gap: 10px; margin-top: 5px;">
+    
+      <select formControlName="conditionDependentOn" style="flex: 1;">
+        <option value="None">Always Show (No Condition)</option>
+        <ng-container *ngFor="let taskName of availableTasksForDependency">
+        <option *ngIf="taskName !== task.value.title" [value]="taskName">
+        IF Outcome of: {{taskName}}
+       </option>
+        </ng-container>
+      </select>
+    <select formControlName="conditionExpectedOutcome" 
+            *ngIf="task.value.conditionDependentOn !== 'None'" 
+            style="flex: 1;">
+      <option value="Pass">IS: Pass / Approved</option>
+      <option value="Fail">IS: Fail / Rejected</option>
+      <option value="WFH">IS: Remote / WFH</option>
+    </select>
+    
+  </div>
+</div>
+                <div>
+                  <label>Remind Before (Days)</label>
+                   <input type="number" formControlName="remindBefore" min="1" max="5" placeholder="1 to 5">
+                </div>
+                <div>
+                  <label>Escalate To</label>
+                  <select formControlName="escalateTo">
+                    <option value="Manager">Manager</option>
+                    <option value="HR Head">HR Head</option>
+                    <option value="IT Head">IT Head</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        <button type="button" class="btn-secondary" (click)="addTask(sIndex)">+ Add Task</button>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button type="button" class="btn-secondary" (click)="addSection()">+ Add New Section</button>
+      <button type="submit" class="btn-primary" [disabled]="checklistForm.invalid">✅ Save & Create Checklist</button>
+    </div>
+  </form>
+</div>

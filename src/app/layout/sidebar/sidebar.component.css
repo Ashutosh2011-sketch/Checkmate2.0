@@ -1,0 +1,200 @@
+/* ===== SIDEBAR CONTAINER ===== */
+.sidebar {
+  width: 240px;
+  /* height: 100%; ki jagah 100vh taaki full screen cover ho */
+  height: 100vh; 
+  background: linear-gradient(180deg, #1f3c88 0%, #1b2e66 100%);
+  color: #cfd8ff;
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 30px 15px; /* Padding thoda kam kiya taaki scroll space mile */
+  
+  /* Scroll handling for long admin menus */
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+}
+
+/* Custom Scrollbar Styling (Modern look) */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+/* ===== MENU ===== */
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1; /* Saari available jagah menu lega */
+}
+
+/* ===== MENU ITEMS ===== */
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 18px; /* Padding thodi adjust ki */
+  margin-bottom: 8px; /* Margin kam kiya taaki saare admin links fit aayein */
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px; /* Thoda sa font size kam kiya for better fit */
+  font-weight: 500;
+}
+
+/* ===== DIVIDER (New) ===== */
+.sidebar-divider {
+  border: 0;
+  border-top: 1px solid rgba(207, 216, 255, 0.1);
+  margin: 15px 10px;
+}
+
+/* Default icon & text colors */
+.icon, .menu-text {
+  color: #cfd8ff;
+  transition: 0.3s ease;
+}
+
+/* ===== HOVER EFFECT ===== */
+.menu li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.menu li:hover .icon, .menu li:hover .menu-text {
+  color: #ffffff;
+}
+
+/* ===== ACTIVE ITEM ===== */
+.menu li.active {
+  background: linear-gradient(90deg, #4f7df3, #2a5298);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  color: white;
+}
+.menu li.active .icon, .menu li.active .menu-text {
+  color: white;
+}
+
+/* ===== LOGOUT SECTION (Force to bottom) ===== */
+.logout-section {
+  margin-top: auto;
+  padding-top: 20px;
+}
+.logout-section li {
+  color: #ffb3b3; /* Subtle red for logout */
+}
+.logout-section li:hover {
+  background: rgba(255, 79, 79, 0.1);
+}/* ===== SIDEBAR CONTAINER ===== */
+.sidebar {
+  width: 240px;
+  /* height: 100%; ki jagah 100vh taaki full screen cover ho */
+  height: 100vh; 
+  background: linear-gradient(180deg, #1f3c88 0%, #1b2e66 100%);
+  color: #cfd8ff;
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 30px 15px; /* Padding thoda kam kiya taaki scroll space mile */
+  
+  /* Scroll handling for long admin menus */
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+}
+
+/* Custom Scrollbar Styling (Modern look) */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+/* ===== MENU ===== */
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1; /* Saari available jagah menu lega */
+}
+
+/* ===== MENU ITEMS ===== */
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 18px; /* Padding thodi adjust ki */
+  margin-bottom: 8px; /* Margin kam kiya taaki saare admin links fit aayein */
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px; /* Thoda sa font size kam kiya for better fit */
+  font-weight: 500;
+}
+
+/* ===== DIVIDER (New) ===== */
+.sidebar-divider {
+  border: 0;
+  border-top: 1px solid rgba(207, 216, 255, 0.1);
+  margin: 15px 10px;
+}
+
+/* Default icon & text colors */
+.icon, .menu-text {
+  color: #cfd8ff;
+  transition: 0.3s ease;
+}
+
+/* ===== HOVER EFFECT ===== */
+.menu li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.menu li:hover .icon, .menu li:hover .menu-text {
+  color: #ffffff;
+}
+
+/* ===== ACTIVE ITEM ===== */
+.menu li.active {
+  background: linear-gradient(90deg, #4f7df3, #2a5298);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  color: white;
+}
+.menu li.active .icon, .menu li.active .menu-text {
+  color: white;
+}
+
+/* ===== LOGOUT SECTION (Force to bottom) ===== */
+.logout-section {
+  margin-top: auto;
+  padding-top: 20px;
+}
+.logout-section li {
+  color: #ffb3b3; /* Subtle red for logout */
+}
+.logout-section li:hover {
+  background: rgba(255, 79, 79, 0.1);
+}
+.sidebar li a {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.sidebar li a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar li.active a {
+  background: linear-gradient(90deg, #4a7cff, #2b5cff);
+}

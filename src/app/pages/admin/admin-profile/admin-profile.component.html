@@ -1,0 +1,92 @@
+<div class="profile-container">
+
+  <h2 class="page-title">My Profile</h2>
+
+  <div class="profile-grid">
+
+    <div class="card">
+
+      <h3>Personal Information</h3>
+
+      <div>
+        <label>Profile Picture</label><br>
+        <input type="file" (change)="uploadProfileImage($event)">
+        <p *ngIf="user.profileImage">Uploaded: {{ user.profileImage }}</p>
+      </div>
+
+      <input [(ngModel)]="user.fullName" type="text" placeholder="Full Name">
+      <input [(ngModel)]="user.email" type="email" placeholder="Email Address">
+      <input [(ngModel)]="user.jobTitle" type="text" placeholder="Job Title">
+
+      <input [(ngModel)]="user.department"
+             [readonly]="role !== 'Admin'"
+             type="text"
+             placeholder="Department">
+
+      <h4>Change Password</h4>
+      <input [(ngModel)]="user.newPassword" type="password" placeholder="New Password">
+      <input [(ngModel)]="user.confirmPassword" type="password" placeholder="Confirm Password">
+
+      <p style="color:red" *ngIf="passwordError">{{ passwordError }}</p>
+
+    </div>
+
+    <div>
+
+      <div class="card">
+        <h3>Notification Preferences</h3>
+
+        <div class="toggle">
+          <span>In-App Alerts</span>
+          <input type="checkbox" [(ngModel)]="user.inAppAlerts">
+        </div>
+
+        <div class="toggle">
+          <span>SMS Notifications</span>
+          <input type="checkbox" [(ngModel)]="user.smsNotifications">
+        </div>
+
+        <div class="toggle">
+          <span>Weekly Summary</span>
+          <input type="checkbox" [(ngModel)]="user.weeklySummary">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Email Notifications</h3>
+
+        <div class="toggle">
+          <span>New Assignments</span>
+          <input type="checkbox" [(ngModel)]="user.newAssignments">
+        </div>
+
+        <div class="toggle">
+          <span>Task Overdue</span>
+          <input type="checkbox" [(ngModel)]="user.taskOverdue">
+        </div>
+
+        <div class="toggle">
+          <span>Workflow Approvals</span>
+          <input type="checkbox" [(ngModel)]="user.workflowApprovals">
+        </div>
+      </div>
+
+      <div class="card" *ngIf="activityLog.length > 0">
+        <h3>Profile Activity Log</h3>
+        <ul>
+          <li *ngFor="let log of activityLog">
+            {{ log }}
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="button-group">
+    <button class="secondary" (click)="saveChanges()">Save Changes</button>
+    <button class="primary" (click)="updateProfile()">Update Profile</button>
+  </div>
+
+</div>

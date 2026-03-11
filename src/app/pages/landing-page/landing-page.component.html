@@ -1,0 +1,170 @@
+<div class="landing-page">
+  <!-- Top Navigation (blue) -->
+  <header class="landing-nav">
+    <div class="left-section">
+      <a routerLink="/" class="logo-link logo-wrapper">
+        <img src="assets/logo.png" alt="CheckMate Logo" class="logo-img">
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#about">About</a>
+      <a routerLink="/login" class="btn-login">Login</a>
+    </nav>
+  </header>
+
+  <!-- Hero (blue gradient, split with white bottom) -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <h1 class="hero-title">Dynamic Workflow Automation for Modern Enterprises</h1>
+        <p class="hero-subtitle">Streamline onboarding, compliance, and complex processes with role-based checklists and real-time tracking.</p>
+        <a routerLink="/dashboard" class="btn-cta">Get Started Free</a>
+      </div>
+      <div class="hero-illustration" aria-hidden="true">
+        <div class="illus-windows">
+          <div class="illus-window"><span class="check">✓</span> Checklist item</div>
+          <div class="illus-window"><span class="check">✓</span> Task complete</div>
+          <div class="illus-window">Process step</div>
+          <div class="illus-connector"></div>
+          <div class="illus-node illus-node--user">👤</div>
+          <div class="illus-node illus-node--gear">⚙</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-bottom-bg"></div>
+  </section>
+
+  <!-- Why Choose CheckMate? -->
+  <section class="features" id="features">
+    <h2 class="section-title">Why Choose CheckMate?</h2>
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon feature-icon--lightning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h3>Dynamic Workflows</h3>
+        <p>Create custom processes that adapt to your needs.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon feature-icon--people">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><circle cx="15" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 11h6m-3-3v6"/></svg>
+        </div>
+        <h3>Role-Based Access</h3>
+        <p>Assign tasks to specific departments or individuals automatically.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon feature-icon--chart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h3>Real-Time Tracking</h3>
+        <p>Monitor progress with live dashboards and instant notifications.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing" id="pricing">
+    <h2 class="section-title">Choose Your Plan</h2>
+    <div class="pricing-grid">
+      <article class="pricing-card">
+        <div class="pricing-header">
+          <h3>Starter</h3>
+          <div class="price">
+            <span class="currency">$</span>
+            <span class="amount">0</span>
+            <span class="period">/month</span>
+          </div>
+          <p class="pricing-desc">Perfect for small teams getting started</p>
+        </div>
+        <ul class="pricing-features">
+          <li>Up to 5 users</li>
+          <li>10 checklists</li>
+          <li>Basic tracking</li>
+          <li>Email support</li>
+        </ul>
+        <a routerLink="/" class="btn-pricing">Get Started</a>
+      </article>
+      <article class="pricing-card pricing-card--featured">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-header">
+          <h3>Professional</h3>
+          <div class="price">
+            <span class="currency">$</span>
+            <span class="amount">29</span>
+            <span class="period">/month</span>
+          </div>
+          <p class="pricing-desc">For growing teams that need more power</p>
+        </div>
+        <ul class="pricing-features">
+          <li>Up to 25 users</li>
+          <li>Unlimited checklists</li>
+          <li>Advanced analytics</li>
+          <li>Priority support</li>
+          <li>Custom workflows</li>
+        </ul>
+        <a routerLink="/login" class="btn-pricing">Start Free Trial</a>
+      </article>
+      <article class="pricing-card">
+        <div class="pricing-header">
+          <h3>Enterprise</h3>
+          <div class="price">
+            <span class="currency">$</span>
+            <span class="amount">99</span>
+            <span class="period">/month</span>
+          </div>
+          <p class="pricing-desc">For large organizations with complex needs</p>
+        </div>
+        <ul class="pricing-features">
+          <li>Unlimited users</li>
+          <li>Unlimited checklists</li>
+          <li>Advanced analytics</li>
+          <li>24/7 dedicated support</li>
+          <li>Custom integrations</li>
+          <li>SSO & SAML</li>
+        </ul>
+        <a routerLink="/dashboard" class="btn-pricing">Contact Sales</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <h2 class="section-title">About CheckMate</h2>
+    <div class="about-content">
+      <div class="about-text">
+        <p>CheckMate is a powerful workflow automation platform designed to help modern enterprises streamline their processes, ensure compliance, and boost productivity.</p>
+        <p>Founded in 2026, we believe that manual processes shouldn't hold back your business. Our mission is to empower teams with intelligent checklists and automation tools that make work flow seamlessly.</p>
+      </div>
+      <div class="about-grid">
+        <article class="about-card">
+          <div class="about-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Our Mission</h3>
+          <p>To simplify complex workflows and make automation accessible to every team.</p>
+        </article>
+        <article class="about-card">
+          <div class="about-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Our Vision</h3>
+          <p>A world where every process is automated, efficient, and error-free.</p>
+        </article>
+        <article class="about-card">
+          <div class="about-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Our Team</h3>
+          <p>Industry experts passionate about transforming how businesses work.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>© 2026 CheckMate Portal. All rights reserved.</p>
+  </footer>
+</div>

@@ -1,0 +1,130 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Security & Compliance</h1>
+    <p class="subtitle">Monitor access logs, audit trails, and compliance status in real-time.</p>
+  </div>
+
+  <!-- Grid Layout -->
+  <div class="compliance-grid">
+    
+    <!-- Card 1: Access Logs -->
+    <div class="card">
+      <h3>Access Logs</h3>
+      <div class="table-container">
+        <table class="access-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Activity</th>
+              <th>Task Name</th>
+              <th>Timestamp</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of accessLogs">
+              <td>{{ log.user }}</td>
+              <td>
+                <span class="badge" [ngClass]="getActivityBadgeClass(log.activityType)">
+                  {{ log.activityType }}
+                </span>
+              </td>
+              <td>{{ log.taskName }}</td>
+              <td>{{ formatTimestamp(log.timestamp) }}</td>
+              <td>{{ log.ipAddress }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Card 2: Audit Trail -->
+    <div class="card">
+      <h3>Audit Trail</h3>
+      <div class="audit-list">
+        <div class="audit-item" *ngFor="let audit of auditLogs">
+          <div class="audit-icon">
+            <span class="material-icons">{{ audit.icon }}</span>
+          </div>
+          <div class="audit-content">
+            <div class="audit-user">{{ audit.user }}</div>
+            <div class="audit-action">{{ audit.action }}</div>
+            <div class="audit-meta">
+              <span>{{ audit.time }}</span>
+              <span class="divider">|</span>
+              <span>{{ audit.ip }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Compliance Overview -->
+    <div class="card">
+      <h3>Compliance Overview</h3>
+      <div class="compliance-list">
+        <div class="compliance-item" *ngFor="let item of complianceItems">
+          <div class="compliance-info">
+            <span class="compliance-name">{{ item.name }}</span>
+            <span class="compliance-desc">{{ item.description }}</span>
+          </div>
+          <span class="status-badge" [ngClass]="item.status ? 'active' : 'inactive'">
+            {{ item.status ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: System Security Settings -->
+    <div class="card">
+      <h3>System Security Settings</h3>
+      <div class="settings-list">
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-name">Enable Two-Factor Authentication</span>
+            <span class="setting-desc">Add an extra layer of security</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [checked]="securitySettings.twoFactorAuth" (change)="toggleSetting('twoFactorAuth')">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-name">Enable Login Alerts</span>
+            <span class="setting-desc">Get notified of new logins</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [checked]="securitySettings.loginAlerts" (change)="toggleSetting('loginAlerts')">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-name">Enable Activity Monitoring</span>
+            <span class="setting-desc">Track user activities</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [checked]="securitySettings.activityMonitoring" (change)="toggleSetting('activityMonitoring')">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-name">Enable Data Encryption</span>
+            <span class="setting-desc">Encrypt data at rest</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [checked]="securitySettings.dataEncryption" (change)="toggleSetting('dataEncryption')">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

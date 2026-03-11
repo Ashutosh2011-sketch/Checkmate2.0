@@ -1,0 +1,59 @@
+
+.top-navbar {
+  height: 75px;
+  background: #f9fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  border-bottom: 1px solid #eee;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-img {
+  height: 150px;
+  width: auto;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 18px;
+  color: #2a5298;
+}
+
+
+.brand {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.divider {
+  width: 1px;
+  height: 25px;
+  background: #ddd;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.right-section input {
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.bell {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+

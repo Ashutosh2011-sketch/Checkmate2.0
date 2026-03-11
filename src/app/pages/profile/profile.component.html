@@ -1,0 +1,55 @@
+<div class="profile-wrapper">
+
+  <h2>My Profile</h2>
+
+  <div class="profile-grid">
+
+    <!-- LEFT SECTION -->
+    <div class="card">
+      <h3>Personal Information</h3>
+
+      <input [(ngModel)]="user.fullName" type="text" placeholder="Full Name">
+      <input [(ngModel)]="user.email" type="email" placeholder="Email Address">
+      <input [(ngModel)]="user.jobTitle" type="text" placeholder="Job Title">
+      <input [(ngModel)]="user.department" type="text" placeholder="Department">
+
+      <h4>Change Password</h4>
+      <input [(ngModel)]="user.newPassword" type="password" placeholder="New Password">
+      <input [(ngModel)]="user.confirmPassword" type="password" placeholder="Confirm Password">
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div>
+      <div class="card">
+        <h3>Notification Preferences</h3>
+        <label>
+          <input type="checkbox" [(ngModel)]="user.inAppAlerts">
+          In-App Alerts
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>Email Notifications</h3>
+        <label>
+          <input type="checkbox" [(ngModel)]="user.emailNewAssignments">
+          New Assignments
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="user.emailTaskOverdue">
+          Task Overdue
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="user.emailWorkflowApprovals">
+          Workflow Approvals
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="button-group">
+    <button (click)="saveChanges()">Save Changes</button>
+    <button class="primary" (click)="updateProfile()">Update Profile</button>
+  </div>
+
+</div>
