@@ -1,87 +1,95 @@
 <div class="page">
 
-  <h1>Checklist Tracker</h1>
+<h1>Checklist Tracker</h1>
 
-  <div class="card-container">
+<input placeholder="Search checklist" [(ngModel)]="searchText">
 
-    <div *ngFor="let checklist of checklists" class="card">
+<div class="card-container">
 
-      <h3>{{ checklist.name }}</h3>
-      <p><strong>Department:</strong> {{ checklist.department }}</p>
+<div *ngFor="let checklist of checklists" class="card">
 
-      <div class="progress-bar">
-        <div class="progress-fill"
-             [style.width.%]="getProgress(checklist)">
-        </div>
-      </div>
+<h3>{{checklist.name}}</h3>
+<p><b>Department:</b> {{checklist.department}}</p>
 
-      <p><strong>{{ getProgress(checklist) }}%</strong> Complete</p>
+<div class="progress-bar">
+<div class="progress-fill"
+[style.width.%]="getProgress(checklist)">
+</div>
+</div>
 
-      <span class="status"
-            [ngClass]="{
-              'pending': getStatus(checklist) === 'Pending',
-              'progress': getStatus(checklist) === 'In Progress',
-              'completed': getStatus(checklist) === 'Completed'
-            }">
-        {{ getStatus(checklist) }}
-      </span>
+<p>{{getProgress(checklist)}}% Complete</p>
 
-      <hr>
+<span class="status">{{getStatus(checklist)}}</span>
 
-      <div *ngFor="let task of checklist.tasks">
+<hr>
 
-        <label>
-          <input type="checkbox"
-                 [checked]="task.completed"
-                 (change)="toggleTask(checklist, task)" />
-          {{ task.title }}
-        </label>
+<div *ngFor="let task of checklist.tasks">
 
-        <p>Deadline: {{ task.deadline }}</p>
+<label>
 
-        <div>
-          <input #commentInput placeholder="Add comment" />
-          <button (click)="addComment(task, commentInput.value); commentInput.value=''">
-            Add
-          </button>
-        </div>
+<input type="checkbox"
+[checked]="task.completed"
+(change)="toggleTask(checklist,task)">
 
-        <div *ngIf="task.comments.length > 0">
-          <p><strong>Comments:</strong></p>
-          <ul>
-            <li *ngFor="let c of task.comments">{{ c }}</li>
-          </ul>
-        </div>
+{{task.title}}
 
-        <div>
-          <input #fileInput placeholder="Attachment name" />
-          <button (click)="addAttachment(task, fileInput.value); fileInput.value=''">
-            Attach
-          </button>
-        </div>
+</label>
 
-        <div *ngIf="task.attachments.length > 0">
-          <p><strong>Attachments:</strong></p>
-          <ul>
-            <li *ngFor="let a of task.attachments">{{ a }}</li>
-          </ul>
-        </div>
+<p>Priority: {{task.priority}}</p>
+<p>Deadline: {{task.deadline}}</p>
+<p>Assigned To: {{task.assignedTo || 'Unassigned'}}</p>
 
-        <hr>
+<button *ngIf="!task.assignedTo"
+(click)="claimTask(task)">
+Claim Task
+</button>
 
-      </div>
+<div>
 
-      <div *ngIf="checklist.activityLog.length > 0">
-        <h4>Activity Log</h4>
-        <ul>
-          <li *ngFor="let log of checklist.activityLog">
-            {{ log }}
-          </li>
-        </ul>
-      </div>
+<input #comment placeholder="Comment">
+<button (click)="addComment(task,comment.value); comment.value=''">
+Add Comment
+</button>
 
-    </div>
+</div>
 
-  </div>
+<ul>
+
+<li *ngFor="let c of task.comments">{{c}}</li>
+
+</ul>
+
+<div>
+
+<input #file placeholder="Attachment name">
+<button (click)="addAttachment(task,file.value); file.value=''">
+Attach
+</button>
+
+</div>
+
+<ul>
+
+<li *ngFor="let a of task.attachments">{{a}}</li>
+
+</ul>
+
+<hr>
+
+</div>
+
+<div *ngIf="checklist.activityLog.length>0">
+
+<h4>Activity Log</h4>
+
+<ul>
+<li *ngFor="let log of checklist.activityLog">{{log}}</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
 
 </div>

@@ -13,17 +13,21 @@
       <span class="menu-text">Checklists</span>
     </li>
 
+    <!-- ✅ ADDED HERE FOR USER -->
+    <li routerLink="/checklist-tracker" routerLinkActive="active">
+      <span class="material-icons icon">assignment</span>
+      <span class="menu-text">Checklist Tracker</span>
+    </li>
+
     <li routerLink="/reports" routerLinkActive="active">
       <span class="material-icons icon">bar_chart</span>
       <span class="menu-text">Reports</span>
     </li>
-    
 
     <li routerLink="/profile" routerLinkActive="active">
       <span class="material-icons icon">person</span>
       <span class="menu-text">Profile</span>
     </li>
-    
 
   </ul>
 
@@ -35,17 +39,16 @@
       <span class="material-icons icon">home</span>
       <span class="menu-text">Dashboard</span>
     </li>
-    <li routerLink="/admin/checklists" routerLinkActive="active">
-  <span class="material-icons icon">assignment</span>
-  <span class="menu-text">All Checklists</span>
-</li>
-    
-    <li routerLink="/admin/checklist-builder" routerLinkActive="active">
-  <span class="material-icons icon">checklist</span>
-  <span class="menu-text">Checklist Builder</span>
-</li>
 
-    
+    <li routerLink="/admin/checklists" routerLinkActive="active">
+      <span class="material-icons icon">assignment</span>
+      <span class="menu-text">All Checklists</span>
+    </li>
+
+    <li routerLink="/admin/checklist-builder" routerLinkActive="active">
+      <span class="material-icons icon">checklist</span>
+      <span class="menu-text">Checklist Builder</span>
+    </li>
 
     <li routerLink="/admin/users" routerLinkActive="active">
       <span class="material-icons icon">group</span>
@@ -57,10 +60,7 @@
       <span class="menu-text">Roles & Permissions</span>
     </li>
 
-    <li routerLink="/admin/checklist-tracker" routerLinkActive="active">
-  <span class="material-icons icon">apartment</span>
-  <span class="menu-text">Checklist Tracker</span>
-</li>
+    <!-- ❌ REMOVED CHECKLIST TRACKER FROM ADMIN -->
 
     <li routerLink="/admin/reports" routerLinkActive="active">
       <span class="material-icons icon">analytics</span>

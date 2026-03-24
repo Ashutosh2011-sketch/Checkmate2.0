@@ -6,6 +6,9 @@ interface Task {
   completed: boolean;
   workflowType: 'Sequential' | 'Parallel';
   deadline: string;
+  priority: 'High' | 'Medium' | 'Low';
+  assignedTo?: string;
+  dependsOn?: number;
   comments: string[];
   attachments: string[];
 }
@@ -24,41 +27,69 @@ interface Checklist {
 })
 export class ChecklistTrackerComponent {
 
-  checklists: Checklist[] = [
-    {
-      name: 'Employee Onboarding',
-      department: 'HR',
-      activityLog: [],
-      tasks: [
+  searchText = '';
+  statusFilter = 'All';
+  currentPage = 1;
+  itemsPerPage = 3;
+
+  currentUser = "Krish";
+
+  checklists: Checklist[] = [];
+
+  constructor(){
+    this.addDemoChecklist(); // simulate admin created checklist
+  }
+
+  addDemoChecklist(){
+
+    const checklist: Checklist = {
+      name:'Employee Onboarding',
+      department:'HR',
+      activityLog:[],
+      tasks:[
         {
-          id: 1,
-          title: 'Collect Documents',
-          completed: true,
-          workflowType: 'Sequential',
-          deadline: '2026-03-01',
-          comments: [],
-          attachments: []
+          id:1,
+          title:'Collect Documents',
+          completed:false,
+          workflowType:'Sequential',
+          deadline:'2026-04-01',
+          priority:'High',
+          assignedTo:'HR Manager',
+          comments:[],
+          attachments:[]
         },
         {
-          id: 2,
-          title: 'System Access Setup',
-          completed: false,
-          workflowType: 'Sequential',
-          deadline: '2026-03-10',
-          comments: [],
-          attachments: []
+          id:2,
+          title:'System Access Setup',
+          completed:false,
+          workflowType:'Sequential',
+          deadline:'2026-04-05',
+          priority:'Medium',
+          dependsOn:1,
+          comments:[],
+          attachments:[]
+        },
+        {
+          id:3,
+          title:'Laptop Allocation',
+          completed:false,
+          workflowType:'Parallel',
+          deadline:'2026-04-05',
+          priority:'Low',
+          comments:[],
+          attachments:[]
         }
       ]
-    }
-  ];
+    };
 
-  // Calculate dynamic progress
+    this.checklists.push(checklist);
+  }
+
   getProgress(checklist: Checklist): number {
     const completed = checklist.tasks.filter(t => t.completed).length;
     return Math.round((completed / checklist.tasks.length) * 100);
   }
 
-  // Determine Status
   getStatus(checklist: Checklist): string {
 
     const progress = this.getProgress(checklist);
@@ -67,22 +98,19 @@ export class ChecklistTrackerComponent {
       !t.completed && new Date(t.deadline) < new Date()
     );
 
-    if (hasOverdue) return 'Overdue';
-    if (progress === 100) return 'Completed';
-    if (progress > 0) return 'In Progress';
+    if(hasOverdue) return 'Overdue';
+    if(progress === 100) return 'Completed';
+    if(progress > 0) return 'In Progress';
     return 'Pending';
   }
 
-  toggleTask(checklist: Checklist, task: Task) {
+  toggleTask(checklist:Checklist,task:Task){
 
-    // Sequential lock logic
-    if (task.workflowType === 'Sequential') {
-      const previousTask = checklist.tasks
-        .filter(t => t.workflowType === 'Sequential')
-        .find(t => t.id === task.id - 1);
+    if(task.workflowType === 'Sequential'){
+      const prev = checklist.tasks.find(t=>t.id === task.dependsOn);
 
-      if (previousTask && !previousTask.completed) {
-        alert("Complete previous task first!");
+      if(prev && !prev.completed){
+        alert("Complete previous task first");
         return;
       }
     }
@@ -90,18 +118,33 @@ export class ChecklistTrackerComponent {
     task.completed = !task.completed;
 
     checklist.activityLog.push(
-      `Task "${task.title}" marked as ${task.completed ? 'Completed' : 'Pending'}`
+      `${this.currentUser} marked "${task.title}" as ${task.completed ? 'Completed':'Pending'}`
     );
+
   }
 
-  addComment(task: Task, comment: string) {
-    if (!comment) return;
-    task.comments.push(comment);
+  addComment(task:Task,comment:string){
+
+    if(!comment) return;
+
+    task.comments.push(`${this.currentUser}: ${comment}`);
+
   }
 
-  addAttachment(task: Task, fileName: string) {
-    if (!fileName) return;
-    task.attachments.push(fileName);
+  addAttachment(task:Task,file:string){
+
+    if(!file) return;
+
+    task.attachments.push(file);
+
+  }
+
+  claimTask(task:Task){
+
+    if(!task.assignedTo){
+      task.assignedTo = this.currentUser;
+    }
+
   }
 
 }
