@@ -75,7 +75,7 @@
 //   bootstrap: [AppComponent]
 // })
 // export class AppModule { }
-
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
@@ -152,7 +152,8 @@ import { AllChecklistComponent } from './pages/all-checklists/all-checklists.com
     FormsModule,
     CommonModule,
     DragDropModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

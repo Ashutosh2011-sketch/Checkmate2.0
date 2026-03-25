@@ -1,4 +1,4 @@
-
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -17,7 +17,7 @@ export class ChecklistBuilderComponent implements OnInit {
   availableTasksForDependency: string[] = []; 
   selectedTemplate: string = 'blank';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.checklistForm = this.fb.group({
@@ -153,8 +153,26 @@ export class ChecklistBuilderComponent implements OnInit {
     this.updateDependenciesList();
   }
 
+  // onSubmit(): void {
+  //   console.log('Final Checklist Data:', this.checklistForm.value);
+  //   alert('Checklist Created Successfully! Check console for data.');
+  // }
+
   onSubmit(): void {
-    console.log('Final Checklist Data:', this.checklistForm.value);
-    alert('Checklist Created Successfully! Check console for data.');
+    console.log('Sending data to backend...', this.checklistForm.value);
+    
+    // Spring Boot ko POST request bhej rahe hain
+    this.http.post('http://localhost:8080/api/checklists/create', this.checklistForm.value)
+      .subscribe({
+        next: (response) => {
+          console.log('Database saved response:', response);
+          alert('🔥 Checklist Successfully Saved in PostgreSQL Database!');
+          this.checklistForm.reset(); // Form khali kar do save hone ke baad
+        },
+        error: (error) => {
+          console.error('Error saving to database:', error);
+          alert('Kuch gadbad hui, console check karo!');
+        }
+      });
   }
 }
