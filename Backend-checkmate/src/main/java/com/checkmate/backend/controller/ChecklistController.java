@@ -1,8 +1,7 @@
 package com.checkmate.backend.controller;
 
-import com.checkmate.backend.entity.Checklist;
-import com.checkmate.backend.repository.ChecklistRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.checkmate.backend.dto.ChecklistDto;
+import com.checkmate.backend.service.ChecklistService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,17 +11,19 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200") 
 public class ChecklistController {
 
-    @Autowired
-    private ChecklistRepository checklistRepository;
+    private final ChecklistService checklistService;
+
+    public ChecklistController(ChecklistService checklistService) {
+        this.checklistService = checklistService;
+    }
 
     @PostMapping("/create")
-    public Checklist createChecklist(@RequestBody Checklist checklist) {
-        System.out.println("Angular sent a new checklist: " + checklist.getChecklistName());
-        return checklistRepository.save(checklist); 
+    public ChecklistDto createChecklist(@RequestBody ChecklistDto checklistDto) {
+        return checklistService.save(checklistDto);
     }
 
     @GetMapping("/all")
-    public List<Checklist> getAllChecklists() {
-        return checklistRepository.findAll();
+    public List<ChecklistDto> getAllChecklists() {
+        return checklistService.getAll();
     }
 }
