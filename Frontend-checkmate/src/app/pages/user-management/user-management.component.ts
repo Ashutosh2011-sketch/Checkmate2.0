@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { UserService } from '../../services/user.service';
 
 interface User {
-  id: number;
+  id?: number;
   name: string;
   department: string;
   role: string;
@@ -14,28 +15,36 @@ interface User {
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.css']
 })
-export class UserManagementComponent {
+export class UserManagementComponent implements OnInit {
 
   searchText = '';
   newTask = '';
-  initialTask = '';   // NEW for Add User
+  initialTask = '';
 
   isEditing = false;
   isAdding = false;
 
-  users: User[] = [
-    { id: 1, name: 'Ram', department: 'Admin', role: 'Reviewer', active: true, tasks: ['Audit Review'] },
-    { id: 2, name: 'Garv', department: 'HR', role: 'HR', active: true, tasks: [] },
-    { id: 3, name: 'John Doe', department: 'Engineering', role: 'Engineer', active: true, tasks: ['System Setup'] }
-  ];
-
+  users: User[] = [];
   selectedUser: User | null = null;
 
   formUser: User = this.getEmptyUser();
 
+  constructor(private userService: UserService) {}
+
+  ngOnInit() {
+    this.loadUsers();
+  }
+
+  // 🔄 LOAD USERS FROM BACKEND
+  loadUsers() {
+    this.userService.getAll().subscribe((res: any[]) => {
+      console.log('Users:', res); // DEBUG
+      this.users = [...res]; // 🔥 force UI refresh
+    });
+  }
+
   getEmptyUser(): User {
     return {
-      id: 0,
       name: '',
       department: '',
       role: '',
@@ -74,24 +83,41 @@ export class UserManagementComponent {
 
   saveUser() {
 
-    //  ADD USER LOGIC
+    // ➕ ADD USER
     if (this.isAdding) {
 
-      if (this.initialTask.trim() !== '') {
+      if (this.initialTask.trim()) {
         this.formUser.tasks.push(this.initialTask.trim());
       }
 
-      this.formUser.id = Date.now();
-      this.users.push({ ...this.formUser });
+      this.userService.create(this.formUser).subscribe((newUser: any) => {
 
-      this.isAdding = false;
-      this.initialTask = '';
+        // ✅ Reload users from DB
+        this.loadUsers();
+
+        // ✅ Select new user after slight delay (ensures list updated)
+        setTimeout(() => {
+          this.selectedUser = newUser;
+        }, 100);
+
+        this.isAdding = false;
+        this.initialTask = '';
+      });
     }
 
-    //  EDIT USER LOGIC
-    if (this.isEditing && this.selectedUser) {
-      Object.assign(this.selectedUser, this.formUser);
-      this.isEditing = false;
+    // ✏️ EDIT USER
+    if (this.isEditing && this.selectedUser?.id) {
+
+      this.userService.update(this.selectedUser.id, this.formUser)
+        .subscribe((updatedUser: any) => {
+
+          this.loadUsers();
+
+          // keep selection updated
+          this.selectedUser = updatedUser;
+
+          this.isEditing = false;
+        });
     }
   }
 
@@ -101,21 +127,62 @@ export class UserManagementComponent {
   }
 
   disableAccount() {
-    if (this.selectedUser) {
-      this.selectedUser.active = false;
+    if (this.selectedUser?.id) {
+
+      const updatedUser = {
+        ...this.selectedUser,
+        active: false
+      };
+
+      this.userService.update(this.selectedUser.id, updatedUser)
+        .subscribe((res: any) => {
+          this.selectedUser = res;
+          this.loadUsers();
+        });
     }
   }
 
+  // ➕ ADD TASK
   allocateTask() {
-    if (this.selectedUser && this.newTask.trim() !== '') {
-      this.selectedUser.tasks.push(this.newTask.trim());
-      this.newTask = '';
+    if (this.selectedUser?.id && this.newTask.trim()) {
+
+      const updatedUser = {
+        ...this.selectedUser,
+        tasks: [...this.selectedUser.tasks, this.newTask.trim()]
+      };
+
+      this.userService.update(this.selectedUser.id, updatedUser)
+        .subscribe((res: any) => {
+          this.selectedUser = res;
+          this.newTask = '';
+          this.loadUsers();
+        });
     }
   }
 
+  // ❌ REMOVE TASK
   removeTask(task: string) {
-    if (!this.selectedUser) return;
-    this.selectedUser.tasks =
-      this.selectedUser.tasks.filter(t => t !== task);
+    if (!this.selectedUser?.id) return;
+
+    const updatedUser = {
+      ...this.selectedUser,
+      tasks: this.selectedUser.tasks.filter(t => t !== task)
+    };
+
+    this.userService.update(this.selectedUser.id, updatedUser)
+      .subscribe((res: any) => {
+        this.selectedUser = res;
+        this.loadUsers();
+      });
+  }
+
+  // 🗑 DELETE USER
+  deleteUser(id: number) {
+    if (confirm('Delete user?')) {
+      this.userService.delete(id).subscribe(() => {
+        this.selectedUser = null;
+        this.loadUsers();
+      });
+    }
   }
 }
