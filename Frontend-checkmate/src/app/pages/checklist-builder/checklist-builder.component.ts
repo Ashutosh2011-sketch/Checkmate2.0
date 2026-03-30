@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TEMPLATE_LIBRARY, type ChecklistTemplateValue } from './template-library';
-import { ChecklistService } from 'src/app/core/services/checklist.service';
+import { ChecklistService } from '../../core/services/checklist.service';
 
 
 
