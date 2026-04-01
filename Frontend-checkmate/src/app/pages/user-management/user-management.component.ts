@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../services/user.service';
+import { UserService } from '../../core/services/user.service';
 
 interface User {
   id?: number;
@@ -7,7 +7,6 @@ interface User {
   department: string;
   role: string;
   active: boolean;
-  tasks: string[];
 }
 
 @Component({
@@ -18,14 +17,16 @@ interface User {
 export class UserManagementComponent implements OnInit {
 
   searchText = '';
-  newTask = '';
-  initialTask = '';
+  newTask = ''; // (optional, can remove later if not needed)
 
   isEditing = false;
   isAdding = false;
 
   users: User[] = [];
   selectedUser: User | null = null;
+
+  // 🔥 tasks now come from checklist
+  userTasks: string[] = [];
 
   formUser: User = this.getEmptyUser();
 
@@ -35,11 +36,11 @@ export class UserManagementComponent implements OnInit {
     this.loadUsers();
   }
 
-  // 🔄 LOAD USERS FROM BACKEND
+  // 🔄 LOAD USERS
   loadUsers() {
     this.userService.getAll().subscribe((res: any[]) => {
-      console.log('Users:', res); // DEBUG
-      this.users = [...res]; // 🔥 force UI refresh
+      console.log('Users:', res);
+      this.users = [...res];
     });
   }
 
@@ -48,8 +49,7 @@ export class UserManagementComponent implements OnInit {
       name: '',
       department: '',
       role: '',
-      active: true,
-      tasks: []
+      active: true
     };
   }
 
@@ -59,11 +59,17 @@ export class UserManagementComponent implements OnInit {
     );
   }
 
+  // 🔥 SELECT USER + FETCH TASKS FROM CHECKLIST
   selectUser(user: User) {
     this.selectedUser = user;
     this.isEditing = false;
     this.isAdding = false;
     this.formUser = { ...user };
+
+    // 🔥 fetch tasks from backend (checklist)
+    this.userService.getUserTasks(user.name).subscribe((tasks: string[]) => {
+      this.userTasks = tasks || [];
+    });
   }
 
   openAddUser() {
@@ -71,7 +77,6 @@ export class UserManagementComponent implements OnInit {
     this.isEditing = false;
     this.selectedUser = null;
     this.formUser = this.getEmptyUser();
-    this.initialTask = '';
   }
 
   openEditUser() {
@@ -85,35 +90,24 @@ export class UserManagementComponent implements OnInit {
 
     // ➕ ADD USER
     if (this.isAdding) {
-
-      if (this.initialTask.trim()) {
-        this.formUser.tasks.push(this.initialTask.trim());
-      }
-
       this.userService.create(this.formUser).subscribe((newUser: any) => {
-
-        // ✅ Reload users from DB
         this.loadUsers();
 
-        // ✅ Select new user after slight delay (ensures list updated)
         setTimeout(() => {
           this.selectedUser = newUser;
+          this.userTasks = [];
         }, 100);
 
         this.isAdding = false;
-        this.initialTask = '';
       });
     }
 
     // ✏️ EDIT USER
     if (this.isEditing && this.selectedUser?.id) {
-
       this.userService.update(this.selectedUser.id, this.formUser)
         .subscribe((updatedUser: any) => {
 
           this.loadUsers();
-
-          // keep selection updated
           this.selectedUser = updatedUser;
 
           this.isEditing = false;
@@ -142,38 +136,9 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  // ➕ ADD TASK
-  allocateTask() {
-    if (this.selectedUser?.id && this.newTask.trim()) {
-
-      const updatedUser = {
-        ...this.selectedUser,
-        tasks: [...this.selectedUser.tasks, this.newTask.trim()]
-      };
-
-      this.userService.update(this.selectedUser.id, updatedUser)
-        .subscribe((res: any) => {
-          this.selectedUser = res;
-          this.newTask = '';
-          this.loadUsers();
-        });
-    }
-  }
-
-  // ❌ REMOVE TASK
+  // ❌ REMOVE TASK (optional UI only, no DB change)
   removeTask(task: string) {
-    if (!this.selectedUser?.id) return;
-
-    const updatedUser = {
-      ...this.selectedUser,
-      tasks: this.selectedUser.tasks.filter(t => t !== task)
-    };
-
-    this.userService.update(this.selectedUser.id, updatedUser)
-      .subscribe((res: any) => {
-        this.selectedUser = res;
-        this.loadUsers();
-      });
+    this.userTasks = this.userTasks.filter(t => t !== task);
   }
 
   // 🗑 DELETE USER
@@ -181,6 +146,7 @@ export class UserManagementComponent implements OnInit {
     if (confirm('Delete user?')) {
       this.userService.delete(id).subscribe(() => {
         this.selectedUser = null;
+        this.userTasks = [];
         this.loadUsers();
       });
     }

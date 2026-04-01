@@ -2,43 +2,44 @@ package com.checkmate.backend.service;
 
 import com.checkmate.backend.entity.User;
 import com.checkmate.backend.repository.UserRepository;
+import com.checkmate.backend.repository.ChecklistRepository;
+import com.checkmate.backend.repository.TaskRepository; // 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class UserService {
 
     private final UserRepository repository;
+    private final ChecklistRepository checklistRepository;
+    private final TaskRepository taskRepository; // 
 
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository,
+                       ChecklistRepository checklistRepository,
+                       TaskRepository taskRepository) { 
         this.repository = repository;
+        this.checklistRepository = checklistRepository;
+        this.taskRepository = taskRepository; 
     }
 
-    // ✅ GET ALL USERS
+    // GET ALL USERS
     public List<User> getAllUsers() {
         return repository.findAll();
     }
 
-    // ✅ CREATE USER (SAFE)
+    // CREATE USER
     public User createUser(User user) {
-
-        // 🔥 prevent null tasks issue
-        if (user.getTasks() == null) {
-            user.setTasks(new ArrayList<>());
-        }
-
         return repository.save(user);
     }
 
-    // ✅ GET USER BY ID
+    //  GET USER BY ID
     public User getUserById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    // ✅ UPDATE USER (SAFE)
+    // UPDATE USER
     public User updateUser(Long id, User updatedUser) {
 
         User existing = getUserById(id);
@@ -48,44 +49,18 @@ public class UserService {
         existing.setRole(updatedUser.getRole());
         existing.setActive(updatedUser.isActive());
 
-        // 🔥 prevent null crash
-        if (updatedUser.getTasks() != null) {
-            existing.setTasks(updatedUser.getTasks());
-        } else {
-            existing.setTasks(new ArrayList<>());
-        }
-
         return repository.save(existing);
     }
 
-    // ✅ DELETE USER
+    //  DELETE USER
     public void deleteUser(Long id) {
         repository.deleteById(id);
     }
 
-    // ✅ ADD TASK
-    public User addTask(Long id, String task) {
+    //  FIXED: GET TASKS FROM DB (NO DATA LOSS)
+    public List<String> getTasksForUser(String userName) {
 
-        User user = getUserById(id);
-
-        if (user.getTasks() == null) {
-            user.setTasks(new ArrayList<>());
-        }
-
-        user.getTasks().add(task);
-
-        return repository.save(user);
-    }
-
-    // ✅ REMOVE TASK
-    public User removeTask(Long id, String task) {
-
-        User user = getUserById(id);
-
-        if (user.getTasks() != null) {
-            user.getTasks().remove(task);
-        }
-
-        return repository.save(user);
+        // Direct DB query → reliable
+        return taskRepository.findTasksByUserName(userName);
     }
 }
