@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Checklist } from '../models/checklist.model';
+import { Checklist, ChecklistSummary } from '../models/checklist.model';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -12,8 +12,8 @@ export class ChecklistService extends ApiService {
     return this.post('/checklists/create', checklist);
   }
 
-  getAllChecklists(): Observable<Checklist[]> {
-    return this.get<Checklist[]>('/checklists/all');
+  getAllChecklists(): Observable<ChecklistSummary[]> {
+    return this.get<ChecklistSummary[]>('/checklists/all');
   }
 }
 

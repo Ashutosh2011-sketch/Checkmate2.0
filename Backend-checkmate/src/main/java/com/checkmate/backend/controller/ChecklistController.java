@@ -1,9 +1,9 @@
 package com.checkmate.backend.controller;
 
 import com.checkmate.backend.dto.ChecklistDto;
+import com.checkmate.backend.dto.ChecklistSummaryDto;
 import com.checkmate.backend.service.ChecklistService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -23,7 +23,7 @@ public class ChecklistController {
     }
 
     @GetMapping("/all")
-    public List<ChecklistDto> getAllChecklists() {
-        return checklistService.getAll();
+    public List<ChecklistSummaryDto> getAllChecklists() {
+        return checklistService.getAllSummaries();
     }
 }

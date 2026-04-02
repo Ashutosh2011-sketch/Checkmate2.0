@@ -1,18 +1,20 @@
 package com.checkmate.backend.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.checkmate.backend.dto.ChecklistDto;
+import com.checkmate.backend.dto.ChecklistSummaryDto;
 import com.checkmate.backend.dto.SectionDto;
 import com.checkmate.backend.dto.TaskDto;
 import com.checkmate.backend.entity.Checklist;
 import com.checkmate.backend.entity.Section;
 import com.checkmate.backend.entity.Task;
 import com.checkmate.backend.repository.ChecklistRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ChecklistService {
@@ -23,9 +25,14 @@ public class ChecklistService {
         this.repository = repository;
     }
 
-    @Transactional(readOnly = true)
+@Transactional(readOnly = true)
     public List<ChecklistDto> getAll() {
         return repository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChecklistSummaryDto> getAllSummaries() {
+        return repository.findAllSummaries();
     }
 
     @Transactional

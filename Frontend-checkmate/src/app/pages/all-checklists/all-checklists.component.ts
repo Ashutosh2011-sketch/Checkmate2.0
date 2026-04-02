@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router'; 
+import { ChecklistService } from '../../core/services/checklist.service';
+import { ChecklistSummary } from '../../core/models/checklist.model';
 
-export interface ChecklistItem {
+interface ChecklistItem {
   id: number;
   title: string;
   assignee: string;
-  progress: number;
   status: string;
   deadline: string;
   priority: string;
@@ -20,71 +21,37 @@ export class AllChecklistComponent implements OnInit {
 
   allChecklists: ChecklistItem[] = [];
   filteredChecklists: ChecklistItem[] = [];
+  loading = true;
 
   currentStatus = 'All';
   currentPriority = 'All';
   searchQuery = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private checklistService: ChecklistService
+  ) {}
 
   ngOnInit() {
-    this.allChecklists = [
-      {
-        id: 1,
-        title: 'Employee Onboarding - John Doe',
-        assignee: 'Anjali (HR)',
-        progress: 65,
-        status: 'In Progress',
-        deadline: '12 Oct, 2026',
-        priority: 'High'
+    this.loading = true;
+    this.checklistService.getAllChecklists().subscribe({
+      next: (summaries: ChecklistSummary[]) => {
+        this.allChecklists = summaries.map(summary => ({
+          id: summary.id,
+          title: summary.title,
+          assignee: summary.assignee,
+          status: summary.status,
+          deadline: summary.deadline,
+          priority: summary.priority
+        }));
+        this.filteredChecklists = [...this.allChecklists];
+        this.loading = false;
       },
-      {
-        id: 2,
-        title: 'IT Asset Allocation - Q3',
-        assignee: 'Pratik (IT)',
-        progress: 20,
-        status: 'In Progress',
-        deadline: '15 Oct, 2026',
-        priority: 'Medium'
-      },
-      {
-        id: 3,
-        title: 'Quarterly Security Audit',
-        assignee: 'Rahul (Admin)',
-        progress: 100,
-        status: 'Completed',
-        deadline: '01 Oct, 2026',
-        priority: 'High'
-      },
-      {
-        id: 4,
-        title: 'Server Migration & Backup',
-        assignee: 'Vikram (DevOps)',
-        progress: 85,
-        status: 'In Progress',
-        deadline: '05 Nov, 2026',
-        priority: 'High'
-      },
-      {
-        id: 5,
-        title: 'Annual Performance Appraisals',
-        assignee: 'Neha (HR)',
-        progress: 0,
-        status: 'Pending',
-        deadline: '20 Dec, 2026',
-        priority: 'Medium'
-      },
-      {
-        id: 6,
-        title: 'Vendor Contract Renewal',
-        assignee: 'Suresh (Legal)',
-        progress: 100,
-        status: 'Completed',
-        deadline: '28 Sep, 2026',
-        priority: 'Medium'
+  error: (err: any) => {
+        console.error('Error loading checklists:', err);
+        this.loading = false;
       }
-    ];
-    this.filteredChecklists = [...this.allChecklists];
+    });
   }
 
   onSearch(event: any) {
