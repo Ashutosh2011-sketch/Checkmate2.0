@@ -1,11 +1,13 @@
 package com.checkmate.backend.entity;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
+<<<<<<< HEAD
 @Table(name = "users") // FIX: avoid reserved keyword
+=======
+@Table(name = "users")
+>>>>>>> 0656e46df790ebd500c5fb92b29f19364d250cc4
 public class User {
 
     @Id
@@ -17,11 +19,6 @@ public class User {
     private String role;
     private String email;
     private boolean active;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_tasks", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "task")
-    private List<String> tasks = new ArrayList<>();
 
     // ===== GETTERS & SETTERS =====
 
@@ -67,13 +64,5 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    public List<String> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(List<String> tasks) {
-        this.tasks = tasks;
     }
 }

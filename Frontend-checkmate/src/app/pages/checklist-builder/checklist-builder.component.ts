@@ -3,11 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TEMPLATE_LIBRARY, type ChecklistTemplateValue } from './template-library';
 import { ChecklistService } from '../../core/services/checklist.service';
-
-
-
-
-
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-checklist-builder',
@@ -15,29 +11,49 @@ import { ChecklistService } from '../../core/services/checklist.service';
   styleUrls: ['./checklist-builder.component.css']
 })
 export class ChecklistBuilderComponent implements OnInit {
+
   checklistForm!: FormGroup;
 
   departments = ['HR', 'IT', 'Engineering', 'Finance'];
-  availableUsers = ['John (IT)', 'Sarah (HR)', 'Admin', 'Vikram (DevOps)'];
-  availableTasksForDependency: string[] = []; 
+
+  //  OLD
+  // availableUsers = ['John (IT)', 'Sarah (HR)', 'Admin', 'Vikram (DevOps)'];
+
+  // NEW (dynamic)
+  availableUsers: string[] = [];
+
+  availableTasksForDependency: string[] = [];
   selectedTemplate: string = 'blank';
 
   constructor(
     private fb: FormBuilder,
-    private checklistService: ChecklistService
+    private checklistService: ChecklistService,
+    private userService: UserService // ✅ NEW
   ) {}
 
-
   ngOnInit(): void {
+
     this.checklistForm = this.fb.group({
       checklistName: ['', Validators.required],
       department: ['', Validators.required],
-      visibility: ['Private', Validators.required], 
-      workflowType: ['Sequential', Validators.required], 
-      sections: this.fb.array([]) 
+      visibility: ['Private', Validators.required],
+      workflowType: ['Sequential', Validators.required],
+      sections: this.fb.array([])
     });
 
+    this.loadUsers(); // ✅ NEW
     this.addSection();
+  }
+
+  // ✅ LOAD USERS FROM BACKEND
+  loadUsers() {
+    this.userService.getAll().subscribe((res: any[]) => {
+
+      // keep SAME format → no data loss
+      this.availableUsers = res.map(user => `${user.name} (${user.department})`);
+
+      console.log("Checklist Users:", this.availableUsers);
+    });
   }
 
   get sections(): FormArray {
@@ -84,7 +100,6 @@ export class ChecklistBuilderComponent implements OnInit {
     this.updateDependenciesList();
   }
 
-  
   addTask(sectionIndex: number, task?: Partial<ChecklistTemplateValue['sections'][number]['tasks'][number]>): void {
     const taskGroup = this.createTaskGroup(task);
     this.tasks(sectionIndex).push(taskGroup);
@@ -96,20 +111,17 @@ export class ChecklistBuilderComponent implements OnInit {
     this.updateDependenciesList();
   }
 
-  
   toggleAdvanced(sectionIndex: number, taskIndex: number): void {
     const task = this.tasks(sectionIndex).at(taskIndex);
     task.patchValue({ showAdvanced: !task.value.showAdvanced });
   }
 
-  
   drop(event: CdkDragDrop<any[]>, sectionIndex: number): void {
     const tasksArray = this.tasks(sectionIndex);
     moveItemInArray(tasksArray.controls, event.previousIndex, event.currentIndex);
     tasksArray.updateValueAndValidity();
   }
 
- 
   updateDependenciesList(): void {
     this.availableTasksForDependency = [];
     this.sections.controls.forEach(sec => {
@@ -162,26 +174,19 @@ export class ChecklistBuilderComponent implements OnInit {
     this.updateDependenciesList();
   }
 
-  // onSubmit(): void {
-  //   console.log('Final Checklist Data:', this.checklistForm.value);
-  //   alert('Checklist Created Successfully! Check console for data.');
-  // }
-
   onSubmit(): void {
     console.log('Sending data to backend...', this.checklistForm.value);
-    
+
     this.checklistService.createChecklist(this.checklistForm.value)
       .subscribe({
         next: (response: any) => {
-          console.log('Database saved response:', response);
-          alert('🔥 Checklist Successfully Saved in PostgreSQL Database!');
+          console.log('Saved:', response);
+          alert('Checklist saved!');
           this.checklistForm.reset();
         },
         error: (error: any) => {
-          console.error('Error saving to database:', error);
-          alert('Kuch gadbad hui, console check karo!');
+          console.error('Error:', error);
         }
-
       });
   }
 }

@@ -17,46 +17,40 @@ public class UserController {
         this.service = service;
     }
 
-    // GET ALL
+    // ✅ GET ALL USERS
     @GetMapping
     public List<User> getAllUsers() {
         return service.getAllUsers();
     }
 
-    // CREATE
+    // ✅ CREATE USER
     @PostMapping
     public User createUser(@RequestBody User user) {
         return service.createUser(user);
     }
 
-    // GET BY ID
+    // ✅ GET USER BY ID
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id) {
         return service.getUserById(id);
     }
 
-    // UPDATE
+    // ✅ UPDATE USER
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User user) {
         return service.updateUser(id, user);
     }
 
-    // DELETE
+    // ✅ DELETE USER
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable Long id) {
         service.deleteUser(id);
         return "User deleted";
     }
 
-    // ADD TASK
-    @PostMapping("/{id}/tasks")
-    public User addTask(@PathVariable Long id, @RequestBody String task) {
-        return service.addTask(id, task);
-    }
-
-    // REMOVE TASK
-    @DeleteMapping("/{id}/tasks")
-    public User removeTask(@PathVariable Long id, @RequestBody String task) {
-        return service.removeTask(id, task);
+    // 🔥 NEW: GET TASKS FROM CHECKLIST
+    @GetMapping("/{name}/tasks")
+    public List<String> getTasksForUser(@PathVariable String name) {
+        return service.getTasksForUser(name);
     }
 }

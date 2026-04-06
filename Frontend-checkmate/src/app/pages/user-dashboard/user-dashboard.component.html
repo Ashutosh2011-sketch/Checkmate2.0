@@ -1,87 +1,95 @@
-<div class="dashboard-grid">
+<div class="dashboard-grid" *ngIf="dashboard">
 
-  <!-- Assigned Checklists -->
+  <!-- ================= ASSIGNED CHECKLISTS ================= -->
   <div class="card large">
     <h3>Assigned Checklists</h3>
 
-    <!-- Checklist Item 1 -->
-    <div class="checklist-item">
-      <div class="left">
-        <img src="assets/photo.png" />
-        <div>
-          <strong>Complete IT Setup for Gaurav</strong>
-          <div class="badge high">High</div>
-        </div>
-      </div>
-
-      <div class="right">
-        <span class="badge high">High</span>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 70%"></div>
-        </div>
-      </div>
+    <div *ngIf="dashboard.assignedChecklists?.length === 0">
+      No checklists assigned
     </div>
 
-    <!-- Checklist Item 2 -->
-    <div class="checklist-item">
+    <div class="checklist-item"
+         *ngFor="let checklist of dashboard.assignedChecklists">
+
       <div class="left">
-        <img src="assets/photo.png" />
+        <div class="circle-avatar">
+    {{ checklist.charAt(0) }}
+      </div>
         <div>
-          <strong>Quarterly Compliance Audit</strong>
-          <div class="status-text">In Progress</div>
+          <strong>{{ checklist }}</strong>
+          <div class="badge high">Active</div>
         </div>
       </div>
 
       <div class="right">
-        <div class="avatar-group">
+        <span class="badge high">In Progress</span>
+
+        <div class="progress-bar">
+          <div class="progress-fill"
+               [style.width.%]="dashboard.progress || 0">
+          </div>
         </div>
-        <span class="status-text">Pending</span>
       </div>
+
     </div>
   </div>
 
-  <!-- Overall Progress -->
+
+  <!-- ================= OVERALL PROGRESS ================= -->
   <div class="card progress-card">
     <h3>Overall Progress</h3>
 
     <div class="circle-wrap">
       <div class="circle">
-        <span>65%</span>
+        <span>{{ dashboard.progress || 0 }}%</span>
         <small>Complete</small>
       </div>
     </div>
   </div>
 
-  <!-- Claimed Tasks -->
+
+  <!-- ================= CLAIMED TASKS ================= -->
   <div class="card">
     <h3>Claimed Tasks</h3>
 
-    <div class="task-box">
-      <div>
-        <span class="small-title">Unassigned Tasks</span>
-        <div class="task-row">
-          <span>Compliance Audit</span>
-          <span class="status-text">Pending</span>
-        </div>
-      </div>
+    <div *ngIf="dashboard.claimedTasks?.length === 0">
+      No claimed tasks
     </div>
-<div class="btn-wrapper">
-  <button class="btn-primary">Claim Task</button>
-</div>
 
+    <div class="task-box"
+         *ngFor="let task of dashboard.claimedTasks">
+
+      <div class="task-row">
+        <span>{{ task }}</span>
+        <span class="status-text">In Progress</span>
+      </div>
+
+    </div>
+
+    <div class="btn-wrapper">
+      <button class="btn-primary">Claim Task</button>
+    </div>
   </div>
 
-  <!-- Notifications -->
+
+  <!-- ================= NOTIFICATIONS ================= -->
   <div class="card">
     <h3>Notifications</h3>
 
-    <div class="notification">
-      New task assigned: Q4 Report
+    <div *ngIf="dashboard.notifications?.length === 0">
+      No notifications
     </div>
 
-    <div class="notification">
-      Deadline approaching: IT Audit in 3 days
+    <div class="notification"
+         *ngFor="let note of dashboard.notifications">
+      {{ note }}
     </div>
   </div>
 
+</div>
+
+
+<!-- ================= LOADING STATE ================= -->
+<div *ngIf="!dashboard" class="loading">
+  Loading dashboard...
 </div>

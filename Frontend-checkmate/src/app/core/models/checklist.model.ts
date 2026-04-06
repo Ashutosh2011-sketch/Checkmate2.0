@@ -12,6 +12,16 @@ export interface Checklist {
   items: ChecklistItem[];
 }
 
+export interface ChecklistSummary {
+  id: number;
+  title: string;
+  assignee: string;
+  status: string;
+  deadline: string;
+  priority: string;
+}
+
+
 export interface ChecklistItem {
   id: string;
   text: string;
