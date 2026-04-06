@@ -1,3 +1,4 @@
+
 package com.checkmate.backend.service;
 
 import com.checkmate.backend.entity.User;
@@ -16,12 +17,12 @@ public class UserService {
         this.repository = repository;
     }
 
-    // ✅ GET ALL USERS
+    // GET ALL USERS
     public List<User> getAllUsers() {
         return repository.findAll();
     }
 
-    // ✅ CREATE USER (SAFE)
+    // CREATE USER (SAFE)
     public User createUser(User user) {
 
         // 🔥 prevent null tasks issue
@@ -32,13 +33,13 @@ public class UserService {
         return repository.save(user);
     }
 
-    // ✅ GET USER BY ID
+    // GET USER BY ID
     public User getUserById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    // ✅ UPDATE USER (SAFE)
+    // UPDATE USER (SAFE)
     public User updateUser(Long id, User updatedUser) {
 
         User existing = getUserById(id);
@@ -58,12 +59,12 @@ public class UserService {
         return repository.save(existing);
     }
 
-    // ✅ DELETE USER
+    // DELETE USER
     public void deleteUser(Long id) {
         repository.deleteById(id);
     }
 
-    // ✅ ADD TASK
+    // ADD TASK
     public User addTask(Long id, String task) {
 
         User user = getUserById(id);
@@ -77,7 +78,7 @@ public class UserService {
         return repository.save(user);
     }
 
-    // ✅ REMOVE TASK
+    // REMOVE TASK
     public User removeTask(Long id, String task) {
 
         User user = getUserById(id);

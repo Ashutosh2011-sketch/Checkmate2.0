@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "users") // ✅ FIX: avoid reserved keyword
+@Table(name = "users") // FIX: avoid reserved keyword
 public class User {
 
     @Id
@@ -15,6 +15,7 @@ public class User {
     private String name;
     private String department;
     private String role;
+    private String email;
     private boolean active;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -55,6 +56,10 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+    
+    public String getEmail() { return email; }
+    
+    public void setEmail(String email) { this.email = email; }
 
     public boolean isActive() {
         return active;
