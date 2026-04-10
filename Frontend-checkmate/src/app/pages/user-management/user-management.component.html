@@ -121,3 +121,31 @@
   </div>
 
 </div>
+
+<div class="custom-modal-overlay" *ngIf="showSuccessPopup">
+  <div class="custom-modal-card">
+    <div class="modal-header">
+      <h3>🎉 User Created Successfully!</h3>
+    </div>
+    <div class="modal-body">
+      <p>Share these credentials with the employee:</p>
+      
+      <div class="detail-box">
+        <label>Email:</label>
+        <div class="copy-group">
+          <span>{{generatedEmail}}</span>
+        </div>
+      </div>
+
+      <div class="detail-box">
+        <label>Temporary Password:</label>
+        <div class="copy-group">
+          <span class="pass-text">{{generatedPassword}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" (click)="closeSuccessPopup()">Done</button>
+    </div>
+  </div>
+</div>

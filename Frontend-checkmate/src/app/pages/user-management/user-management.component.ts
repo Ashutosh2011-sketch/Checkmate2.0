@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../core/services/user.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface User {
   id?: number;
@@ -25,12 +26,20 @@ export class UserManagementComponent implements OnInit {
   users: User[] = [];
   selectedUser: User | null = null;
 
+  showSuccessPopup = false;
+generatedEmail = '';
+generatedPassword = '';
+
   // 🔥 tasks now come from checklist
   userTasks: string[] = [];
 
   formUser: User = this.getEmptyUser();
 
-  constructor(private userService: UserService) {}
+
+  constructor(
+    private userService: UserService, 
+    private authService: AuthService  
+  ) {}
 
   ngOnInit() {
     this.loadUsers();
@@ -88,17 +97,21 @@ export class UserManagementComponent implements OnInit {
 
   saveUser() {
 
-    // ➕ ADD USER
     if (this.isAdding) {
-      this.userService.create(this.formUser).subscribe((newUser: any) => {
+      this.authService.registerNewEmployee(this.formUser).subscribe({
+        next: (response: any) => {
+          // 1. Pehle Popup dikhao
+          this.generatedEmail = response.email;
+        this.generatedPassword = response.password;
+        this.showSuccessPopup = true;
+
         this.loadUsers();
-
-        setTimeout(() => {
-          this.selectedUser = newUser;
-          this.userTasks = [];
-        }, 100);
-
+        this.selectedUser = { ...this.formUser };
         this.isAdding = false;
+        },
+        error: (err) => {
+          alert('Error: ' + (err.error?.error || 'Could not add user.'));
+        }
       });
     }
 
@@ -114,6 +127,12 @@ export class UserManagementComponent implements OnInit {
         });
     }
   }
+
+
+
+closeSuccessPopup() {
+  this.showSuccessPopup = false;
+}
 
   cancel() {
     this.isEditing = false;
@@ -136,7 +155,7 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  // ❌ REMOVE TASK (optional UI only, no DB change)
+  //  REMOVE TASK (optional UI only, no DB change)
   removeTask(task: string) {
     this.userTasks = this.userTasks.filter(t => t !== task);
   }

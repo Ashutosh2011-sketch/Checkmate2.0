@@ -18,15 +18,15 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Check karte hain ki kya table khali hai?
+
         if (userRepository.count() == 0) {
-            
+
             AppUser admin = new AppUser();
             admin.setEmail("admin@checkmate.com");
-            // Yahan hum normal password de rahe hain, par machine isko encrypt karke save karegi!
-            admin.setPassword(passwordEncoder.encode("admin123")); 
+
+            admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole("ADMIN");
-            
+
             userRepository.save(admin);
             System.out.println("First Admin user created successfully in the database!");
         } else {

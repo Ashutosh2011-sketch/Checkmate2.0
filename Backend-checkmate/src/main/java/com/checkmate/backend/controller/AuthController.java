@@ -1,95 +1,12 @@
-//package com.checkmate.backend.controller;
-//
-//import com.checkmate.backend.entity.AppUser;
-//import com.checkmate.backend.entity.User;
-//import com.checkmate.backend.repository.AppUserRepository;
-//import com.checkmate.backend.repository.UserRepository;
-//import com.checkmate.backend.security.JwtUtil;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.authentication.AuthenticationManager;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//@RestController
-//@RequestMapping("/api/auth")
-//@CrossOrigin("*") // Angular se request aane dega
-//public class AuthController {
-//
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
-//
-//    @Autowired
-//    private JwtUtil jwtUtil;
-//
-//    @Autowired
-//    private AppUserRepository userRepository;
-//
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
-//
-//    // 1. REGISTER API (Database mein pehla user banane ke liye)
-//    @PostMapping("/register")
-//    public ResponseEntity<?> registerUser(@RequestBody AppUser user) {
-//        // Check karo ki email pehle se toh nahi hai
-//        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-//            return ResponseEntity.badRequest().body("Error: Email pehle se registered hai!");
-//        }
-//
-//        // Password ko hash (encrypt) karo aur database mein save karo
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        
-//        // Agar role nahi diya, toh default 'USER' bana do
-//        if(user.getRole() == null || user.getRole().isEmpty()){
-//            user.setRole("USER");
-//        }
-//        
-//        userRepository.save(user);
-//        return ResponseEntity.ok("User successfully register ho gaya!");
-//    }
-//
-//    // 2. LOGIN API (Token lene ke liye)
-//    @PostMapping("/login")
-//    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
-//        String email = loginData.get("email");
-//        String password = loginData.get("password");
-//
-//        try {
-//            // Spring Security ko bolo password check karne ko
-//            authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(email, password)
-//            );
-//        } catch (Exception e) {
-//            return ResponseEntity.status(401).body("Error: Email ya Password galat hai!");
-//        }
-//
-//        // Agar password sahi hai, toh database se user nikalo role pata karne ke liye
-//        AppUser user = userRepository.findByEmail(email).get();
-//
-//        // Machine se naya Token (ID Card) banwao
-//        String token = jwtUtil.generateToken(email, user.getRole());
-//
-//        // Token aur Role frontend ko bhej do
-//        Map<String, String> response = new HashMap<>();
-//        response.put("token", token);
-//        response.put("role", user.getRole());
-//        response.put("message", "Login Successful!");
-//
-//        return ResponseEntity.ok(response);
-//    }
-//}
-
-
-
 
 package com.checkmate.backend.controller;
 
 import com.checkmate.backend.entity.AppUser;
 import com.checkmate.backend.repository.AppUserRepository;
+
+import com.checkmate.backend.entity.User;
+import com.checkmate.backend.repository.UserRepository;
+
 import com.checkmate.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -98,12 +15,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin("*") 
+@CrossOrigin("*")
 public class AuthController {
 
     @Autowired
@@ -113,51 +31,92 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private AppUserRepository userRepository;
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private UserRepository teammateUserRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody AppUser user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            // 🛑 English update
-            return ResponseEntity.badRequest().body("Error: Email is already registered!");
+    public ResponseEntity<?> registerUser(@RequestBody AppUser appUser) {
+
+        if (appUser.getName() == null || appUser.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Name is required!"));
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
-        if(user.getRole() == null || user.getRole().isEmpty()){
-            user.setRole("USER");
+        // 1. Save Original Role to Designation
+        String originalRoleFromFrontend = appUser.getRole();
+        if (appUser.getRole() != null && !appUser.getRole().isEmpty()) {
+            appUser.setDesignation(appUser.getRole());
         }
-        
-        userRepository.save(user);
-        // 🛑 English update
-        return ResponseEntity.ok("User registered successfully!");
+
+        appUser.setRole("USER");
+
+        String cleanName = appUser.getName().trim().replaceAll("\\s+", "").toLowerCase();
+        String generatedEmail = cleanName + "@checkmate.com";
+        String generatedPassword = generateRandomPassword();
+
+        appUser.setEmail(generatedEmail);
+        appUser.setPassword(passwordEncoder.encode(generatedPassword));
+
+        if (appUserRepository.findByEmail(generatedEmail).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Employee with this name already exists!"));
+        }
+
+        appUserRepository.save(appUser);
+
+        try {
+            User teammateUser = new User();
+            teammateUser.setName(appUser.getName());
+            teammateUser.setDepartment(appUser.getDepartment());
+            teammateUser.setRole(originalRoleFromFrontend);
+            teammateUser.setActive(true);
+
+            teammateUserRepository.save(teammateUser);
+        } catch (Exception e) {
+            System.out.println("Teammate ki table mein save nahi ho paya: " + e.getMessage());
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User created successfully!");
+        response.put("email", generatedEmail);
+        response.put("password", generatedPassword);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
+
         String email = loginData.get("email");
         String password = loginData.get("password");
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
-            );
+                    new UsernamePasswordAuthenticationToken(email, password));
         } catch (Exception e) {
-            // 🛑 English update
-            return ResponseEntity.status(401).body("Error: Invalid Email or Password!");
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password!"));
         }
 
-        AppUser user = userRepository.findByEmail(email).get();
+        AppUser user = appUserRepository.findByEmail(email).get();
         String token = jwtUtil.generateToken(email, user.getRole());
 
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
         response.put("role", user.getRole());
-        // 🛑 English update
         response.put("message", "Login Successful!");
+        response.put("name", user.getName());
 
         return ResponseEntity.ok(response);
     }

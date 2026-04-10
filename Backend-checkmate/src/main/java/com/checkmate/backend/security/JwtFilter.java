@@ -24,38 +24,34 @@ public class JwtFilter extends OncePerRequestFilter {
     private CustomUserDetailsService service;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        
-        // 1. Request ke header se "Authorization" wali line nikalo
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         String authorizationHeader = request.getHeader("Authorization");
 
         String token = null;
         String email = null;
 
-        // 2. Check karo ki kya token "Bearer " se shuru ho raha hai
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7); // "Bearer " hatakar asli token nikalo
-            email = jwtUtil.extractEmail(token); // Token se email nikalo
+            token = authorizationHeader.substring(7);
+            email = jwtUtil.extractEmail(token);
+            System.out.println("debug:email extracted from token : " + email);
         }
 
-        // 3. Agar email mil gaya aur bouncer ne abhi tak check nahi kiya hai
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = service.loadUserByUsername(email);
 
-            // 4. Token validate karo
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
-                // Agar token sahi hai, toh green signal de do
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                
-                // Spring Security ko bata do ki "Banda verified hai, isko aane do"
+
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
         }
-        // 5. Agle darwaze ya API tak request ko jaane do
         filterChain.doFilter(request, response);
     }
 }

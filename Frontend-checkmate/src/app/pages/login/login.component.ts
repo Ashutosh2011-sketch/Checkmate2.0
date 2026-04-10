@@ -35,7 +35,8 @@ export class LoginComponent {
           
           this.authService.saveTokenAndRole(response.token, response.role);
 
-         
+          localStorage.setItem('userName', response.name);
+
           if (this.authService.isAdmin()) {
             this.router.navigate(['/admin-dashboard']);
           } else {

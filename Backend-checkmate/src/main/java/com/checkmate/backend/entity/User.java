@@ -3,11 +3,7 @@ package com.checkmate.backend.entity;
 import jakarta.persistence.*;
 
 @Entity
-<<<<<<< HEAD
-@Table(name = "users") // FIX: avoid reserved keyword
-=======
 @Table(name = "users")
->>>>>>> 0656e46df790ebd500c5fb92b29f19364d250cc4
 public class User {
 
     @Id
@@ -53,10 +49,14 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
-    
-    public String getEmail() { return email; }
-    
-    public void setEmail(String email) { this.email = email; }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public boolean isActive() {
         return active;
