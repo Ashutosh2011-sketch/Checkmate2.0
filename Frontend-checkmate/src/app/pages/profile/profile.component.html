@@ -14,6 +14,7 @@
       <input [(ngModel)]="user.department" type="text" placeholder="Department">
 
       <h4>Change Password</h4>
+      <input [(ngModel)]="user.currentPassword" type="password" placeholder="Current Password">
       <input [(ngModel)]="user.newPassword" type="password" placeholder="New Password">
       <input [(ngModel)]="user.confirmPassword" type="password" placeholder="Confirm Password">
     </div>
@@ -48,7 +49,7 @@
   </div>
 
   <div class="button-group">
-    <button (click)="saveChanges()">Save Changes</button>
+    <!-- <button (click)="saveChanges()">Save Changes</button> -->
     <button class="primary" (click)="updateProfile()">Update Profile</button>
   </div>
 

@@ -1,3 +1,4 @@
+
 package com.checkmate.backend.service;
 
 import com.checkmate.backend.entity.User;
@@ -13,14 +14,14 @@ public class UserService {
 
     private final UserRepository repository;
     private final ChecklistRepository checklistRepository;
-    private final TaskRepository taskRepository; // 
+    private final TaskRepository taskRepository; //
 
     public UserService(UserRepository repository,
-                       ChecklistRepository checklistRepository,
-                       TaskRepository taskRepository) { 
+            ChecklistRepository checklistRepository,
+            TaskRepository taskRepository) {
         this.repository = repository;
         this.checklistRepository = checklistRepository;
-        this.taskRepository = taskRepository; 
+        this.taskRepository = taskRepository;
     }
 
     // GET ALL USERS
@@ -33,7 +34,7 @@ public class UserService {
         return repository.save(user);
     }
 
-    //  GET USER BY ID
+    // GET USER BY ID
     public User getUserById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -52,12 +53,12 @@ public class UserService {
         return repository.save(existing);
     }
 
-    //  DELETE USER
+    // DELETE USER
     public void deleteUser(Long id) {
         repository.deleteById(id);
     }
 
-    //  FIXED: GET TASKS FROM DB (NO DATA LOSS)
+    // FIXED: GET TASKS FROM DB (NO DATA LOSS)
     public List<String> getTasksForUser(String userName) {
 
         // Direct DB query → reliable

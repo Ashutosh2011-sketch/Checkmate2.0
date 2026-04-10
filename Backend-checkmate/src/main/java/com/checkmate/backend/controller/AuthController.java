@@ -1,0 +1,123 @@
+
+package com.checkmate.backend.controller;
+
+import com.checkmate.backend.entity.AppUser;
+import com.checkmate.backend.repository.AppUserRepository;
+
+import com.checkmate.backend.entity.User;
+import com.checkmate.backend.repository.UserRepository;
+
+import com.checkmate.backend.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin("*")
+public class AuthController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private UserRepository teammateUserRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody AppUser appUser) {
+
+        if (appUser.getName() == null || appUser.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Name is required!"));
+        }
+
+        // 1. Save Original Role to Designation
+        String originalRoleFromFrontend = appUser.getRole();
+        if (appUser.getRole() != null && !appUser.getRole().isEmpty()) {
+            appUser.setDesignation(appUser.getRole());
+        }
+
+        appUser.setRole("USER");
+
+        String cleanName = appUser.getName().trim().replaceAll("\\s+", "").toLowerCase();
+        String generatedEmail = cleanName + "@checkmate.com";
+        String generatedPassword = generateRandomPassword();
+
+        appUser.setEmail(generatedEmail);
+        appUser.setPassword(passwordEncoder.encode(generatedPassword));
+
+        if (appUserRepository.findByEmail(generatedEmail).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Employee with this name already exists!"));
+        }
+
+        appUserRepository.save(appUser);
+
+        try {
+            User teammateUser = new User();
+            teammateUser.setName(appUser.getName());
+            teammateUser.setDepartment(appUser.getDepartment());
+            teammateUser.setRole(originalRoleFromFrontend);
+            teammateUser.setActive(true);
+
+            teammateUserRepository.save(teammateUser);
+        } catch (Exception e) {
+            System.out.println("Teammate ki table mein save nahi ho paya: " + e.getMessage());
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User created successfully!");
+        response.put("email", generatedEmail);
+        response.put("password", generatedPassword);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
+
+        String email = loginData.get("email");
+        String password = loginData.get("password");
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password!"));
+        }
+
+        AppUser user = appUserRepository.findByEmail(email).get();
+        String token = jwtUtil.generateToken(email, user.getRole());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        response.put("role", user.getRole());
+        response.put("message", "Login Successful!");
+        response.put("name", user.getName());
+
+        return ResponseEntity.ok(response);
+    }
+}
