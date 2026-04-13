@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -27,13 +26,21 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
-          
-          localStorage.clear();
-          this.router.navigate(['/login']);
-        }
-        return throwError(() => error);
-      })
+
+  // ✅ Allow these APIs without forcing login
+  const allowedUrls = ['/tasks'];
+
+  const isAllowed = allowedUrls.some(url => req.url.includes(url));
+
+  if ((error.status === 401 || error.status === 403) && !isAllowed) {
+    localStorage.clear();
+    this.router.navigate(['/login']);
+  } else {
+    console.log('Ignored auth error for:', req.url);
+  }
+
+  return throwError(() => error);
+})
     );
   }
 }

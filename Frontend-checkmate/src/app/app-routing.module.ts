@@ -36,12 +36,11 @@ const routes: Routes = [
 
   { path: 'dashboard', component: UserDashboardComponent, canActivate: [AuthGuard] },
   { path: 'checklists', component: ChecklistDetailComponent, canActivate: [AuthGuard] },
-  { path: 'checklist-detail/:id', component: ChecklistDetailComponent, canActivate: [AuthGuard] },
   { path: 'checklist-builder', component: ChecklistBuilderComponent, canActivate: [AuthGuard] },
   { path: 'checklist-tracker', component: ChecklistTrackerComponent, canActivate: [AuthGuard] },
   { path: 'reports', component: ReportsComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-
+  { path: 'admin/checklist-detail/:id', component: ChecklistDetailComponent, canActivate: [AuthGuard]},
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard] },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] },
 

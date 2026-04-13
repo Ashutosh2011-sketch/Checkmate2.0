@@ -92,7 +92,7 @@ export class AllChecklistComponent implements OnInit {
     });
   }
 
-  openDetail(item: ChecklistItem) {
-      this.router.navigate(['/checklist-detail', item.id]); 
+  openDetail(item: any) {
+      this.router.navigate(['/admin/checklist-detail', item.id]); 
   }
 }

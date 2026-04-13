@@ -21,28 +21,27 @@
   <div class="cards-grid">
     
     <div class="checklist-card" 
-         *ngFor="let item of filteredChecklists" 
-         (click)="openDetail(item)">
-      
-      <h3 class="card-title">{{ item.title }}</h3>
-      
+     *ngFor="let item of filteredChecklists" 
+     (click)="openDetail(item)">
+  
+  <h3 class="card-title">{{ item.title }}</h3>
 
-
-      <div class="card-footer">
-        <div class="assignee-info">
-          <div class="avatar">👩‍💼</div> <div class="info-text">
-            <span class="label">{{ item.status }}</span>
-            <span class="value">{{ item.assignee }}</span>
-          </div>
-        </div>
-        
-        <div class="deadline-info">
-          <span class="label">Next Deadline</span>
-          <span class="value">{{ item.deadline }}</span>
-        </div>
+  <div class="card-footer">
+    <div class="assignee-info">
+      <div class="avatar">👩‍💼</div>
+      <div class="info-text">
+        <span class="label">{{ item.status }}</span>
+        <span class="value">{{ item.assignee }}</span>
       </div>
-
     </div>
+    
+    <div class="deadline-info">
+      <span class="label">Next Deadline</span>
+      <span class="value">{{ item.deadline }}</span>
+    </div>
+  </div>
+
+</div>
 
   </div>
 </div>
