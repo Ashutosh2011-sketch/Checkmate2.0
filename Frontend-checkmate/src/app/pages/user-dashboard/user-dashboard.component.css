@@ -17,6 +17,14 @@
   grid-row: span 1;
 }
 
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  color: #6c757d;
+  font-size: 14px;
+  padding: 20px 0;
+  text-align: center;
+}
+
 /* ===== CHECKLIST ===== */
 .checklist-item {
   display: flex;
@@ -40,10 +48,38 @@
   border-radius: 50%;
 }
 
+.circle-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.task-count {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
 .right {
   text-align: right;
 }
 
+.progress-text {
+  font-size: 11px;
+  color: #6c757d;
+  display: block;
+  margin-top: 3px;
+}
+
+/* ===== BADGES ===== */
 .badge {
   display: inline-block;
   padding: 4px 10px;
@@ -53,8 +89,32 @@
   color: white;
 }
 
-.badge.high {
+.badge-active {
   background: #f06565;
+}
+
+.badge-completed {
+  background: #2ecc71;
+}
+
+.badge-high {
+  background: #e74c3c;
+  color: white;
+}
+
+.badge-medium {
+  background: #f39c12;
+  color: white;
+}
+
+.badge-low {
+  background: #3498db;
+  color: white;
+}
+
+.badge-default {
+  background: #95a5a6;
+  color: white;
 }
 
 .progress-bar {
@@ -69,6 +129,7 @@
   height: 6px;
   background: #2ecc71;
   border-radius: 10px;
+  transition: width 0.3s ease;
 }
 
 /* ===== PROGRESS CIRCLE ===== */
@@ -86,14 +147,13 @@
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: conic-gradient(
-    #2a5298 0% 65%,
-    #2ecc71 65% 100%
-  );
+  /* Default gradient - overridden dynamically via [style.background] */
+  background: conic-gradient(#2a5298 0% 0%, #e6e6e6 0% 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .circle span {
@@ -106,13 +166,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .circle small {
   position: absolute;
-  margin-top: 60px;
+  bottom: 35px;
   font-size: 12px;
   color: gray;
+  z-index: 2;
 }
 
 /* ===== CLAIMED TASKS ===== */
@@ -123,15 +185,66 @@
   margin-top: 15px;
 }
 
-.small-title {
-  font-size: 13px;
-  color: gray;
-}
-
 .task-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  align-items: center;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-title {
+  font-weight: 500;
+  font-size: 14px;
+  color: #212529;
+}
+
+.task-checklist {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.task-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ===== STATUS BADGES ===== */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-inprogress {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-pending {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ===== PRIORITY BADGES ===== */
+.priority-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .btn-primary {
@@ -150,11 +263,29 @@
   padding: 12px;
   border-radius: 12px;
   margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.notif-icon {
+  font-size: 16px;
 }
 
 /* ===== STATUS TEXT ===== */
 .status-text {
   font-size: 13px;
+  color: #6c757d;
+}
+
+/* ===== LOADING ===== */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 16px;
   color: #6c757d;
 }
 
@@ -169,5 +300,5 @@
 
 /* space from bottom */
 .dashboard-wrapper-box {
-  margin-bottom: 80px;   
+  margin-bottom: 80px;
 }

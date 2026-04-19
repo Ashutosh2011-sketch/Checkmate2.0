@@ -4,7 +4,7 @@
   <div class="card large">
     <h3>Assigned Checklists</h3>
 
-    <div *ngIf="dashboard.assignedChecklists?.length === 0">
+    <div *ngIf="dashboard.assignedChecklists?.length === 0" class="empty-state">
       No checklists assigned
     </div>
 
@@ -13,22 +13,25 @@
 
       <div class="left">
         <div class="circle-avatar">
-    {{ checklist.charAt(0) }}
-      </div>
+          {{ checklist.name?.charAt(0) || '?' }}
+        </div>
         <div>
-          <strong>{{ checklist }}</strong>
-          <div class="badge high">Active</div>
+          <strong>{{ checklist.name }}</strong>
+          <div class="task-count">{{ checklist.totalTasks }} tasks</div>
         </div>
       </div>
 
       <div class="right">
-        <span class="badge high">In Progress</span>
+        <span class="badge" [ngClass]="checklist.progress >= 100 ? 'badge-completed' : 'badge-active'">
+          {{ checklist.progress >= 100 ? 'Completed' : 'In Progress' }}
+        </span>
 
         <div class="progress-bar">
           <div class="progress-fill"
-               [style.width.%]="dashboard.progress || 0">
+               [style.width.%]="checklist.progress || 0">
           </div>
         </div>
+        <small class="progress-text">{{ checklist.progress || 0 }}%</small>
       </div>
 
     </div>
@@ -40,7 +43,7 @@
     <h3>Overall Progress</h3>
 
     <div class="circle-wrap">
-      <div class="circle">
+      <div class="circle" [style.background]="getProgressGradient()">
         <span>{{ dashboard.progress || 0 }}%</span>
         <small>Complete</small>
       </div>
@@ -52,7 +55,7 @@
   <div class="card">
     <h3>Claimed Tasks</h3>
 
-    <div *ngIf="dashboard.claimedTasks?.length === 0">
+    <div *ngIf="dashboard.claimedTasks?.length === 0" class="empty-state">
       No claimed tasks
     </div>
 
@@ -60,14 +63,20 @@
          *ngFor="let task of dashboard.claimedTasks">
 
       <div class="task-row">
-        <span>{{ task }}</span>
-        <span class="status-text">In Progress</span>
+        <div class="task-info">
+          <span class="task-title">{{ task.title }}</span>
+          <span class="task-checklist">{{ task.checklistName }}</span>
+        </div>
+        <div class="task-meta">
+          <span class="status-badge" [ngClass]="getStatusClass(task.status)">
+            {{ task.status }}
+          </span>
+          <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+            {{ task.priority }}
+          </span>
+        </div>
       </div>
 
-    </div>
-
-    <div class="btn-wrapper">
-      <button class="btn-primary">Claim Task</button>
     </div>
   </div>
 
@@ -76,13 +85,13 @@
   <div class="card">
     <h3>Notifications</h3>
 
-    <div *ngIf="dashboard.notifications?.length === 0">
+    <div *ngIf="dashboard.notifications?.length === 0" class="empty-state">
       No notifications
     </div>
 
     <div class="notification"
          *ngFor="let note of dashboard.notifications">
-      {{ note }}
+      <span class="notif-icon">🔔</span> {{ note }}
     </div>
   </div>
 

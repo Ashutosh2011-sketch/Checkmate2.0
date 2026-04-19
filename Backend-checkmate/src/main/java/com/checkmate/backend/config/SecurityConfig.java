@@ -65,6 +65,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/roles/**").authenticated()
+                        .requestMatchers("/api/permissions/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/users/update-profile").authenticated()
                         .anyRequest().authenticated())

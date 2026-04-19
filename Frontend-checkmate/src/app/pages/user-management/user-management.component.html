@@ -101,7 +101,10 @@
 
         <div class="form-group">
           <label>Role</label>
-          <input type="text" [(ngModel)]="formUser.role">
+          <select [(ngModel)]="formUser.role" class="role-select">
+            <option value="" disabled>Select Role</option>
+            <option *ngFor="let role of availableRoles" [value]="role.name">{{ role.name }}</option>
+          </select>
         </div>
 
         <div class="form-buttons">

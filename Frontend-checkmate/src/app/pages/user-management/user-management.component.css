@@ -248,3 +248,20 @@ input:checked + .slider:before {
 .pass-text { font-family: monospace; font-weight: bold; color: #d63384; font-size: 1.1em; }
 .copy-btn { background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 .btn-close-modal { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+
+/* Role Select Dropdown */
+.role-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  width: 100%;
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: #6a11cb;
+  box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.1);
+}

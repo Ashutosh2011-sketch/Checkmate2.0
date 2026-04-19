@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Role, Permission, MOCK_ROLES,MOCK_ALL_PERMISSIONS, clonePermissions } from '../../../core/models/roles-permissions.model';
-
-import { v4 as uuidv4 } from 'uuid'; // You might need to install 'uuid' and '@types/uuid'
+import { Role, Permission, clonePermissions } from '../../../core/models/roles-permissions.model';
+import { RolesPermissionsService } from '../../../core/services/roles-permissions.service';
 
 @Component({
   selector: 'app-add-role-drawer',
@@ -17,13 +16,31 @@ export class AddRoleDrawerComponent implements OnInit {
   newRoleName = '';
   newRoleDescription = '';
   selectedCloneRole: Role | null = null;
-  
+
   // Permissions for the new role being created
   newRolePermissions: Permission[] = [];
   groupedPermissions: { [category: string]: Permission[] } = {};
 
+  // All available permissions loaded from API
+  allPermissions: Permission[] = [];
+
+  constructor(private rolesService: RolesPermissionsService) {}
+
   ngOnInit(): void {
-    this.resetForm();
+    this.loadPermissions();
+  }
+
+  loadPermissions(): void {
+    this.rolesService.getAllPermissions().subscribe({
+      next: (permissions) => {
+        this.allPermissions = permissions;
+        this.resetForm();
+      },
+      error: (err) => {
+        console.error('Error loading permissions:', err);
+        this.resetForm();
+      }
+    });
   }
 
   resetForm(): void {
@@ -31,7 +48,7 @@ export class AddRoleDrawerComponent implements OnInit {
     this.newRoleDescription = '';
     this.selectedCloneRole = null;
     // Initialize with all permissions disabled
-    this.newRolePermissions = clonePermissions(MOCK_ALL_PERMISSIONS);
+    this.newRolePermissions = this.allPermissions.map(p => ({ ...p, isEnabled: false }));
     this.groupPermissions();
   }
 
@@ -45,13 +62,14 @@ export class AddRoleDrawerComponent implements OnInit {
       return groups;
     }, {} as { [category: string]: Permission[] });
   }
-  
+
   get permissionCategories(): string[] {
     return Object.keys(this.groupedPermissions);
   }
 
   onCloneRoleSelect(roleId: string): void {
-    const role = this.existingRoles.find(r => r.id === roleId);
+    const id = Number(roleId);
+    const role = this.existingRoles.find(r => r.id === id);
     if (role) {
       this.selectedCloneRole = role;
       // Copy permissions from the selected role
@@ -59,7 +77,8 @@ export class AddRoleDrawerComponent implements OnInit {
       this.groupPermissions();
     } else {
       this.selectedCloneRole = null;
-      this.resetForm(); // Or just reset permissions
+      this.newRolePermissions = this.allPermissions.map(p => ({ ...p, isEnabled: false }));
+      this.groupPermissions();
     }
   }
 
@@ -70,7 +89,7 @@ export class AddRoleDrawerComponent implements OnInit {
     }
 
     const newRole: Role = {
-      id: uuidv4(), // Generate a new ID
+      id: 0, // Backend generates the ID
       name: this.newRoleName,
       description: this.newRoleDescription,
       permissions: this.newRolePermissions

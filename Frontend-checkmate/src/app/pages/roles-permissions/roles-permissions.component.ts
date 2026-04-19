@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-
-import { Role, Permission, MOCK_ROLES, clonePermissions } from '../../core/models/roles-permissions.model'
+import { RolesPermissionsService } from '../../core/services/roles-permissions.service';
+import { Role, Permission, clonePermissions } from '../../core/models/roles-permissions.model';
 
 @Component({
   selector: 'app-roles-permissions',
@@ -8,9 +8,9 @@ import { Role, Permission, MOCK_ROLES, clonePermissions } from '../../core/model
   styleUrls: ['./roles-permissions.component.css']
 })
 export class RolesPermissionsComponent implements OnInit {
-  roles: Role[] = MOCK_ROLES;
+  roles: Role[] = [];
   selectedRole: Role | null = null;
-  
+
   // To track changes for the "Save" button
   originalPermissions: Permission[] = [];
   hasUnsavedChanges = false;
@@ -21,11 +21,31 @@ export class RolesPermissionsComponent implements OnInit {
   // Grouped permissions for display
   groupedPermissions: { [category: string]: Permission[] } = {};
 
+  // Loading state
+  isLoading = true;
+
+  constructor(private rolesService: RolesPermissionsService) {}
+
   ngOnInit(): void {
-    // Select the first role by default
-    if (this.roles.length > 0) {
-      this.selectRole(this.roles[0]);
-    }
+    this.loadRoles();
+  }
+
+  loadRoles(): void {
+    this.isLoading = true;
+    this.rolesService.getAllRoles().subscribe({
+      next: (roles) => {
+        this.roles = roles;
+        this.isLoading = false;
+        // Select the first role by default
+        if (this.roles.length > 0) {
+          this.selectRole(this.roles[0]);
+        }
+      },
+      error: (err) => {
+        console.error('Error loading roles:', err);
+        this.isLoading = false;
+      }
+    });
   }
 
   selectRole(role: Role): void {
@@ -51,7 +71,7 @@ export class RolesPermissionsComponent implements OnInit {
       return groups;
     }, {} as { [category: string]: Permission[] });
   }
-  
+
   get permissionCategories(): string[] {
     return Object.keys(this.groupedPermissions);
   }
@@ -68,13 +88,26 @@ export class RolesPermissionsComponent implements OnInit {
 
   saveChanges(): void {
     if (!this.selectedRole) return;
-    // In a real app, you would make an API call here.
-    console.log('Saving changes for role:', this.selectedRole.name, this.selectedRole.permissions);
-    
-    // Update the original permissions to the new state
-    this.originalPermissions = clonePermissions(this.selectedRole.permissions);
-    this.hasUnsavedChanges = false;
-    alert('Changes saved successfully!');
+
+    this.rolesService.updateRolePermissions(this.selectedRole.id, this.selectedRole.permissions)
+      .subscribe({
+        next: (updatedRole) => {
+          // Update the role in the list
+          const index = this.roles.findIndex(r => r.id === updatedRole.id);
+          if (index !== -1) {
+            this.roles[index] = updatedRole;
+          }
+          this.selectedRole = updatedRole;
+          this.originalPermissions = clonePermissions(updatedRole.permissions);
+          this.hasUnsavedChanges = false;
+          this.groupPermissions();
+          alert('Changes saved successfully!');
+        },
+        error: (err) => {
+          console.error('Error saving changes:', err);
+          alert('Error saving changes. Please try again.');
+        }
+      });
   }
 
   discardChanges(): void {
@@ -94,9 +127,17 @@ export class RolesPermissionsComponent implements OnInit {
   }
 
   onRoleCreated(newRole: Role): void {
-    this.roles.push(newRole);
-    this.selectRole(newRole);
-    this.closeAddRoleDrawer();
-    alert(`Role "${newRole.name}" created successfully!`);
+    this.rolesService.createRole(newRole).subscribe({
+      next: (createdRole) => {
+        this.roles.push(createdRole);
+        this.selectRole(createdRole);
+        this.closeAddRoleDrawer();
+        alert(`Role "${createdRole.name}" created successfully!`);
+      },
+      error: (err) => {
+        console.error('Error creating role:', err);
+        alert('Error creating role: ' + (err.error?.error || 'Please try again.'));
+      }
+    });
   }
 }

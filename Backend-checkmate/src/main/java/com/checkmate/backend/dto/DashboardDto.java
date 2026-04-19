@@ -4,27 +4,26 @@ import java.util.List;
 
 public class DashboardDto {
 
-    private List<String> assignedChecklists; // rename
-    private List<String> claimedTasks;
+    private List<ChecklistInfoDto> assignedChecklists;
+    private List<TaskInfoDto> claimedTasks;
     private List<String> notifications;
-
     private int progress;
 
     // GETTERS & SETTERS
 
-    public List<String> getAssignedChecklists() {
+    public List<ChecklistInfoDto> getAssignedChecklists() {
         return assignedChecklists;
     }
 
-    public void setAssignedChecklists(List<String> assignedChecklists) {
+    public void setAssignedChecklists(List<ChecklistInfoDto> assignedChecklists) {
         this.assignedChecklists = assignedChecklists;
     }
 
-    public List<String> getClaimedTasks() {
+    public List<TaskInfoDto> getClaimedTasks() {
         return claimedTasks;
     }
 
-    public void setClaimedTasks(List<String> claimedTasks) {
+    public void setClaimedTasks(List<TaskInfoDto> claimedTasks) {
         this.claimedTasks = claimedTasks;
     }
 

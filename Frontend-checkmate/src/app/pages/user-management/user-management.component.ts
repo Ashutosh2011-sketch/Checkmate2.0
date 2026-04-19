@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
+import { RolesPermissionsService } from '../../core/services/roles-permissions.service';
+import { Role } from '../../core/models/roles-permissions.model';
 
 interface User {
   id?: number;
@@ -18,7 +20,6 @@ interface User {
 export class UserManagementComponent implements OnInit {
 
   searchText = '';
-  newTask = ''; // (optional, can remove later if not needed)
 
   isEditing = false;
   isAdding = false;
@@ -27,29 +28,45 @@ export class UserManagementComponent implements OnInit {
   selectedUser: User | null = null;
 
   showSuccessPopup = false;
-generatedEmail = '';
-generatedPassword = '';
+  generatedEmail = '';
+  generatedPassword = '';
 
-  // 🔥 tasks now come from checklist
+  // Tasks from checklist
   userTasks: string[] = [];
+
+  // Roles from backend
+  availableRoles: Role[] = [];
 
   formUser: User = this.getEmptyUser();
 
-
   constructor(
-    private userService: UserService, 
-    private authService: AuthService  
+    private userService: UserService,
+    private authService: AuthService,
+    private rolesService: RolesPermissionsService
   ) {}
 
   ngOnInit() {
     this.loadUsers();
+    this.loadRoles();
   }
 
-  // 🔄 LOAD USERS
+  // LOAD USERS
   loadUsers() {
     this.userService.getAll().subscribe((res: any[]) => {
       console.log('Users:', res);
       this.users = [...res];
+    });
+  }
+
+  // LOAD ROLES FROM BACKEND
+  loadRoles() {
+    this.rolesService.getAllRoles().subscribe({
+      next: (roles) => {
+        this.availableRoles = roles;
+      },
+      error: (err) => {
+        console.error('Error loading roles:', err);
+      }
     });
   }
 
@@ -68,14 +85,14 @@ generatedPassword = '';
     );
   }
 
-  // 🔥 SELECT USER + FETCH TASKS FROM CHECKLIST
+  // SELECT USER + FETCH TASKS FROM CHECKLIST
   selectUser(user: User) {
     this.selectedUser = user;
     this.isEditing = false;
     this.isAdding = false;
     this.formUser = { ...user };
 
-    // 🔥 fetch tasks from backend (checklist)
+    // fetch tasks from backend (checklist)
     this.userService.getUserTasks(user.name).subscribe((tasks: string[]) => {
       this.userTasks = tasks || [];
     });
@@ -100,14 +117,13 @@ generatedPassword = '';
     if (this.isAdding) {
       this.authService.registerNewEmployee(this.formUser).subscribe({
         next: (response: any) => {
-          // 1. Pehle Popup dikhao
           this.generatedEmail = response.email;
-        this.generatedPassword = response.password;
-        this.showSuccessPopup = true;
+          this.generatedPassword = response.password;
+          this.showSuccessPopup = true;
 
-        this.loadUsers();
-        this.selectedUser = { ...this.formUser };
-        this.isAdding = false;
+          this.loadUsers();
+          this.selectedUser = { ...this.formUser };
+          this.isAdding = false;
         },
         error: (err) => {
           alert('Error: ' + (err.error?.error || 'Could not add user.'));
@@ -115,24 +131,20 @@ generatedPassword = '';
       });
     }
 
-    // ✏️ EDIT USER
+    // EDIT USER
     if (this.isEditing && this.selectedUser?.id) {
       this.userService.update(this.selectedUser.id, this.formUser)
         .subscribe((updatedUser: any) => {
-
           this.loadUsers();
           this.selectedUser = updatedUser;
-
           this.isEditing = false;
         });
     }
   }
 
-
-
-closeSuccessPopup() {
-  this.showSuccessPopup = false;
-}
+  closeSuccessPopup() {
+    this.showSuccessPopup = false;
+  }
 
   cancel() {
     this.isEditing = false;
@@ -141,7 +153,6 @@ closeSuccessPopup() {
 
   disableAccount() {
     if (this.selectedUser?.id) {
-
       const updatedUser = {
         ...this.selectedUser,
         active: false
@@ -155,12 +166,12 @@ closeSuccessPopup() {
     }
   }
 
-  //  REMOVE TASK (optional UI only, no DB change)
+  // REMOVE TASK (optional UI only)
   removeTask(task: string) {
     this.userTasks = this.userTasks.filter(t => t !== task);
   }
 
-  // 🗑 DELETE USER
+  // DELETE USER
   deleteUser(id: number) {
     if (confirm('Delete user?')) {
       this.userService.delete(id).subscribe(() => {
