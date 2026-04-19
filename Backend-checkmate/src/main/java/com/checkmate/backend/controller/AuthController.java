@@ -1,4 +1,3 @@
-
 package com.checkmate.backend.controller;
 
 import com.checkmate.backend.entity.AppUser;
@@ -6,6 +5,10 @@ import com.checkmate.backend.repository.AppUserRepository;
 
 import com.checkmate.backend.entity.User;
 import com.checkmate.backend.repository.UserRepository;
+
+import com.checkmate.backend.entity.Role;
+import com.checkmate.backend.entity.RolePermission;
+import com.checkmate.backend.repository.RoleRepository;
 
 import com.checkmate.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,6 +41,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     private String generateRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
@@ -112,11 +118,38 @@ public class AuthController {
         AppUser user = appUserRepository.findByEmail(email).get();
         String token = jwtUtil.generateToken(email, user.getRole());
 
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("role", user.getRole());
         response.put("message", "Login Successful!");
         response.put("name", user.getName());
+
+        // Return the user's designation (which is the role name from roles table)
+        String designation = user.getDesignation();
+        response.put("designation", designation != null ? designation : "");
+
+        // Look up actual permissions for this user's designation (role name)
+        List<String> permissions = new ArrayList<>();
+        if (designation != null && !designation.isEmpty()) {
+            Optional<Role> roleOpt = roleRepository.findByName(designation);
+            if (roleOpt.isPresent()) {
+                Role role = roleOpt.get();
+                permissions = role.getRolePermissions().stream()
+                        .filter(RolePermission::isEnabled)
+                        .map(rp -> rp.getPermission().getName())
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // ADMIN gets all permissions automatically
+        if ("ADMIN".equals(user.getRole())) {
+            permissions = List.of(
+                "Create Checklists", "Publish Workflows", "Manage Users",
+                "Access Audit Logs", "View All Reports", "Manage Workflows"
+            );
+        }
+
+        response.put("permissions", permissions);
 
         return ResponseEntity.ok(response);
     }

@@ -27,6 +27,7 @@ import { AdminNotificationsComponent } from './pages/notifications/notifications
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { PermissionGuard } from './core/guards/permission.guard';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -34,32 +35,49 @@ const routes: Routes = [
   { path: 'landing', component: LandingPageComponent },
   { path: 'login', component: LoginComponent },
 
+  // === USER ROUTES (AuthGuard = must be logged in) ===
   { path: 'dashboard', component: UserDashboardComponent, canActivate: [AuthGuard] },
   { path: 'checklists', component: ChecklistDetailComponent, canActivate: [AuthGuard] },
-  { path: 'checklist-builder', component: ChecklistBuilderComponent, canActivate: [AuthGuard] },
   { path: 'checklist-tracker', component: ChecklistTrackerComponent, canActivate: [AuthGuard] },
-  { path: 'reports', component: ReportsComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'admin/checklist-detail/:id', component: ChecklistDetailComponent, canActivate: [AuthGuard]},
+
+  // === PERMISSION-PROTECTED USER ROUTES ===
+  // These routes are visible to regular users ONLY if they have the required permission
+  { 
+    path: 'checklist-builder', 
+    component: ChecklistBuilderComponent, 
+    canActivate: [PermissionGuard],
+    data: { permission: 'Create Checklists' }
+  },
+  { 
+    path: 'user-management', 
+    component: UserManagementComponent, 
+    canActivate: [PermissionGuard],
+    data: { permission: 'Manage Users' }
+  },
+  { 
+    path: 'reports', 
+    component: ReportsComponent, 
+    canActivate: [PermissionGuard],
+    data: { permission: 'View All Reports' }
+  },
+
+  // === ADMIN ROUTES (AdminGuard = must be ADMIN role) ===
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard] },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] },
-
   { path: 'admin/checklists', component: AllChecklistComponent, canActivate: [AdminGuard] },
-
   { path: 'admin/checklist-builder', component: ChecklistBuilderComponent, canActivate: [AdminGuard] },
-
+  { path: 'admin/checklist-detail/:id', component: ChecklistDetailComponent, canActivate: [AuthGuard]},
   { path: 'admin/users', component: UserManagementComponent, canActivate: [AdminGuard] },
   { path: 'admin/roles', component: AdminRolesComponent, canActivate: [AdminGuard] },
-
   { path: 'admin/checklist-tracker', component: ChecklistTrackerComponent, canActivate: [AdminGuard] },
-
   { path: 'admin/templates', component: AdminTemplatesComponent, canActivate: [AdminGuard] },
   { path: 'admin/workflow', component: AdminWorkflowComponent, canActivate: [AdminGuard] },
   { path: 'admin/reports', component: AdminReportsComponent, canActivate: [AdminGuard] },
   { path: 'admin/security', component: SecurityComplianceComponent, canActivate: [AdminGuard] },
   { path: 'admin/notifications', component: AdminNotificationsComponent, canActivate: [AdminGuard] },
   { path: 'admin/profile', component: AdminProfileComponent, canActivate: [AdminGuard] },
-  { path: 'admin/roles-permissions', component: RolesPermissionsComponent },
+  { path: 'admin/roles-permissions', component: RolesPermissionsComponent, canActivate: [AdminGuard] },
 
   { path: '**', component: NotFoundComponent },
 ];
