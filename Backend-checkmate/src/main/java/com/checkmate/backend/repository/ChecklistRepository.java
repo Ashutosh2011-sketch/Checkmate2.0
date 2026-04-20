@@ -11,6 +11,8 @@ import com.checkmate.backend.entity.Checklist;
 
 @Repository
 public interface ChecklistRepository extends JpaRepository<Checklist, Long> {
+
+    long countByCompletedTrue();
     
     @Query(value = "SELECT " +
            "c.id, " +

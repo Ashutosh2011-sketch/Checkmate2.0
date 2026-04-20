@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Dashboard } from '../models/dashboard.model';
+import { AdminDashboardSummary, Dashboard } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,10 @@ export class DashboardService {
   // ✅ REAL BACKEND CALL
   getDashboardData(userName: string): Observable<Dashboard> {
     return this.http.get<Dashboard>(`${this.api}/${userName}`);
+  }
+
+  getAdminSummary(): Observable<AdminDashboardSummary> {
+    return this.http.get<AdminDashboardSummary>(`${this.api}/admin/summary`);
   }
 
   /*
