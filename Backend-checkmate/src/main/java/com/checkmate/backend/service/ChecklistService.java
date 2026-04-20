@@ -25,7 +25,7 @@ public class ChecklistService {
         this.repository = repository;
     }
 
-@Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<ChecklistDto> getAll() {
         return repository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
@@ -51,40 +51,42 @@ public class ChecklistService {
         checklist.setCompleted(dto.isCompleted());
 
         List<Section> sections = new ArrayList<>();
+
         if (dto.getSections() != null) {
             for (SectionDto sectionDto : dto.getSections()) {
+
                 Section section = new Section();
                 section.setSectionName(sectionDto.getSectionName());
 
                 List<Task> tasks = new ArrayList<>();
+
                 if (sectionDto.getTasks() != null) {
                     for (TaskDto taskDto : sectionDto.getTasks()) {
+
                         Task task = new Task();
                         task.setTitle(taskDto.getTitle());
                         task.setDescription(taskDto.getDescription());
                         task.setAssignees(taskDto.getAssignees());
                         task.setPriority(taskDto.getPriority());
                         task.setDueDateDays(taskDto.getDueDateDays());
-                        task.setDependsOn(taskDto.getDependsOn());
-                        task.setConditionDependentOn(taskDto.getConditionDependentOn());
-                        task.setConditionExpectedOutcome(taskDto.getConditionExpectedOutcome());
-                        task.setRemindBefore(taskDto.getRemindBefore());
-                        task.setEscalateTo(taskDto.getEscalateTo());
-                        task.setShowAdvanced(taskDto.isShowAdvanced());
+                        task.setStatus(taskDto.getStatus());
+
                         tasks.add(task);
                     }
                 }
+
                 section.setTasks(tasks);
                 sections.add(section);
             }
         }
-        checklist.setSections(sections);
 
+        checklist.setSections(sections);
         return checklist;
     }
 
     private ChecklistDto toDto(Checklist checklist) {
         ChecklistDto dto = new ChecklistDto();
+
         dto.setId(checklist.getId());
         dto.setChecklistName(checklist.getChecklistName());
         dto.setDepartment(checklist.getDepartment());
@@ -93,15 +95,19 @@ public class ChecklistService {
         dto.setCompleted(checklist.isCompleted());
 
         List<SectionDto> sectionDtos = new ArrayList<>();
+
         if (checklist.getSections() != null) {
             for (Section section : checklist.getSections()) {
+
                 SectionDto sectionDto = new SectionDto();
                 sectionDto.setId(section.getId());
                 sectionDto.setSectionName(section.getSectionName());
 
                 List<TaskDto> taskDtos = new ArrayList<>();
+
                 if (section.getTasks() != null) {
                     for (Task task : section.getTasks()) {
+
                         TaskDto taskDto = new TaskDto();
                         taskDto.setId(task.getId());
                         taskDto.setTitle(task.getTitle());
@@ -109,19 +115,17 @@ public class ChecklistService {
                         taskDto.setAssignees(task.getAssignees());
                         taskDto.setPriority(task.getPriority());
                         taskDto.setDueDateDays(task.getDueDateDays());
-                        taskDto.setDependsOn(task.getDependsOn());
-                        taskDto.setConditionDependentOn(task.getConditionDependentOn());
-                        taskDto.setConditionExpectedOutcome(task.getConditionExpectedOutcome());
-                        taskDto.setRemindBefore(task.getRemindBefore());
-                        taskDto.setEscalateTo(task.getEscalateTo());
-                        taskDto.setShowAdvanced(task.isShowAdvanced());
+                        taskDto.setStatus(task.getStatus());
+
                         taskDtos.add(taskDto);
                     }
                 }
+
                 sectionDto.setTasks(taskDtos);
                 sectionDtos.add(sectionDto);
             }
         }
+
         dto.setSections(sectionDtos);
         return dto;
     }

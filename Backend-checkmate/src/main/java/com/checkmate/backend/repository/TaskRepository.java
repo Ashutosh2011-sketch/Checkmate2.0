@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+    // ✅ FIXED METHOD (this was missing)
     @Query(value = """
         SELECT t.title
         FROM tasks t
@@ -17,6 +18,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<String> findTasksByUserName(String userName);
 
+<<<<<<< HEAD
     // Get full task objects assigned to a user
     @Query(value = """
         SELECT t.id, t.title, t.priority, t.description,
@@ -46,4 +48,10 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         WHERE c.completed = true
     """, nativeQuery = true)
     long countCompletedTasks();
+=======
+
+    // ✅ FOR CHECKLIST DETAIL PAGE (already needed)
+    @Query("SELECT t FROM Task t JOIN FETCH t.section s JOIN FETCH s.checklist WHERE s.checklist.id = :checklistId")
+    List<Task> findBySection_Checklist_Id(Long checklistId);
+>>>>>>> 5cd979d (Checklist details page is updated)
 }

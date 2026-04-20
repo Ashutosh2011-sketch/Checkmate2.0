@@ -3,6 +3,9 @@ package com.checkmate.backend.entity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore; // ✅ IMPORTANT
 
 @Entity
 @Table(name = "sections")
@@ -22,8 +25,10 @@ public class Section {
     @JoinColumn(name = "checklist_id", nullable = false)
     private Checklist checklist;
 
+    // ✅ FIX: PREVENT INFINITE LOOP
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
+    @JsonIgnore
     private List<Task> tasks = new ArrayList<>();
 
     public Long getId() { return id; }
@@ -46,9 +51,7 @@ public class Section {
 
     public void setTasks(List<Task> tasks) {
         this.tasks.clear();
-        if (tasks == null) {
-            return;
-        }
+        if (tasks == null) return;
 
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
