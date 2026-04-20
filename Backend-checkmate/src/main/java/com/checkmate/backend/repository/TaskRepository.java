@@ -37,4 +37,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         WHERE s.checklist_id = :checklistId
     """, nativeQuery = true)
     int countTasksByChecklistId(@Param("checklistId") Long checklistId);
+
+    @Query(value = """
+        SELECT COUNT(t.id)
+        FROM tasks t
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        WHERE c.completed = true
+    """, nativeQuery = true)
+    long countCompletedTasks();
 }

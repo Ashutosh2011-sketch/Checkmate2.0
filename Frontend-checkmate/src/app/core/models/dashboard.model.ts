@@ -19,3 +19,11 @@ export interface Dashboard {
   claimedTasks: TaskInfo[];
   notifications: string[];
 }
+
+export interface AdminDashboardSummary {
+  totalChecklists: number;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  completedChecklists: number;
+}

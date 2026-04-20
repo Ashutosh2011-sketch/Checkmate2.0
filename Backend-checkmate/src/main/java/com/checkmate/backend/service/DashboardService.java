@@ -2,7 +2,9 @@ package com.checkmate.backend.service;
 
 import com.checkmate.backend.dto.ChecklistInfoDto;
 import com.checkmate.backend.dto.DashboardDto;
+import com.checkmate.backend.dto.AdminDashboardSummaryDto;
 import com.checkmate.backend.dto.TaskInfoDto;
+import com.checkmate.backend.repository.ChecklistRepository;
 import com.checkmate.backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,11 @@ import java.util.*;
 public class DashboardService {
 
     private final TaskRepository taskRepository;
+    private final ChecklistRepository checklistRepository;
 
-    public DashboardService(TaskRepository taskRepository) {
+    public DashboardService(TaskRepository taskRepository, ChecklistRepository checklistRepository) {
         this.taskRepository = taskRepository;
+        this.checklistRepository = checklistRepository;
     }
 
     public DashboardDto getDashboard(String userName) {
@@ -81,5 +85,21 @@ public class DashboardService {
         dto.setProgress(overallProgress);
 
         return dto;
+    }
+
+    public AdminDashboardSummaryDto getAdminSummary() {
+        long totalChecklists = checklistRepository.count();
+        long totalTasks = taskRepository.count();
+        long completedTasks = taskRepository.countCompletedTasks();
+        long pendingTasks = Math.max(totalTasks - completedTasks, 0);
+        long completedChecklists = checklistRepository.countByCompletedTrue();
+
+        AdminDashboardSummaryDto summary = new AdminDashboardSummaryDto();
+        summary.setTotalChecklists(totalChecklists);
+        summary.setTotalTasks(totalTasks);
+        summary.setCompletedTasks(completedTasks);
+        summary.setPendingTasks(pendingTasks);
+        summary.setCompletedChecklists(completedChecklists);
+        return summary;
     }
 }
