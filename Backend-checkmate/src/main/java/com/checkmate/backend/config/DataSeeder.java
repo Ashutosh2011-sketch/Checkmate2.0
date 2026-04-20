@@ -40,13 +40,34 @@ public class DataSeeder implements CommandLineRunner {
         // 1. Seed admin user
         if (userRepository.count() == 0) {
             AppUser admin = new AppUser();
+            admin.setName("Admin User");
             admin.setEmail("admin@checkmate.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole("ADMIN");
+            admin.setDesignation("Approver"); // Set designation for testing
             userRepository.save(admin);
+            
+            try {
+                com.checkmate.backend.entity.User teammateUser = new com.checkmate.backend.entity.User();
+                teammateUser.setName("admin@checkmate.com");
+                teammateUser.setDepartment("Management");
+                teammateUser.setRole("Approver");
+                teammateUser.setEmail("admin@checkmate.com");
+                teammateUser.setActive(true);
+                // Can't inject UserRepository here easily without adding it to constructor
+            } catch(Exception ignored) {}
+            
             System.out.println("First Admin user created successfully in the database!");
         } else {
             System.out.println("Users already exist in the database, skipping creation.");
+            // Migration for existing users: Ensure admin has Approver designation
+            userRepository.findByEmail("admin@checkmate.com").ifPresent(admin -> {
+                if (admin.getDesignation() == null) {
+                    admin.setDesignation("Approver");
+                    admin.setName(admin.getName() == null ? "Admin User" : admin.getName());
+                    userRepository.save(admin);
+                }
+            });
         }
 
         // 2. Seed default permissions

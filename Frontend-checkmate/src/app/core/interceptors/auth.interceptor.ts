@@ -11,10 +11,12 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     
+    // Skip auth for login/register endpoints
     if (req.url.includes('/api/auth/')) {
       return next.handle(req);
     }
 
+    // Attach JWT token to all other requests
     const token = localStorage.getItem('token');
     let authReq = req;
     
@@ -27,20 +29,20 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
 
-  // ✅ Allow these APIs without forcing login
-  const allowedUrls = ['/tasks'];
+        // Only redirect to login if token is missing or truly expired
+        // Do NOT clear localStorage on every 401 — only on actual auth failures
+        if (error.status === 401 && !req.url.includes('/api/auth/')) {
+          // Only redirect if we don't have a token (means session expired)
+          if (!token) {
+            this.router.navigate(['/login']);
+          } else {
+            // Token exists but got 401 — could be expired
+            console.warn('Auth error for:', req.url, '- Status:', error.status);
+          }
+        }
 
-  const isAllowed = allowedUrls.some(url => req.url.includes(url));
-
-  if ((error.status === 401 || error.status === 403) && !isAllowed) {
-    localStorage.clear();
-    this.router.navigate(['/login']);
-  } else {
-    console.log('Ignored auth error for:', req.url);
-  }
-
-  return throwError(() => error);
-})
+        return throwError(() => error);
+      })
     );
   }
 }
