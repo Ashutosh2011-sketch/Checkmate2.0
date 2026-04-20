@@ -28,14 +28,15 @@ export class LoginComponent {
   onLogin(): void {
     if (this.loginObj.email && this.loginObj.password) {
       
-     
       this.authService.login(this.loginObj.email, this.loginObj.password).subscribe({
         
         next: (response: any) => {
           
           this.authService.saveTokenAndRole(response.token, response.role);
+          this.authService.savePermissions(response.permissions || []);
 
           localStorage.setItem('userName', response.name);
+          localStorage.setItem('designation', response.designation || '');
 
           if (this.authService.isAdmin()) {
             this.router.navigate(['/admin-dashboard']);
@@ -45,7 +46,6 @@ export class LoginComponent {
         },
 
         error: (err) => {
-          
           alert('Error: Invalid Email or Password!');
           console.error(err);
         }

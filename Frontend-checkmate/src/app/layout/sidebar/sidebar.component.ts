@@ -18,8 +18,13 @@ export class SidebarComponent {
     return this.router.url.includes(route);
   }
 
- isAdmin(): boolean {
-    return this.router.url.includes('admin'); 
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  // Check if user has a specific permission
+  hasPermission(permission: string): boolean {
+    return this.authService.hasPermission(permission);
   }
 
   // Logout handler
