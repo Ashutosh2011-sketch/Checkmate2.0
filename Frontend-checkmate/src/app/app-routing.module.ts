@@ -73,7 +73,7 @@ const routes: Routes = [
   { path: 'admin/checklist-tracker', component: ChecklistTrackerComponent, canActivate: [AdminGuard] },
   { path: 'admin/templates', component: AdminTemplatesComponent, canActivate: [AdminGuard] },
   { path: 'admin/workflow', component: AdminWorkflowComponent, canActivate: [AdminGuard] },
-  { path: 'admin/reports', component: AdminReportsComponent, canActivate: [AdminGuard] },
+  { path: 'admin/reports', component: ReportsComponent, canActivate: [AdminGuard] },
   { path: 'admin/security', component: SecurityComplianceComponent, canActivate: [AdminGuard] },
   { path: 'admin/notifications', component: AdminNotificationsComponent, canActivate: [AdminGuard] },
   { path: 'admin/profile', component: AdminProfileComponent, canActivate: [AdminGuard] },

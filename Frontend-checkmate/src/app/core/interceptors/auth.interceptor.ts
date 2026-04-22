@@ -28,7 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
 
   // ✅ Allow these APIs without forcing login
-  const allowedUrls = ['/tasks'];
+const allowedUrls = ['/tasks', '/reports', '/api/reports'];
 
   const isAllowed = allowedUrls.some(url => req.url.includes(url));
 

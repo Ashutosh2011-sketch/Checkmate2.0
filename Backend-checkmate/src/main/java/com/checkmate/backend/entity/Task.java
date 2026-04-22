@@ -17,7 +17,7 @@ public class Task {
 
     private String description;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER) 
     @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "assignee", nullable = false)
     private List<String> assignees = new ArrayList<>();
