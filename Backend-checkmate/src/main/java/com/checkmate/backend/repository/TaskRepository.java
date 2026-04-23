@@ -145,4 +145,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         ORDER BY completed DESC
     """, nativeQuery = true)
     List<Object[]> getUserPerformanceStats(@Param("currentDayOfYear") int currentDayOfYear);
+
+    // ✅ FOR CHECKLIST DETAIL PAGE (IMPORTANT)
+    @Query("""
+        SELECT t FROM Task t
+        JOIN FETCH t.section s
+        JOIN FETCH s.checklist c
+        WHERE c.id = :checklistId
+    """)
+    List<Task> findBySection_Checklist_Id(@Param("checklistId") Long checklistId);
 }
