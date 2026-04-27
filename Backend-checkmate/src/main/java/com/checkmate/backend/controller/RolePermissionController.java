@@ -67,15 +67,15 @@ public class RolePermissionController {
         return service.getAllPermissions();
     }
 
-    // ===== USER-LEVEL ENDPOINTS =====
-    // Use /api/role-users/{roleName} to avoid path conflict with /api/roles/{id}
+    // ===== USER-LEVEL PERMISSION ENDPOINTS =====
+    // Moved to /api/role-users and /api/user-permissions to avoid conflicts with UserController
 
     @GetMapping("/role-users/{roleName}")
     public List<UserPermissionDto> getUsersByRole(@PathVariable String roleName) {
         return service.getUsersByRole(roleName);
     }
 
-    @GetMapping("/users/{userId}/permissions")
+    @GetMapping("/user-permissions/{userId}")
     public ResponseEntity<?> getUserPermissions(@PathVariable Long userId) {
         try {
             return ResponseEntity.ok(service.getUserPermissions(userId));
@@ -84,7 +84,7 @@ public class RolePermissionController {
         }
     }
 
-    @PutMapping("/users/{userId}/permissions")
+    @PutMapping("/user-permissions/{userId}")
     public ResponseEntity<?> updateUserPermissions(@PathVariable Long userId,
                                                     @RequestBody List<PermissionDto> permissions) {
         try {

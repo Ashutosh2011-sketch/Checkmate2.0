@@ -46,15 +46,17 @@ export class RolesPermissionsService {
   }
 
   // ===== USER-LEVEL =====
+  // Uses /api/role-users/{roleName} to get users by role
   getUsersByRole(roleName: string): Observable<UserPermissionInfo[]> {
     return this.http.get<UserPermissionInfo[]>(`${this.apiUrl}/role-users/${roleName}`);
   }
 
+  // Uses /api/user-permissions/{userId} — NEW path to avoid conflict with /api/users
   getUserPermissions(userId: number): Observable<UserPermissionInfo> {
-    return this.http.get<UserPermissionInfo>(`${this.apiUrl}/users/${userId}/permissions`);
+    return this.http.get<UserPermissionInfo>(`${this.apiUrl}/user-permissions/${userId}`);
   }
 
   updateUserPermissions(userId: number, permissions: Permission[]): Observable<UserPermissionInfo> {
-    return this.http.put<UserPermissionInfo>(`${this.apiUrl}/users/${userId}/permissions`, permissions);
+    return this.http.put<UserPermissionInfo>(`${this.apiUrl}/user-permissions/${userId}`, permissions);
   }
 }

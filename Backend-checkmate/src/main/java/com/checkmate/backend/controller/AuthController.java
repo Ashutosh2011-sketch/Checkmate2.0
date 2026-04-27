@@ -83,16 +83,17 @@ public class AuthController {
 
         appUserRepository.save(appUser);
 
+        // Also create a matching record in the users (teammates) table
         try {
             User teammateUser = new User();
             teammateUser.setName(appUser.getName());
             teammateUser.setDepartment(appUser.getDepartment());
             teammateUser.setRole(originalRoleFromFrontend);
+            teammateUser.setEmail(generatedEmail); // CRITICAL: Set email for cross-table sync
             teammateUser.setActive(true);
-
             teammateUserRepository.save(teammateUser);
         } catch (Exception e) {
-            System.out.println("Teammate ki table mein save nahi ho paya: " + e.getMessage());
+            System.out.println("Teammate save error: " + e.getMessage());
         }
 
         Map<String, String> response = new HashMap<>();

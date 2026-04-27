@@ -9,6 +9,7 @@ interface User {
   name: string;
   department: string;
   role: string;
+  email?: string;
   active: boolean;
 }
 
@@ -52,9 +53,14 @@ export class UserManagementComponent implements OnInit {
 
   // LOAD USERS
   loadUsers() {
-    this.userService.getAll().subscribe((res: any[]) => {
-      console.log('Users:', res);
-      this.users = [...res];
+    this.userService.getAll().subscribe({
+      next: (res: any[]) => {
+        console.log('Users loaded:', res);
+        this.users = [...res];
+      },
+      error: (err) => {
+        console.error('Error loading users:', err);
+      }
     });
   }
 
@@ -92,9 +98,15 @@ export class UserManagementComponent implements OnInit {
     this.isAdding = false;
     this.formUser = { ...user };
 
-    // fetch tasks from backend (checklist)
-    this.userService.getUserTasks(user.name).subscribe((tasks: string[]) => {
-      this.userTasks = tasks || [];
+    // fetch tasks from backend (checklist) — with error handling
+    this.userService.getUserTasks(user.name).subscribe({
+      next: (tasks: string[]) => {
+        this.userTasks = tasks || [];
+      },
+      error: (err) => {
+        console.warn('Could not fetch tasks for user:', err);
+        this.userTasks = [];
+      }
     });
   }
 
@@ -134,10 +146,17 @@ export class UserManagementComponent implements OnInit {
     // EDIT USER
     if (this.isEditing && this.selectedUser?.id) {
       this.userService.update(this.selectedUser.id, this.formUser)
-        .subscribe((updatedUser: any) => {
-          this.loadUsers();
-          this.selectedUser = updatedUser;
-          this.isEditing = false;
+        .subscribe({
+          next: (updatedUser: any) => {
+            console.log('User updated successfully:', updatedUser);
+            this.loadUsers();
+            this.selectedUser = updatedUser;
+            this.isEditing = false;
+          },
+          error: (err) => {
+            console.error('Error updating user:', err);
+            alert('Error updating user: ' + (err.error?.error || err.message));
+          }
         });
     }
   }
@@ -159,10 +178,19 @@ export class UserManagementComponent implements OnInit {
       };
 
       this.userService.update(this.selectedUser.id, updatedUser)
-        .subscribe((res: any) => {
-          this.selectedUser = res;
-          this.loadUsers();
+        .subscribe({
+          next: (res: any) => {
+            console.log('User disabled:', res);
+            this.selectedUser = res;
+            this.loadUsers();
+          },
+          error: (err) => {
+            console.error('Error disabling user:', err);
+            alert('Error disabling user: ' + (err.error?.error || err.message));
+          }
         });
+    } else {
+      console.warn('No user selected or user has no ID');
     }
   }
 
@@ -174,10 +202,17 @@ export class UserManagementComponent implements OnInit {
   // DELETE USER
   deleteUser(id: number) {
     if (confirm('Delete user?')) {
-      this.userService.delete(id).subscribe(() => {
-        this.selectedUser = null;
-        this.userTasks = [];
-        this.loadUsers();
+      this.userService.delete(id).subscribe({
+        next: () => {
+          console.log('User deleted');
+          this.selectedUser = null;
+          this.userTasks = [];
+          this.loadUsers();
+        },
+        error: (err) => {
+          console.error('Error deleting user:', err);
+          alert('Error deleting user: ' + (err.error?.error || err.message));
+        }
       });
     }
   }
