@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ChecklistService } from './services/checklist.service';
 
 @Component({
   selector: 'app-root',
@@ -12,13 +13,17 @@ export class AppComponent implements OnInit, OnDestroy {
   isLandingPage = false;
   private sub: any;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private checklistService: ChecklistService ) {}
 
   ngOnInit(): void {
     this.updateLandingFlag();
     this.sub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => this.updateLandingFlag());
+         this.checklistService.getAllChecklists().subscribe({
+      next: (data) => console.log('Checklists ✅', data),
+      error: (err) => console.log('Error ❌', err)
+    });
   }
 
   ngOnDestroy(): void {

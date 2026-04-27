@@ -29,6 +29,7 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
 
+<<<<<<< HEAD
         // Only redirect to login if token is missing or truly expired
         // Do NOT clear localStorage on every 401 — only on actual auth failures
         if (error.status === 401 && !req.url.includes('/api/auth/')) {
@@ -40,6 +41,10 @@ export class AuthInterceptor implements HttpInterceptor {
             console.warn('Auth error for:', req.url, '- Status:', error.status);
           }
         }
+=======
+  // ✅ Allow these APIs without forcing login
+const allowedUrls = ['/tasks', '/reports', '/api/reports'];
+>>>>>>> b5439415b5f35a8444dbc016a72d3e70074b7f88
 
         return throwError(() => error);
       })

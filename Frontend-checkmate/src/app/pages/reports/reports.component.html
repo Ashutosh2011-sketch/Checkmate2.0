@@ -1,0 +1,197 @@
+<div class="reports-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Reports & Analytics</h1>
+      <p class="page-subtitle">Track completion trends, overdue tasks, and team performance in real-time.</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-group">
+        <select class="filter-select" [(ngModel)]="selectedDepartment" (change)="applyFilters()">
+          <option value="">All Departments</option>
+          <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+        </select>
+        <input type="date" class="filter-date" [(ngModel)]="filterFrom" (change)="applyFilters()" />
+        <input type="date" class="filter-date" [(ngModel)]="filterTo" (change)="applyFilters()" />
+      </div>
+      <button class="btn-export" (click)="exportReport()">
+        <span class="export-icon">↓</span> Export Report
+      </button>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card" *ngFor="let card of summaryCards">
+      <div class="card-icon-wrap" [ngClass]="card.iconClass">
+        <span class="card-icon">{{ card.icon }}</span>
+      </div>
+      <div class="card-content">
+        <span class="card-value">{{ card.value }}</span>
+        <span class="card-label">{{ card.label }}</span>
+      </div>
+      <div class="card-trend" [ngClass]="card.trendClass">
+        {{ card.trend }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="charts-row">
+
+    <!-- Completion Trend Chart -->
+    <div class="chart-card large">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Completion Trends</h3>
+          <p class="chart-subtitle">Monthly checklist completion rate</p>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot completed"></span><span>Completed</span>
+          <span class="legend-dot overdue"></span><span>Overdue</span>
+        </div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-group" *ngFor="let item of completionTrend">
+          <div class="bar-pair">
+            <div class="bar bar-completed" [style.height.px]="item.completedHeight" [title]="item.completed + ' completed'"></div>
+            <div class="bar bar-overdue" [style.height.px]="item.overdueHeight" [title]="item.overdue + ' overdue'"></div>
+          </div>
+          <span class="bar-label">{{ item.month }}</span>
+        </div>
+        <!-- Y-axis lines -->
+        <div class="y-grid">
+          <div class="y-line" *ngFor="let line of yGridLines">
+            <span class="y-label">{{ line }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Performance -->
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Department Analytics</h3>
+          <p class="chart-subtitle">Completion rate by department</p>
+        </div>
+      </div>
+      <div class="dept-list">
+        <div class="dept-row" *ngFor="let dept of departmentStats">
+          <div class="dept-info">
+            <span class="dept-name">{{ dept.name }}</span>
+            <span class="dept-pct" [ngClass]="dept.pctClass">{{ dept.percentage }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [ngClass]="dept.barClass" [style.width.%]="dept.percentage"></div>
+          </div>
+          <div class="dept-meta">
+            <span>{{ dept.completed }}/{{ dept.total }} tasks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="charts-row">
+
+    <!-- Overdue Report Table -->
+    <div class="chart-card large">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Overdue Reports</h3>
+          <p class="chart-subtitle">Tasks past their deadline</p>
+        </div>
+        <span class="badge badge-danger">{{ overdueItems.length }} Overdue</span>
+      </div>
+      <div class="table-wrap">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Task Name</th>
+              <th>Owner</th>
+              <th>Department</th>
+              <th>Due Date</th>
+              <th>Overdue By</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of overdueItems">
+              <td class="task-name-cell">{{ item.taskName }}</td>
+              <td>
+                <div class="owner-cell">
+                  <div class="avatar">{{ item.ownerInitials }}</div>
+                  <span>{{ item.owner }}</span>
+                </div>
+              </td>
+              <td>{{ item.department }}</td>
+              <td class="date-cell">{{ item.dueDate }}</td>
+              <td><span class="overdue-days">{{ item.overdueBy }}</span></td>
+              <td><span class="status-pill" [ngClass]="item.statusClass">{{ item.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Performance Metrics</h3>
+          <p class="chart-subtitle">Individual contributor analytics</p>
+        </div>
+      </div>
+      <div class="perf-list">
+        <div class="perf-row" *ngFor="let user of performanceMetrics; let i = index">
+          <div class="rank-badge" [ngClass]="'rank-' + (i + 1)">{{ i + 1 }}</div>
+          <div class="avatar large-avatar">{{ user.initials }}</div>
+          <div class="perf-info">
+            <span class="perf-name">{{ user.name }}</span>
+            <span class="perf-role">{{ user.role }}</span>
+          </div>
+          <div class="perf-stats">
+            <span class="perf-score">{{ user.completionRate }}%</span>
+            <span class="perf-tasks">{{ user.tasksCompleted }} tasks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Workflow Insights -->
+  <div class="insight-section">
+    <div class="chart-card full">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Workflow Insights</h3>
+          <p class="chart-subtitle">Bottleneck analysis and process improvement areas</p>
+        </div>
+        <button class="btn-text" (click)="viewAllInsights()">View All →</button>
+      </div>
+      <div class="insights-grid">
+        <div class="insight-card" *ngFor="let insight of workflowInsights" [ngClass]="insight.cardClass">
+          <div class="insight-icon">{{ insight.icon }}</div>
+          <div class="insight-body">
+            <span class="insight-title">{{ insight.title }}</span>
+            <span class="insight-desc">{{ insight.description }}</span>
+          </div>
+          <div class="insight-value" [ngClass]="insight.valueClass">{{ insight.value }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Success Toast -->
+  <div class="toast" [ngClass]="{ 'toast-visible': showToast }">
+    ✓ Report exported successfully
+  </div>
+
+</div>
