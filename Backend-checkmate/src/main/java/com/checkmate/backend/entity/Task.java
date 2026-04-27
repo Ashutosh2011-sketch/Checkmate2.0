@@ -33,8 +33,26 @@ public class Task {
     @Column(name = "due_date_days", nullable = false)
     private int dueDateDays;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false)
+    private String status = "Pending";
+
+    @Column(name = "depends_on", nullable = false)
+    private String dependsOn = "None";
+
+    @Column(name = "condition_dependent_on", nullable = false)
+    private String conditionDependentOn = "None";
+
+    @Column(name = "condition_expected_outcome", nullable = false)
+    private String conditionExpectedOutcome = "Pass";
+
+    @Column(name = "remind_before", nullable = false)
+    private Integer remindBefore = 1;
+
+    @Column(name = "escalate_to", nullable = false)
+    private String escalateTo = "Manager";
+
+    @Column(name = "show_advanced", nullable = false)
+    private boolean showAdvanced = false;
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;
@@ -65,7 +83,29 @@ public class Task {
     public String getStatus() {
         return status != null ? status : "Pending";
     }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) { this.status = status != null ? status : "Pending"; }
+
+    public String getDependsOn() { return dependsOn; }
+    public void setDependsOn(String dependsOn) { this.dependsOn = dependsOn != null ? dependsOn : "None"; }
+
+    public String getConditionDependentOn() { return conditionDependentOn; }
+    public void setConditionDependentOn(String conditionDependentOn) {
+        this.conditionDependentOn = conditionDependentOn != null ? conditionDependentOn : "None";
+    }
+
+    public String getConditionExpectedOutcome() { return conditionExpectedOutcome; }
+    public void setConditionExpectedOutcome(String conditionExpectedOutcome) {
+        this.conditionExpectedOutcome = conditionExpectedOutcome != null ? conditionExpectedOutcome : "Pass";
+    }
+
+    public Integer getRemindBefore() { return remindBefore != null ? remindBefore : 1; }
+    public void setRemindBefore(Integer remindBefore) { this.remindBefore = remindBefore != null ? remindBefore : 1; }
+
+    public String getEscalateTo() { return escalateTo; }
+    public void setEscalateTo(String escalateTo) { this.escalateTo = escalateTo != null ? escalateTo : "Manager"; }
+
+    public boolean isShowAdvanced() { return showAdvanced; }
+    public void setShowAdvanced(boolean showAdvanced) { this.showAdvanced = showAdvanced; }
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }

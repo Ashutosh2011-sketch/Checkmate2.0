@@ -70,6 +70,12 @@ public class ChecklistService {
                         task.setPriority(taskDto.getPriority());
                         task.setDueDateDays(taskDto.getDueDateDays());
                         task.setStatus(taskDto.getStatus());
+                        task.setDependsOn(taskDto.getDependsOn());
+                        task.setConditionDependentOn(taskDto.getConditionDependentOn());
+                        task.setConditionExpectedOutcome(taskDto.getConditionExpectedOutcome());
+                        task.setRemindBefore(taskDto.getRemindBefore());
+                        task.setEscalateTo(taskDto.getEscalateTo());
+                        task.setShowAdvanced(taskDto.isShowAdvanced());
 
                         tasks.add(task);
                     }
@@ -116,6 +122,12 @@ public class ChecklistService {
                         taskDto.setPriority(task.getPriority());
                         taskDto.setDueDateDays(task.getDueDateDays());
                         taskDto.setStatus(task.getStatus());
+                        taskDto.setDependsOn(task.getDependsOn());
+                        taskDto.setConditionDependentOn(task.getConditionDependentOn());
+                        taskDto.setConditionExpectedOutcome(task.getConditionExpectedOutcome());
+                        taskDto.setRemindBefore(task.getRemindBefore());
+                        taskDto.setEscalateTo(task.getEscalateTo());
+                        taskDto.setShowAdvanced(task.isShowAdvanced());
 
                         taskDtos.add(taskDto);
                     }
