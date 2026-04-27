@@ -1,23 +1,23 @@
 package com.checkmate.backend.config;
 
-import com.checkmate.backend.security.CustomUserDetailsService;
-import com.checkmate.backend.security.JwtFilter;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.List;
+import com.checkmate.backend.security.CustomUserDetailsService;
+import com.checkmate.backend.security.JwtFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -63,21 +63,6 @@ public class SecurityConfig {
 
             .csrf(csrf -> csrf.disable())
 
-<<<<<<< HEAD
-                .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/roles/**").authenticated()
-                        .requestMatchers("/api/role-users/**").authenticated()
-                        .requestMatchers("/api/user-permissions/**").authenticated()
-                        .requestMatchers("/api/permissions/**").authenticated()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-=======
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/roles/**").permitAll()
@@ -93,7 +78,6 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
 
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
->>>>>>> b5439415b5f35a8444dbc016a72d3e70074b7f88
 
         return http.build();
     }
