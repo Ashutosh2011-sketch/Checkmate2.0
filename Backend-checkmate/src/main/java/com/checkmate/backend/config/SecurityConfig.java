@@ -16,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+<<<<<<< HEAD
+=======
+import org.springframework.http.HttpMethod;
+import org.springframework.web.cors.CorsConfiguration;
+>>>>>>> 3c61c152d918d99ef8a5517cab50a3810fa72a91
 
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.List;
@@ -63,6 +68,7 @@ public class SecurityConfig {
 
                 .csrf(csrf -> csrf.disable())
 
+<<<<<<< HEAD
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
@@ -79,6 +85,25 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+=======
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/roles/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/checklists/create").permitAll()
+                    .requestMatchers("/api/permissions/**").authenticated()
+                    .requestMatchers("/api/checklists/**").authenticated()
+                    .requestMatchers("/api/users/**").authenticated()
+                    .requestMatchers("/api/users/update-profile").authenticated()
+                    .requestMatchers("/api/tasks/**").permitAll() 
+                    .anyRequest().authenticated()
+            )
+
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            .authenticationProvider(authenticationProvider())
+
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+>>>>>>> 3c61c152d918d99ef8a5517cab50a3810fa72a91
 
         return http.build();
     }
