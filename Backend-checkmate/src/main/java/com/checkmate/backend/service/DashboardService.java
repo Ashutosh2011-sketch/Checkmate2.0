@@ -26,30 +26,14 @@ public class DashboardService {
         DashboardDto dto = new DashboardDto();
 
         try {
-            // 1. Get raw task data assigned to user
+            System.out.println("DASH-DEBUG: Querying tasks for userName='" + userName + "'");
             List<Object[]> rawTasks = taskRepository.findFullTasksByUserName(userName);
+            System.out.println("DASH-DEBUG: Found " + rawTasks.size() + " raw tasks");
 
-            // 2. Build task list and group by checklist
+            // Build task list and group by checklist — using RAW query data only (no entity loading)
             List<TaskInfoDto> claimedTasks = new ArrayList<>();
             Map<Long, String> checklistNames = new LinkedHashMap<>();
             Map<Long, List<TaskInfoDto>> checklistTaskMap = new LinkedHashMap<>();
-
-            // Pre-fetch ALL task entities by their IDs to avoid N+1
-            List<Long> taskIds = new ArrayList<>();
-            for (Object[] row : rawTasks) {
-                try {
-                    taskIds.add(((Number) row[0]).longValue());
-                } catch (Exception e) {
-                    // skip bad rows
-                }
-            }
-            Map<Long, Task> taskEntityMap = new HashMap<>();
-            if (!taskIds.isEmpty()) {
-                List<Task> taskEntities = taskRepository.findAllById(taskIds);
-                for (Task t : taskEntities) {
-                    taskEntityMap.put(t.getId(), t);
-                }
-            }
 
             for (Object[] row : rawTasks) {
                 try {
@@ -59,16 +43,22 @@ public class DashboardService {
                     String checklistName = row[5] != null ? (String) row[5] : "Unknown";
                     Long checklistId = ((Number) row[6]).longValue();
 
-                    // Get actual status from the entity
-                    Task entity = taskEntityMap.get(taskId);
+                    // Try to get completion data from the task entity
                     String status = "Pending";
                     int completionPercent = 0;
                     boolean completed = false;
 
-                    if (entity != null) {
-                        status = entity.getStatus();
-                        completionPercent = entity.getCompletionPercent();
-                        completed = entity.isCompleted();
+                    try {
+                        Optional<Task> optTask = taskRepository.findById(taskId);
+                        if (optTask.isPresent()) {
+                            Task entity = optTask.get();
+                            status = entity.getStatus();
+                            completionPercent = entity.getCompletionPercent();
+                            completed = entity.isCompleted();
+                        }
+                    } catch (Exception e) {
+                        // completion_percent column might not exist yet — use defaults
+                        System.out.println("DASH-DEBUG: Could not load task entity " + taskId + ": " + e.getMessage());
                     }
 
                     TaskInfoDto taskDto = new TaskInfoDto(taskId, title, status, priority,
@@ -78,11 +68,11 @@ public class DashboardService {
                     checklistNames.put(checklistId, checklistName);
                     checklistTaskMap.computeIfAbsent(checklistId, k -> new ArrayList<>()).add(taskDto);
                 } catch (Exception e) {
-                    System.out.println("Error processing task row: " + e.getMessage());
+                    System.out.println("DASH-DEBUG: Error processing task row: " + e.getMessage());
                 }
             }
 
-            // 3. Build checklist lists: in-progress vs completed
+            // Build checklist lists: in-progress vs completed
             List<ChecklistInfoDto> inProgressChecklists = new ArrayList<>();
             List<ChecklistInfoDto> completedChecklists = new ArrayList<>();
 
@@ -118,14 +108,14 @@ public class DashboardService {
                 }
             }
 
-            // 4. Compute overall progress
+            // Compute overall progress
             int totalPercent = 0;
             for (TaskInfoDto t : claimedTasks) {
                 totalPercent += t.isCompleted() ? 100 : t.getCompletionPercent();
             }
             int overallProgress = claimedTasks.size() > 0 ? totalPercent / claimedTasks.size() : 0;
 
-            // 5. Build notifications
+            // Build notifications
             List<String> notifications = new ArrayList<>();
             if (claimedTasks.isEmpty()) {
                 notifications.add("No tasks assigned to you yet.");
@@ -149,10 +139,12 @@ public class DashboardService {
             dto.setNotifications(notifications);
             dto.setProgress(overallProgress);
 
+            System.out.println("DASH-DEBUG: Returning " + inProgressChecklists.size() + " in-progress, " 
+                + completedChecklists.size() + " completed, " + claimedTasks.size() + " tasks");
+
         } catch (Exception e) {
-            System.out.println("Dashboard error for user '" + userName + "': " + e.getMessage());
+            System.out.println("Dashboard error for user '" + userName + "': " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace();
-            // Return an empty but valid dashboard so UI doesn't break
             dto.setAssignedChecklists(new ArrayList<>());
             dto.setCompletedChecklists(new ArrayList<>());
             dto.setClaimedTasks(new ArrayList<>());
@@ -212,7 +204,12 @@ public class DashboardService {
     public AdminDashboardSummaryDto getAdminSummary() {
         long totalChecklists = checklistRepository.count();
         long totalTasks = taskRepository.count();
-        long completedTasks = taskRepository.countCompletedTasks();
+        long completedTasks = 0;
+        try {
+            completedTasks = taskRepository.countCompletedTasks();
+        } catch (Exception e) {
+            System.out.println("countCompletedTasks error: " + e.getMessage());
+        }
         long pendingTasks = Math.max(totalTasks - completedTasks, 0);
         long completedChecklists = checklistRepository.countByCompletedTrue();
 

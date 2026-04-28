@@ -14,7 +14,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         SELECT t.title
         FROM tasks t
         JOIN task_assignees ta ON t.id = ta.task_id
-        WHERE ta.assignee LIKE CONCAT(:userName, '%')
+        WHERE ta.assignee ILIKE CONCAT('%', :userName, '%')
     """, nativeQuery = true)
     List<String> findTasksByUserName(@Param("userName") String userName);
 
@@ -26,7 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         JOIN task_assignees ta ON t.id = ta.task_id
         JOIN sections s ON t.section_id = s.id
         JOIN checklists c ON s.checklist_id = c.id
-        WHERE ta.assignee LIKE CONCAT(:userName, '%')
+        WHERE ta.assignee ILIKE CONCAT('%', :userName, '%')
     """, nativeQuery = true)
     List<Object[]> findFullTasksByUserName(@Param("userName") String userName);
 
