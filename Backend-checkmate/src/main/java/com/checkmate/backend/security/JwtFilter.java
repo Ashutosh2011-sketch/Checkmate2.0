@@ -29,49 +29,44 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // ✅ FINAL FIX: USE getRequestURI (more reliable than getServletPath)
         String path = request.getRequestURI();
 
-        System.out.println("DEBUG PATH: " + path);
-
-        // ✅ SKIP JWT FOR TASK APIs
-        if (path.contains("/api/tasks")) {
-            System.out.println("DEBUG: Skipping JWT for Tasks API");
+        // SKIP JWT FOR AUTH & TASK APIs
+        if (path.contains("/api/auth") || path.contains("/api/tasks")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 🔐 NORMAL JWT FLOW
-        String authorizationHeader = request.getHeader("Authorization");
+        // NORMAL JWT FLOW — wrapped in try-catch to prevent filter-level 500
+        try {
+            String authorizationHeader = request.getHeader("Authorization");
+            String token = null;
+            String email = null;
 
-        String token = null;
-        String email = null;
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
-
-            try {
-                email = jwtUtil.extractEmail(token);
-                System.out.println("DEBUG: Email extracted = " + email);
-            } catch (Exception e) {
-                System.out.println("DEBUG: Invalid token");
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);
+                try {
+                    email = jwtUtil.extractEmail(token);
+                } catch (Exception e) {
+                    System.out.println("JWT: Invalid token - " + e.getMessage());
+                }
             }
-        }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = service.loadUserByUsername(email);
 
-            UserDetails userDetails = service.loadUserByUsername(email);
-
-            if (jwtUtil.validateToken(token, userDetails.getUsername())) {
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (jwtUtil.validateToken(token, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            System.out.println("JWT Filter error for " + path + ": " + e.getMessage());
+            // Don't re-throw — let the request continue without authentication
+            // Spring Security will handle the 401/403 if auth is required
         }
 
         filterChain.doFilter(request, response);

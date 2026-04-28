@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AdminDashboardSummary, Dashboard } from '../models/dashboard.model';
+import { AdminDashboardSummary, Dashboard, TaskInfo } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,6 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ REAL BACKEND CALL
   getDashboardData(userName: string): Observable<Dashboard> {
     return this.http.get<Dashboard>(`${this.api}/${userName}`);
   }
@@ -21,18 +20,18 @@ export class DashboardService {
     return this.http.get<AdminDashboardSummary>(`${this.api}/admin/summary`);
   }
 
-  /*
-  ================== OPTIONAL (BACKUP MOCK) ==================
-  If backend fails, you can temporarily use this:
-
-  getDashboardData(userName: string): Observable<Dashboard> {
-    return of({
-      progress: 65,
-      assignedChecklists: ['IT Onboarding Checklist'],
-      claimedTasks: ['Audit Preparation'],
-      notifications: ['New task assigned']
-    });
+  // Update task completion percentage
+  updateTaskStatus(taskId: number, completionPercent: number): Observable<TaskInfo> {
+    return this.http.put<TaskInfo>(`${this.api}/tasks/${taskId}/status`, { completionPercent });
   }
-  ===========================================================
-  */
+
+  // Mark a single task as completed (100%)
+  markTaskComplete(taskId: number): Observable<TaskInfo> {
+    return this.http.put<TaskInfo>(`${this.api}/tasks/${taskId}/complete`, {});
+  }
+
+  // Mark entire checklist as completed
+  markChecklistComplete(checklistId: number): Observable<any> {
+    return this.http.put(`${this.api}/checklists/${checklistId}/complete`, {});
+  }
 }

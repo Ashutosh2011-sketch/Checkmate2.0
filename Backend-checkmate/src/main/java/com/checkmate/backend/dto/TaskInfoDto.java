@@ -7,15 +7,20 @@ public class TaskInfoDto {
     private String status;
     private String priority;
     private String checklistName;
+    private int completionPercent;
+    private boolean completed;
 
     public TaskInfoDto() {}
 
-    public TaskInfoDto(Long id, String title, String status, String priority, String checklistName) {
+    public TaskInfoDto(Long id, String title, String status, String priority, String checklistName,
+                       int completionPercent, boolean completed) {
         this.id = id;
         this.title = title;
         this.status = status;
         this.priority = priority;
         this.checklistName = checklistName;
+        this.completionPercent = completionPercent;
+        this.completed = completed;
     }
 
     // ===== GETTERS & SETTERS =====
@@ -34,4 +39,10 @@ public class TaskInfoDto {
 
     public String getChecklistName() { return checklistName; }
     public void setChecklistName(String checklistName) { this.checklistName = checklistName; }
+
+    public int getCompletionPercent() { return completionPercent; }
+    public void setCompletionPercent(int completionPercent) { this.completionPercent = completionPercent; }
+
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 }

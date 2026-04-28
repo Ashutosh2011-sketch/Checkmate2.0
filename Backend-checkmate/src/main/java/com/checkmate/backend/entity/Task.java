@@ -19,10 +19,7 @@ public class Task {
 
     private String description;
 
-     
-
     @ElementCollection(fetch = FetchType.EAGER)
-
     @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "assignee")
     private List<String> assignees = new ArrayList<>();
@@ -35,6 +32,12 @@ public class Task {
 
     @Column(name = "status")
     private String status;
+
+    @Column(name = "completion_percent")
+    private int completionPercent = 0;
+
+    @Column(name = "completed")
+    private boolean completed = false;
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;
@@ -63,9 +66,17 @@ public class Task {
     public void setDueDateDays(int dueDateDays) { this.dueDateDays = dueDateDays; }
 
     public String getStatus() {
+        if (completed) return "Completed";
+        if (completionPercent > 0) return "In Progress";
         return status != null ? status : "Pending";
     }
     public void setStatus(String status) { this.status = status; }
+
+    public int getCompletionPercent() { return completionPercent; }
+    public void setCompletionPercent(int completionPercent) { this.completionPercent = completionPercent; }
+
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
