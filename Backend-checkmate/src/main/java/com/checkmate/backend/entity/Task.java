@@ -52,10 +52,10 @@ public class Task {
     private boolean showAdvanced = false;
 
     @Column(name = "completion_percent")
-    private int completionPercent = 0;
+    private Integer completionPercent = 0;
 
     @Column(name = "completed")
-    private boolean completed = false;
+    private Boolean completed = false;
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;
@@ -84,8 +84,8 @@ public class Task {
     public void setDueDateDays(int dueDateDays) { this.dueDateDays = dueDateDays; }
 
     public String getStatus() {
-        if (completed) return "Completed";
-        if (completionPercent > 0) return "In Progress";
+        if (Boolean.TRUE.equals(completed)) return "Completed";
+        if (completionPercent != null && completionPercent > 0) return "In Progress";
         return status != null ? status : "Pending";
     }
     public void setStatus(String status) { this.status = status != null ? status : "Pending"; }
@@ -112,10 +112,10 @@ public class Task {
     public boolean isShowAdvanced() { return showAdvanced; }
     public void setShowAdvanced(boolean showAdvanced) { this.showAdvanced = showAdvanced; }
 
-    public int getCompletionPercent() { return completionPercent; }
+    public int getCompletionPercent() { return completionPercent != null ? completionPercent : 0; }
     public void setCompletionPercent(int completionPercent) { this.completionPercent = completionPercent; }
 
-    public boolean isCompleted() { return completed; }
+    public boolean isCompleted() { return Boolean.TRUE.equals(completed); }
     public void setCompleted(boolean completed) { this.completed = completed; }
 
     public Integer getSortOrder() { return sortOrder; }

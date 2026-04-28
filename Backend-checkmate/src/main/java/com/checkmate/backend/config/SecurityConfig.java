@@ -70,6 +70,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/roles/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/checklists/create").permitAll()
                     .requestMatchers("/api/permissions/**").authenticated()
+                    .requestMatchers("/api/dashboard/**").authenticated()
                     .requestMatchers("/api/checklists/**").authenticated()
                     .requestMatchers("/api/users/**").authenticated()
                     .requestMatchers("/api/users/update-profile").authenticated()

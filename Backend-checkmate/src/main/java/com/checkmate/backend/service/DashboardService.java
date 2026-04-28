@@ -5,9 +5,11 @@ import com.checkmate.backend.dto.DashboardDto;
 import com.checkmate.backend.dto.AdminDashboardSummaryDto;
 import com.checkmate.backend.dto.TaskInfoDto;
 import com.checkmate.backend.entity.Task;
+import com.checkmate.backend.entity.Checklist;
 import com.checkmate.backend.repository.ChecklistRepository;
 import com.checkmate.backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -22,6 +24,7 @@ public class DashboardService {
         this.checklistRepository = checklistRepository;
     }
 
+    @Transactional(readOnly = true)
     public DashboardDto getDashboard(String userName) {
         DashboardDto dto = new DashboardDto();
 
@@ -30,7 +33,6 @@ public class DashboardService {
             List<Object[]> rawTasks = taskRepository.findFullTasksByUserName(userName);
             System.out.println("DASH-DEBUG: Found " + rawTasks.size() + " raw tasks");
 
-            // Build task list and group by checklist — using RAW query data only (no entity loading)
             List<TaskInfoDto> claimedTasks = new ArrayList<>();
             Map<Long, String> checklistNames = new LinkedHashMap<>();
             Map<Long, List<TaskInfoDto>> checklistTaskMap = new LinkedHashMap<>();
@@ -43,7 +45,7 @@ public class DashboardService {
                     String checklistName = row[5] != null ? (String) row[5] : "Unknown";
                     Long checklistId = ((Number) row[6]).longValue();
 
-                    // Try to get completion data from the task entity
+                    // Try to get completion data from task entity
                     String status = "Pending";
                     int completionPercent = 0;
                     boolean completed = false;
@@ -57,8 +59,7 @@ public class DashboardService {
                             completed = entity.isCompleted();
                         }
                     } catch (Exception e) {
-                        // completion_percent column might not exist yet — use defaults
-                        System.out.println("DASH-DEBUG: Could not load task entity " + taskId + ": " + e.getMessage());
+                        System.out.println("DASH-DEBUG: Could not load task " + taskId + ": " + e.getMessage());
                     }
 
                     TaskInfoDto taskDto = new TaskInfoDto(taskId, title, status, priority,
@@ -68,11 +69,10 @@ public class DashboardService {
                     checklistNames.put(checklistId, checklistName);
                     checklistTaskMap.computeIfAbsent(checklistId, k -> new ArrayList<>()).add(taskDto);
                 } catch (Exception e) {
-                    System.out.println("DASH-DEBUG: Error processing task row: " + e.getMessage());
+                    System.out.println("DASH-DEBUG: Error processing row: " + e.getMessage());
                 }
             }
 
-            // Build checklist lists: in-progress vs completed
             List<ChecklistInfoDto> inProgressChecklists = new ArrayList<>();
             List<ChecklistInfoDto> completedChecklists = new ArrayList<>();
 
@@ -95,7 +95,6 @@ public class DashboardService {
                 }
 
                 int avgProgress = totalTasks > 0 ? totalPercent / totalTasks : 0;
-
                 ChecklistInfoDto clDto = new ChecklistInfoDto(checklistId, name, totalTasks, completedCount);
                 clDto.setProgress(avgProgress);
 
@@ -108,29 +107,21 @@ public class DashboardService {
                 }
             }
 
-            // Compute overall progress
             int totalPercent = 0;
             for (TaskInfoDto t : claimedTasks) {
                 totalPercent += t.isCompleted() ? 100 : t.getCompletionPercent();
             }
             int overallProgress = claimedTasks.size() > 0 ? totalPercent / claimedTasks.size() : 0;
 
-            // Build notifications
             List<String> notifications = new ArrayList<>();
             if (claimedTasks.isEmpty()) {
                 notifications.add("No tasks assigned to you yet.");
             } else {
                 long pending = claimedTasks.stream().filter(t -> !t.isCompleted()).count();
                 long done = claimedTasks.stream().filter(TaskInfoDto::isCompleted).count();
-                if (pending > 0) {
-                    notifications.add("You have " + pending + " pending task" + (pending > 1 ? "s" : "") + ".");
-                }
-                if (done > 0) {
-                    notifications.add("Completed " + done + " task" + (done > 1 ? "s" : "") + "!");
-                }
-                if (!completedChecklists.isEmpty()) {
-                    notifications.add(completedChecklists.size() + " checklist" + (completedChecklists.size() > 1 ? "s" : "") + " done.");
-                }
+                if (pending > 0) notifications.add("You have " + pending + " pending task" + (pending > 1 ? "s" : "") + ".");
+                if (done > 0) notifications.add("Completed " + done + " task" + (done > 1 ? "s" : "") + "!");
+                if (!completedChecklists.isEmpty()) notifications.add(completedChecklists.size() + " checklist(s) done.");
             }
 
             dto.setAssignedChecklists(inProgressChecklists);
@@ -138,9 +129,6 @@ public class DashboardService {
             dto.setClaimedTasks(claimedTasks);
             dto.setNotifications(notifications);
             dto.setProgress(overallProgress);
-
-            System.out.println("DASH-DEBUG: Returning " + inProgressChecklists.size() + " in-progress, " 
-                + completedChecklists.size() + " completed, " + claimedTasks.size() + " tasks");
 
         } catch (Exception e) {
             System.out.println("Dashboard error for user '" + userName + "': " + e.getClass().getName() + " - " + e.getMessage());
@@ -155,8 +143,9 @@ public class DashboardService {
         return dto;
     }
 
-    // Update task completion percentage
+    @Transactional
     public TaskInfoDto updateTaskCompletion(Long taskId, int percent) {
+        System.out.println("SERVICE: updateTaskCompletion taskId=" + taskId + " percent=" + percent);
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
 
@@ -174,20 +163,23 @@ public class DashboardService {
             task.setStatus("Pending");
         }
 
-        taskRepository.save(task);
+        task = taskRepository.save(task);
+        System.out.println("SERVICE: Task saved OK - completed=" + task.isCompleted() + " percent=" + task.getCompletionPercent());
 
         return new TaskInfoDto(task.getId(), task.getTitle(), task.getStatus(),
                 task.getPriority(), null, task.getCompletionPercent(), task.isCompleted());
     }
 
-    // Mark task as complete (100%)
+    @Transactional
     public TaskInfoDto markTaskComplete(Long taskId) {
         return updateTaskCompletion(taskId, 100);
     }
 
-    // Mark all tasks in a checklist as complete
+    @Transactional
     public void markChecklistComplete(Long checklistId) {
+        System.out.println("SERVICE: markChecklistComplete checklistId=" + checklistId);
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
+        System.out.println("SERVICE: Found " + tasks.size() + " tasks for checklist " + checklistId);
         for (Task task : tasks) {
             task.setCompletionPercent(100);
             task.setCompleted(true);
@@ -199,8 +191,10 @@ public class DashboardService {
             checklist.setCompleted(true);
             checklistRepository.save(checklist);
         });
+        System.out.println("SERVICE: Checklist marked complete OK");
     }
 
+    @Transactional(readOnly = true)
     public AdminDashboardSummaryDto getAdminSummary() {
         long totalChecklists = checklistRepository.count();
         long totalTasks = taskRepository.count();
