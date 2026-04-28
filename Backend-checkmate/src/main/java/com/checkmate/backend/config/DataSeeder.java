@@ -42,7 +42,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // 1. Seed admin user
+        // 1. Seed admin user if DB is empty
         if (appUserRepository.count() == 0) {
             AppUser admin = new AppUser();
             admin.setName("Admin User");
@@ -52,12 +52,9 @@ public class DataSeeder implements CommandLineRunner {
             admin.setDesignation("Approver");
             appUserRepository.save(admin);
             System.out.println("Admin user created successfully!");
-        } else {
-            System.out.println("Users already exist, skipping admin creation.");
         }
 
         // 2. Sync: Ensure every AppUser has a matching User record in the users table
-        // This fixes the issue where AppUser records exist but User records are missing
         for (AppUser appUser : appUserRepository.findAll()) {
             if (appUser.getEmail() != null) {
                 boolean userExists = userRepository.findAll().stream()
@@ -75,7 +72,41 @@ public class DataSeeder implements CommandLineRunner {
             }
         }
 
-        // 3. Sync: Ensure every User record has a matching designation in AppUser
+        // 2.5 REVERSE SYNC: Ensure every User record has a matching AppUser for login
+        for (User user : userRepository.findAll()) {
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                boolean appUserExists = appUserRepository.findByEmail(user.getEmail()).isPresent();
+                if (!appUserExists) {
+                    String name = user.getEmail().split("@")[0];
+                    String plainPassword = name + "234";
+                    AppUser newAppUser = new AppUser();
+                    newAppUser.setName(user.getName());
+                    newAppUser.setEmail(user.getEmail());
+                    newAppUser.setPassword(passwordEncoder.encode(plainPassword));
+                    newAppUser.setRole("USER");
+                    newAppUser.setDepartment(user.getDepartment());
+                    newAppUser.setDesignation(user.getRole());
+                    appUserRepository.save(newAppUser);
+                    System.out.println("Created AppUser for login: " + user.getEmail() + " -> password: " + plainPassword);
+                }
+            }
+        }
+
+        // 3. Re-hash ALL user passwords on every startup to fix any corruption
+        for (AppUser user : appUserRepository.findAll()) {
+            String plainPassword;
+            if ("ADMIN".equals(user.getRole())) {
+                plainPassword = "admin123";
+            } else {
+                String name = user.getEmail().split("@")[0];
+                plainPassword = name + "234";
+            }
+            user.setPassword(passwordEncoder.encode(plainPassword));
+            appUserRepository.save(user);
+            System.out.println("Password re-hashed for: " + user.getEmail() + " -> " + plainPassword);
+        }
+
+        // 4. Sync: Ensure every User record has a matching designation in AppUser
         for (User user : userRepository.findAll()) {
             if (user.getEmail() != null && user.getRole() != null) {
                 appUserRepository.findByEmail(user.getEmail()).ifPresent(appUser -> {
