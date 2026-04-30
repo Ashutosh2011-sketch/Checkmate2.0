@@ -1,41 +1,58 @@
-.page {
-  padding: 25px;
-  font-family: Arial;
+.container {
+  padding: 30px;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8fafc;
 }
 
-.header {
+/* HEADER */
+.top-bar {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  align-items: center;
 }
 
-.header input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+.sub {
+  color: gray;
+  font-size: 13px;
 }
 
-.progress-section {
-  margin-bottom: 20px;
+.search {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 250px;
 }
 
-.progress-bar {
-  height: 6px;
-  background: green;
-  border-radius: 5px;
+/* PROGRESS */
+.progress-wrapper {
+  margin: 20px 0;
 }
 
+.progress-track {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.progress-fill {
+  height: 8px;
+  background: #22c55e;
+  border-radius: 10px;
+}
+
+/* FILTER */
 .filters {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .filters button {
-  margin-left: 5px;
-  padding: 4px 10px;
-  border-radius: 5px;
+  margin-left: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
   border: none;
+  background: #e5e7eb;
   cursor: pointer;
 }
 
@@ -44,26 +61,36 @@
   color: white;
 }
 
+/* SECTION */
 .section {
-  background: #fff;
+  background: white;
+  border-radius: 10px;
   padding: 15px;
-  border-radius: 8px;
-  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .section-header {
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-}
-
-.task {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #eee;
-  padding: 10px 0;
 }
 
-.task-left {
+.count {
+  background: #e5e7eb;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* TASK */
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+}
+
+.left {
   width: 70%;
 }
 
@@ -74,13 +101,13 @@
   gap: 15px;
 }
 
-.task-right {
+.right {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: flex-end;
 }
 
+/* BADGES */
 .badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -88,15 +115,32 @@
   font-size: 12px;
 }
 
-.priority-high { background: red; }
-.priority-medium { background: orange; }
-.priority-low { background: green; }
+.priority-high { background: #ef4444; }
+.priority-medium { background: #f59e0b; }
+.priority-low { background: #22c55e; }
 
-.status-completed { background: green; }
-.status-progress { background: blue; }
-.status-pending { background: gray; }
+.status-completed { background: #22c55e; }
+.status-progress { background: #3b82f6; }
+.status-pending { background: #6b7280; }
 
 .empty {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 40px;
+  color: gray;
+}
+
+.locked {
+  opacity: 0.4;
+  filter: blur(1px);
+  pointer-events: none;
+  position: relative;
+}
+
+.locked::after {
+  content: "🔒 Locked";
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 12px;
+  color: #999;
 }

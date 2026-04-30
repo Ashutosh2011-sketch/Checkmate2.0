@@ -1,28 +1,31 @@
-<div class="page">
+<div class="container">
 
   <!-- HEADER -->
-  <div class="header">
+  <div class="top-bar">
     <div>
       <h2>Checklist Detail</h2>
-      <p>ID: {{ checklistId }}</p>
+      <span class="sub">ID: {{ checklistId }}</span>
     </div>
 
-    <input type="text"
+    <input
+      class="search"
       placeholder="Search tasks..."
       [(ngModel)]="searchText"
       (input)="applyFilters()" />
   </div>
 
   <!-- PROGRESS -->
-  <div class="progress-section">
-    <div class="progress-bar" [style.width.%]="progress"></div>
+  <div class="progress-wrapper">
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="progress"></div>
+    </div>
     <span>{{ progress }}% Completed</span>
   </div>
 
   <!-- FILTERS -->
   <div class="filters">
     <div>
-      <b>Status:</b>
+      <span>Status:</span>
       <button *ngFor="let f of statusFilters"
         [class.active]="activeStatus === f"
         (click)="setStatusFilter(f)">
@@ -31,7 +34,7 @@
     </div>
 
     <div>
-      <b>Priority:</b>
+      <span>Priority:</span>
       <button *ngFor="let f of priorityFilters"
         [class.active]="activePriority === f"
         (click)="setPriorityFilter(f)">
@@ -43,48 +46,43 @@
   <!-- EMPTY -->
   <div *ngIf="groupedTasks.length === 0" class="empty">
     No tasks found
-    <button (click)="resetFilters()">Reset</button>
   </div>
 
   <!-- SECTIONS -->
   <div *ngFor="let section of groupedTasks" class="section">
 
     <div class="section-header" (click)="toggleSection(section)">
-      {{ section.key }} ({{ section.value.length }})
+      {{ section.key }}
+      <span class="count">{{ section.value.length }}</span>
     </div>
 
     <div *ngIf="section.expanded">
 
-      <!-- TASK -->
-      <div *ngFor="let task of section.value" class="task">
+      <div *ngFor="let task of section.value"
+     class="task-card"
+     [class.locked]="isTaskLocked(task)">
 
-        <!-- LEFT -->
-        <div class="task-left">
-          <h4>{{ task.title }}</h4>
-          <p>{{ task.description }}</p>
+  <div class="left">
+    <h4>{{ task.title }}</h4>
+    <p>{{ task.description }}</p>
 
-          <div class="meta">
-            <span>👤 {{ task.assignees?.length ? task.assignees.join(', ') : 'No Owner' }}</span>
-            <span>⏱ {{ formatDays(task.dueDateDays) }}</span>
-          </div>
-        </div>
+    <div class="meta">
+      <span>👤 {{ task.assignees?.join(', ') }}</span>
+      <span>⏱ {{ formatDays(task.dueDateDays) }}</span>
+    </div>
+  </div>
 
-        <!-- RIGHT -->
-        <div class="task-right">
+  <div class="right">
+    <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+      {{ task.priority }}
+    </span>
 
-          <span class="badge"
-            [ngClass]="getPriorityClass(task.priority)">
-            {{ task.priority }}
-          </span>
+    <span class="badge" [ngClass]="getStatusClass(task.status)">
+      {{ task.status }}
+    </span>
+  </div>
 
-          <span class="badge"
-            [ngClass]="getStatusClass(task.status)">
-            {{ task.status }}
-          </span>
-
-        </div>
-
-      </div>
+</div>
 
     </div>
 

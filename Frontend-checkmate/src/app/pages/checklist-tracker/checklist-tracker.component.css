@@ -1,37 +1,102 @@
-.page{
-padding:30px;
+.page {
+  padding: 30px;
+  font-family: system-ui;
+  background: #f8fafc;
 }
 
-.card-container{
-display:flex;
-flex-wrap:wrap;
-gap:20px;
+.card-container {
+  display: flex;
+  gap: 20px;
 }
 
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-width:320px;
-box-shadow:0 4px 10px rgba(0,0,0,0.05);
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 360px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
-.progress-bar{
-height:8px;
-background:#e5e7eb;
-border-radius:5px;
+.progress-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  margin: 10px 0;
 }
 
-.progress-fill{
-height:100%;
-background:#3b82f6;
-border-radius:5px;
+.progress-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 5px;
 }
 
-.status{
-padding:5px 10px;
-background:#3b82f6;
-color:white;
-border-radius:10px;
-font-size:12px;
+.status {
+  background: #2563eb;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.task {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  transition: 0.2s;
+}
+
+/* 🔥 ACTIVE TASK */
+.task:not(.locked) {
+  border-left: 3px solid #2563eb;
+  padding-left: 10px;
+}
+
+/* 🔒 LOCKED TASK */
+.locked {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: blur(1px);
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.task-title {
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+/* 🎯 PRIORITY COLORS */
+.priority {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.priority.high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.priority.medium {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.priority.low {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.user {
+  color: #6b7280;
 }

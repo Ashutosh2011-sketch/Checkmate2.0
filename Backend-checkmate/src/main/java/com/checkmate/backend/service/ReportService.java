@@ -49,28 +49,37 @@ public class ReportService {
 
     // Overdue items
     public List<OverdueItemDto> getOverdueItems(String department) {
+
         int currentDayOfYear = LocalDate.now().getDayOfYear();
-        
-        List<Object[]> overdueTasks = department != null ?
-            taskRepository.findOverdueTasksByDepartment(currentDayOfYear, department) :
-            taskRepository.findAllOverdueTasks(currentDayOfYear);
+
+        List<Object[]> overdueTasks;
+
+        if (department != null) {
+            overdueTasks = taskRepository.findOverdueTasksByDepartment(currentDayOfYear, department);
+        } else {
+            overdueTasks = taskRepository.findAllOverdueTasks(currentDayOfYear);
+        }
 
         return overdueTasks.stream().map(row -> {
+
             OverdueItemDto dto = new OverdueItemDto();
+
             dto.setTaskId(((Number) row[0]).longValue());
             dto.setTaskName((String) row[1]);
             dto.setPriority((String) row[2]);
-            
+
             int dueDay = ((Number) row[3]).intValue();
             int daysOverdue = currentDayOfYear - dueDay;
             dto.setDaysOverdue(daysOverdue);
-            
+
             dto.setChecklistName((String) row[4]);
             dto.setAssignedTo((String) row[6]);
             dto.setDepartmentName((String) row[7]);
+
             dto.setDueDate(LocalDate.now());
-            
+
             return dto;
+
         }).collect(Collectors.toList());
     }
 
