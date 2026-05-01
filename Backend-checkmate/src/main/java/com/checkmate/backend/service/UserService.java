@@ -15,13 +15,16 @@ public class UserService {
     private final UserRepository repository;
     private final ChecklistRepository checklistRepository;
     private final TaskRepository taskRepository; //
+    private final com.checkmate.backend.repository.AppUserRepository appUserRepo;
 
     public UserService(UserRepository repository,
             ChecklistRepository checklistRepository,
-            TaskRepository taskRepository) {
+            TaskRepository taskRepository,
+            com.checkmate.backend.repository.AppUserRepository appUserRepo) {
         this.repository = repository;
         this.checklistRepository = checklistRepository;
         this.taskRepository = taskRepository;
+        this.appUserRepo = appUserRepo;
     }
 
     // GET ALL USERS
@@ -49,7 +52,15 @@ public class UserService {
         existing.setDepartment(updatedUser.getDepartment());
         existing.setRole(updatedUser.getRole());
         existing.setActive(updatedUser.isActive());
-
+        
+        // Also update the authentication user's designation (very important for RBAC)
+        if (existing.getEmail() != null) {
+            appUserRepo.findByEmail(existing.getEmail()).ifPresent(appUser -> {
+                appUser.setDesignation(updatedUser.getRole());
+                appUserRepo.save(appUser);
+            });
+        }
+        
         return repository.save(existing);
     }
 

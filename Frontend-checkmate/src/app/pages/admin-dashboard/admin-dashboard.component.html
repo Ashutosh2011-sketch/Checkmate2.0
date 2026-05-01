@@ -1,100 +1,50 @@
 <div class="dashboard-wrapper">
-  
-  <div class="dashboard-grid top-stats-grid">
-    <div class="stat-card" *ngFor="let stat of stats">
-      <h3 class="stat-title">{{ stat.title }}</h3>
-      
-      <div class="stat-value-row">
-        <h2 class="stat-value">{{ stat.value }}</h2>
-        <span *ngIf="stat.iconClass" class="material-icons stat-icon" [ngClass]="stat.iconColor">
-          {{ stat.iconClass }}
-        </span>
-      </div>
-
-      <div class="stat-footer">
-        <span *ngIf="stat.subtitle" class="stat-subtitle" [ngClass]="stat.subtitleColor">
-          {{ stat.subtitle }}
-        </span>
-        <button *ngIf="stat.buttonText" class="btn-stat-action" (click)="onStatAction(stat.buttonText)">
-          {{ stat.buttonText }}
-        </button>
-      </div>
+  <div class="dashboard-header">
+    <div>
+      <h2>Admin Dashboard</h2>
     </div>
+    <span class="updated-at" *ngIf="lastUpdated">Updated: {{ lastUpdated | date:'mediumTime' }}</span>
   </div>
 
-  <div class="dashboard-grid two-col-grid">
-    
-    <div class="content-card">
-      <h3 class="card-title">Checklist Completion Trend</h3>
-      <div class="legend">
-        <span class="legend-box blue"></span> Past 6 Months
+  <div class="loading" *ngIf="isLoading">Loading dashboard...</div>
+  <div class="error" *ngIf="!isLoading && loadError">{{ loadError }}</div>
+
+  <ng-container *ngIf="!isLoading && !loadError">
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let stat of stats">
+        <div class="stat-head">
+          <h3>{{ stat.title }}</h3>
+          <span class="material-icons">{{ stat.iconClass }}</span>
+        </div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <p>{{ stat.helperText }}</p>
       </div>
-      <div class="chart-placeholder line-chart-container">
-        <div class="css-line-chart">
-           <div class="line-segment"></div>
-           <div class="chart-bars">
-              <div class="bar bar-1"></div>
-              <div class="bar bar-2"></div>
-              <div class="bar bar-3"></div>
-              <div class="bar bar-4 red-bar"></div>
-           </div>
-           <div class="x-axis-labels">
-             <span>IT Setup</span>
-             <span>Sales</span>
-             <span>Legal Review</span>
-             <span>Engineering</span>
-           </div>
+    </div>
+
+    <div class="panel-grid">
+      <div class="panel">
+        <h3>Task Progress</h3>
+        <div class="progress-row">
+          <span>Completed</span>
+          <strong>{{ completionRate }}%</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="completionRate"></div>
+        </div>
+        <div class="breakdown">
+          <span>Done: {{ summary.completedTasks }}</span>
+          <span>Pending: {{ summary.pendingTasks }}</span>
+          <span>Total: {{ summary.totalTasks }}</span>
         </div>
       </div>
-    </div>
 
-    <div class="content-card">
-      <h3 class="card-title">Task Status Distribution</h3>
-      <div class="chart-placeholder bar-chart-container">
-        <div class="css-bar-chart">
-          <div class="bar-row"><span class="label">100%</span><div class="track"><div class="fill blue" style="width: 50%"></div></div></div>
-          <div class="bar-row"><span class="label">200%</span><div class="track"><div class="fill blue" style="width: 80%"></div></div></div>
-          <div class="bar-row"><span class="label">1.10%</span><div class="track"><div class="fill blue" style="width: 60%"></div></div></div>
-          <div class="bar-row"><span class="label">0</span><div class="track"></div></div>
-          <div class="x-axis-labels text-center mt-2">
-            <span>IT Setup</span>
-          </div>
-        </div>
+      <div class="panel">
+        <h3>Quick Actions</h3>
+        <button class="btn-outline" (click)="onQuickAction('/admin/checklist-builder')">+ Create Checklist</button>
+        <button class="btn-outline" (click)="onQuickAction('/admin/checklists')">View Checklists</button>
+        <button class="btn-outline" (click)="onQuickAction('/admin/users')">Manage Users</button>
+        <button class="btn-outline" (click)="onQuickAction('/admin/reports')">View Reports</button>
       </div>
     </div>
-
-  </div>
-
-  <div class="dashboard-grid two-col-grid mt-4">
-    
-    <div class="content-card">
-      <h3 class="card-title">Recent Activity Feed</h3>
-      <ul class="activity-list">
-        <li *ngFor="let activity of activities">
-          {{ activity.description }}
-        </li>
-      </ul>
-    </div>
-
-    <div class="content-card">
-      <div class="alerts-header">
-        <h3 class="card-title">Critical Alerts</h3>
-        <span class="material-icons alert-icon text-red">warning</span>
-      </div>
-      
-      <div class="alert-box red-alert">
-        Overdue: 'System Upgrade Checklist'<br>
-        deadline passed for IT Team!
-      </div>
-
-      <div class="action-buttons-grid">
-        <button class="btn-outline" (click)="onQuickAction('Create Checklist')">+ Create Checklist</button>
-        <button class="btn-outline" (click)="onQuickAction('Add User')">Add User</button>
-        <button class="btn-outline" (click)="onQuickAction('Create Template')">+ Create Template</button>
-        <button class="btn-outline" (click)="onQuickAction('Configure Workflow')">Configure Workflow</button>
-      </div>
-    </div>
-
-  </div>
-
+  </ng-container>
 </div>

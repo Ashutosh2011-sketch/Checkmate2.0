@@ -1,6 +1,8 @@
 package com.checkmate.backend.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +19,9 @@ public class Task {
 
     private String description;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))
-    @Column(name = "assignee", nullable = false)
+    @Column(name = "assignee")
     private List<String> assignees = new ArrayList<>();
 
     @Column(nullable = false)
@@ -28,86 +30,121 @@ public class Task {
     @Column(name = "due_date_days", nullable = false)
     private int dueDateDays;
 
-    @Column(name = "depends_on", nullable = false)
+    @Column(name = "status", nullable = false)
+    private String status = "Pending";
+
+    // ✅ KEEP STRING (DO NOT CHANGE TYPE)
+    @Column(name = "depends_on")
     private String dependsOn;
 
-    @Column(name = "condition_dependent_on", nullable = false)
+    @Column(name = "condition_dependent_on")
     private String conditionDependentOn;
 
-    @Column(name = "condition_expected_outcome", nullable = false)
+    @Column(name = "condition_expected_outcome")
     private String conditionExpectedOutcome;
 
-    @Column(name = "remind_before", nullable = false)
-    private int remindBefore;
+    @Column(name = "remind_before")
+    private Integer remindBefore = 1;
 
-    @Column(name = "escalate_to", nullable = false)
-    private String escalateTo;
+    @Column(name = "escalate_to")
+    private String escalateTo = "Manager";
 
-    @Column(name = "show_advanced", nullable = false)
-    private boolean showAdvanced;
+    @Column(name = "show_advanced")
+    private boolean showAdvanced = false;
 
-    @Column(name = "sort_order", nullable = false)
+    @Column(name = "completion_percent")
+    private Integer completionPercent = 0;
+
+    @Column(name = "completed")
+    private Boolean completed = false;
+
+    @Column(name = "sort_order")
     private Integer sortOrder = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id", nullable = false)
+    @JsonIgnore
     private Section section;
+
+    // ---------------- GETTERS ----------------
 
     public Long getId() { return id; }
 
-    public void setId(Long id) { this.id = id; }
-
     public String getTitle() { return title; }
-
-    public void setTitle(String title) { this.title = title; }
 
     public String getDescription() { return description; }
 
-    public void setDescription(String description) { this.description = description; }
-
     public List<String> getAssignees() { return assignees; }
-
-    public void setAssignees(List<String> assignees) {
-        this.assignees = assignees == null ? new ArrayList<>() : assignees;
-    }
 
     public String getPriority() { return priority; }
 
-    public void setPriority(String priority) { this.priority = priority; }
-
     public int getDueDateDays() { return dueDateDays; }
 
-    public void setDueDateDays(int dueDateDays) { this.dueDateDays = dueDateDays; }
+    public String getStatus() {
+        if (Boolean.TRUE.equals(completed)) return "Completed";
+        if (completionPercent != null && completionPercent > 0) return "In Progress";
+        return status != null ? status : "Pending";
+    }
 
-    public String getDependsOn() { return dependsOn; }
-
-    public void setDependsOn(String dependsOn) { this.dependsOn = dependsOn; }
-
-    public String getConditionDependentOn() { return conditionDependentOn; }
-
-    public void setConditionDependentOn(String conditionDependentOn) { this.conditionDependentOn = conditionDependentOn; }
-
-    public String getConditionExpectedOutcome() { return conditionExpectedOutcome; }
-
-    public void setConditionExpectedOutcome(String conditionExpectedOutcome) { this.conditionExpectedOutcome = conditionExpectedOutcome; }
-
-    public int getRemindBefore() { return remindBefore; }
-
-    public void setRemindBefore(int remindBefore) { this.remindBefore = remindBefore; }
-
-    public String getEscalateTo() { return escalateTo; }
-
-    public void setEscalateTo(String escalateTo) { this.escalateTo = escalateTo; }
-
-    public boolean isShowAdvanced() { return showAdvanced; }
-
-    public void setShowAdvanced(boolean showAdvanced) { this.showAdvanced = showAdvanced; }
+    public boolean isCompleted() { return Boolean.TRUE.equals(completed); }
 
     public Integer getSortOrder() { return sortOrder; }
 
-    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
-
     public Section getSection() { return section; }
+
+    public String getDependsOn() { return dependsOn; }
+
+    public String getConditionDependentOn() { return conditionDependentOn; }
+
+    public String getConditionExpectedOutcome() { return conditionExpectedOutcome; }
+
+    public Integer getRemindBefore() { return remindBefore; }
+
+    public String getEscalateTo() { return escalateTo; }
+
+    public boolean isShowAdvanced() { return showAdvanced; }
+
+    public Integer getCompletionPercent() { return completionPercent; }
+
+    // ---------------- SETTERS ----------------
+
+    public void setId(Long id) { this.id = id; }
+
+    public void setTitle(String title) { this.title = title; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public void setAssignees(List<String> assignees) { this.assignees = assignees; }
+
+    public void setPriority(String priority) { this.priority = priority; }
+
+    public void setDueDateDays(int dueDateDays) { this.dueDateDays = dueDateDays; }
+
+    public void setStatus(String status) { this.status = status; }
+
+    public void setDependsOn(String dependsOn) { this.dependsOn = dependsOn; }
+
+    public void setConditionDependentOn(String conditionDependentOn) {
+        this.conditionDependentOn = conditionDependentOn;
+    }
+
+    public void setConditionExpectedOutcome(String conditionExpectedOutcome) {
+        this.conditionExpectedOutcome = conditionExpectedOutcome;
+    }
+
+    public void setRemindBefore(Integer remindBefore) { this.remindBefore = remindBefore; }
+
+    public void setEscalateTo(String escalateTo) { this.escalateTo = escalateTo; }
+
+    public void setShowAdvanced(boolean showAdvanced) { this.showAdvanced = showAdvanced; }
+
+    public void setCompletionPercent(Integer completionPercent) {
+        this.completionPercent = completionPercent;
+    }
+
+    public void setCompleted(Boolean completed) { this.completed = completed; }
+
+    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 
     public void setSection(Section section) { this.section = section; }
 }

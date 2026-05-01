@@ -7,17 +7,41 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
 
+public interface TaskRepository extends JpaRepository<Task, Long> {
+	
+	
+
+    // ✅ EXISTING
     @Query(value = """
         SELECT t.title
         FROM tasks t
         JOIN task_assignees ta ON t.id = ta.task_id
-        WHERE ta.assignee LIKE CONCAT(:userName, '%')
+        WHERE ta.assignee ILIKE CONCAT('%', :userName, '%')
     """, nativeQuery = true)
-    List<String> findTasksByUserName(String userName);
+    List<String> findTasksByUserName(@Param("userName") String userName);
+    
+    @Query(value = """
+    	    SELECT 
+    	        t.id, t.title, t.priority, t.due_date_days,
+    	        c.checklist_name, c.id as checklist_id,
+    	        STRING_AGG(DISTINCT ta.assignee, ', ') as assignees,
+    	        COALESCE(c.department, 'Unassigned') as department
+    	    FROM tasks t
+    	    JOIN sections s ON t.section_id = s.id
+    	    JOIN checklists c ON s.checklist_id = c.id
+    	    LEFT JOIN task_assignees ta ON ta.task_id = t.id
+    	    WHERE t.completed = false 
+    	    AND t.due_date_days < :currentDayOfYear
+    	    AND c.department = :department
+    	    GROUP BY t.id, t.title, t.priority, t.due_date_days, c.checklist_name, c.id, c.department
+    	""", nativeQuery = true)
+    	List<Object[]> findOverdueTasksByDepartment(
+    	        @Param("currentDayOfYear") int currentDayOfYear,
+    	        @Param("department") String department
+    	);
 
-    // Get full task objects assigned to a user
+    // ✅ EXISTING
     @Query(value = """
         SELECT t.id, t.title, t.priority, t.description,
                s.section_name, c.checklist_name, c.id as checklist_id
@@ -25,11 +49,32 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         JOIN task_assignees ta ON t.id = ta.task_id
         JOIN sections s ON t.section_id = s.id
         JOIN checklists c ON s.checklist_id = c.id
-        WHERE ta.assignee LIKE CONCAT(:userName, '%')
+        WHERE ta.assignee ILIKE CONCAT('%', :userName, '%')
     """, nativeQuery = true)
     List<Object[]> findFullTasksByUserName(@Param("userName") String userName);
 
-    // Count total tasks in a checklist
+    // 🔥 NEW → THIS FIXES YOUR USER TASK API (USE THIS IN CONTROLLER)
+    @Query(value = """
+    	    SELECT 
+    	        t.id,
+    	        t.title,
+    	        t.description,
+    	        t.priority,
+    	        t.due_date_days,
+    	        t.completed,
+    	        s.section_name,
+    	        STRING_AGG(ta.assignee, ',') as assignees,
+    	        t.depends_on   -- ✅ ADD THIS
+    	    FROM tasks t
+    	    JOIN sections s ON t.section_id = s.id
+    	    JOIN task_assignees ta ON ta.task_id = t.id
+    	    WHERE LOWER(ta.assignee) = LOWER(:username)
+    	    GROUP BY t.id, t.title, t.description, t.priority, 
+    	             t.due_date_days, t.completed, s.section_name, t.depends_on
+    	""", nativeQuery = true)
+    	List<Object[]> findTasksByExactUser(@Param("username") String username);
+
+    // ✅ EXISTING
     @Query(value = """
         SELECT COUNT(t.id)
         FROM tasks t
@@ -37,4 +82,98 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         WHERE s.checklist_id = :checklistId
     """, nativeQuery = true)
     int countTasksByChecklistId(@Param("checklistId") Long checklistId);
+
+    // ✅ EXISTING
+    @Query(value = """
+        SELECT COUNT(t.id)
+        FROM tasks t
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        WHERE c.completed = true
+    """, nativeQuery = true)
+    long countCompletedTasks();
+
+    // 📊 Total tasks
+    @Query(value = "SELECT COUNT(*) FROM tasks", nativeQuery = true)
+    long countTotalTasks();
+
+    // 📊 Pending tasks
+    @Query(value = """
+        SELECT COUNT(*) FROM tasks t
+        WHERE t.completed = false
+    """, nativeQuery = true)
+    long countPendingTasks();
+
+    // ⏰ Overdue
+    @Query(value = """
+        SELECT 
+            t.id, t.title, t.priority, t.due_date_days,
+            c.checklist_name, c.id as checklist_id,
+            STRING_AGG(DISTINCT ta.assignee, ', ') as assignees,
+            COALESCE(c.department, 'Unassigned') as department
+        FROM tasks t
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        LEFT JOIN task_assignees ta ON ta.task_id = t.id
+        WHERE t.completed = false 
+        AND t.due_date_days < :currentDayOfYear
+        GROUP BY t.id, t.title, t.priority, t.due_date_days, c.checklist_name, c.id, c.department
+        ORDER BY t.due_date_days ASC
+    """, nativeQuery = true)
+    List<Object[]> findAllOverdueTasks(@Param("currentDayOfYear") int currentDayOfYear);
+
+    // 👤 Tasks assigned
+    @Query(value = """
+        SELECT 
+            t.id, t.title, t.priority, t.completed,
+            c.checklist_name, c.department
+        FROM tasks t
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        JOIN task_assignees ta ON ta.task_id = t.id
+        WHERE ta.assignee = :userName
+    """, nativeQuery = true)
+    List<Object[]> findTasksByAssignee(@Param("userName") String userName);
+
+    // 📊 Department stats
+    @Query(value = """
+        SELECT 
+            COALESCE(c.department, 'Unassigned') as department,
+            COUNT(DISTINCT t.id),
+            COUNT(DISTINCT CASE WHEN t.completed = true THEN t.id END),
+            COUNT(DISTINCT CASE WHEN t.completed = false AND t.due_date_days < :currentDayOfYear THEN t.id END)
+        FROM tasks t
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        GROUP BY c.department
+    """, nativeQuery = true)
+    List<Object[]> getTaskStatsByDepartment(@Param("currentDayOfYear") int currentDayOfYear);
+
+    // 👤 User performance
+    @Query(value = """
+        SELECT 
+            ta.assignee,
+            COALESCE(c.department, 'Unassigned'),
+            COUNT(DISTINCT t.id),
+            COUNT(DISTINCT CASE WHEN t.completed = true THEN t.id END),
+            COUNT(DISTINCT CASE WHEN t.completed = false AND t.due_date_days < :currentDayOfYear THEN t.id END)
+        FROM task_assignees ta
+        JOIN tasks t ON ta.task_id = t.id
+        JOIN sections s ON t.section_id = s.id
+        JOIN checklists c ON s.checklist_id = c.id
+        GROUP BY ta.assignee, c.department
+        ORDER BY COUNT(DISTINCT t.id) DESC
+    """, nativeQuery = true)
+    List<Object[]> getUserPerformanceStats(@Param("currentDayOfYear") int currentDayOfYear);
+
+    // ✅ CHECKLIST DETAIL PAGE
+    @Query("""
+        SELECT t FROM Task t
+        JOIN FETCH t.section s
+        JOIN FETCH s.checklist c
+        WHERE c.id = :checklistId
+    """)
+    List<Task> findBySection_Checklist_Id(@Param("checklistId") Long checklistId);
+    
+    
 }

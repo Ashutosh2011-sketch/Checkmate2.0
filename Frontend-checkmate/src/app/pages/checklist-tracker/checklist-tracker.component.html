@@ -2,8 +2,6 @@
 
 <h1>Checklist Tracker</h1>
 
-<input placeholder="Search checklist" [(ngModel)]="searchText">
-
 <div class="card-container">
 
 <div *ngFor="let checklist of checklists" class="card">
@@ -12,79 +10,41 @@
 <p><b>Department:</b> {{checklist.department}}</p>
 
 <div class="progress-bar">
-<div class="progress-fill"
-[style.width.%]="getProgress(checklist)">
-</div>
+  <div class="progress-fill"
+       [style.width.%]="getProgress(checklist)">
+  </div>
 </div>
 
 <p>{{getProgress(checklist)}}% Complete</p>
-
 <span class="status">{{getStatus(checklist)}}</span>
 
 <hr>
 
-<div *ngFor="let task of checklist.tasks">
+<!-- 🔥 ORDERED TASK FLOW -->
+<div *ngFor="let task of getOrderedTasks(checklist)"
+     class="task"
+     [class.locked]="isTaskLocked(task, checklist)">
 
-<label>
+<label class="task-row">
 
 <input type="checkbox"
-[checked]="task.completed"
-(change)="toggleTask(checklist,task)">
+       [checked]="task.completed"
+       (change)="toggleTask(checklist, task)"
+       [disabled]="isTaskLocked(task, checklist)">
 
-{{task.title}}
+<span class="task-title">{{task.title}}</span>
 
 </label>
 
-<p>Priority: {{task.priority}}</p>
-<p>Deadline: {{task.deadline}}</p>
-<p>Assigned To: {{task.assignedTo || 'Unassigned'}}</p>
+<div class="meta">
 
-<button *ngIf="!task.assignedTo"
-(click)="claimTask(task)">
-Claim Task
-</button>
+<span class="priority {{task.priority.toLowerCase()}}">
+  {{task.priority}}
+</span>
 
-<div>
-
-<input #comment placeholder="Comment">
-<button (click)="addComment(task,comment.value); comment.value=''">
-Add Comment
-</button>
-
-</div>
-
-<ul>
-
-<li *ngFor="let c of task.comments">{{c}}</li>
-
-</ul>
-
-<div>
-
-<input #file placeholder="Attachment name">
-<button (click)="addAttachment(task,file.value); file.value=''">
-Attach
-</button>
-
-</div>
-
-<ul>
-
-<li *ngFor="let a of task.attachments">{{a}}</li>
-
-</ul>
-
-<hr>
-
-</div>
-
-<div *ngIf="checklist.activityLog.length>0">
-
-<h4>Activity Log</h4>
-
-<ul>
-<li *ngFor="let log of checklist.activityLog">{{log}}</li>
-</ul>
+<span class="user">
+  👤 {{task.assignedTo || 'Unassigned'}}
+</span>
 
 </div>
 
@@ -92,4 +52,5 @@ Attach
 
 </div>
 
+</div>
 </div>

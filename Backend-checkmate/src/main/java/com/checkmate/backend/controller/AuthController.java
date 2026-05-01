@@ -82,16 +82,17 @@ public class AuthController {
 
         appUserRepository.save(appUser);
 
+        // Also create a matching record in the users (teammates) table
         try {
             User teammateUser = new User();
             teammateUser.setName(appUser.getName());
             teammateUser.setDepartment(appUser.getDepartment());
             teammateUser.setRole(originalRoleFromFrontend);
+            teammateUser.setEmail(generatedEmail); // CRITICAL: Set email for cross-table sync
             teammateUser.setActive(true);
-
             teammateUserRepository.save(teammateUser);
         } catch (Exception e) {
-            System.out.println("Teammate ki table mein save nahi ho paya: " + e.getMessage());
+            System.out.println("Teammate save error: " + e.getMessage());
         }
 
         Map<String, String> response = new HashMap<>();
@@ -108,9 +109,20 @@ public class AuthController {
         String password = loginData.get("password");
 
         try {
+            System.out.println("LOGIN-DEBUG: Attempting login for email='" + email + "'");
+            // Check if user exists first
+            var userOpt = appUserRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                AppUser u = userOpt.get();
+                System.out.println("LOGIN-DEBUG: User found: name='" + u.getName() + "' role='" + u.getRole() + "' pwHash='" + (u.getPassword() != null ? u.getPassword().substring(0, Math.min(20, u.getPassword().length())) : "NULL") + "...'");
+                System.out.println("LOGIN-DEBUG: Password matches? " + passwordEncoder.matches(password, u.getPassword()));
+            } else {
+                System.out.println("LOGIN-DEBUG: No user found with email '" + email + "'");
+            }
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password));
         } catch (Exception e) {
+            System.out.println("LOGIN-DEBUG: Auth failed: " + e.getClass().getName() + " - " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password!"));
         }
 

@@ -2,9 +2,11 @@ package com.checkmate.backend.controller;
 
 import com.checkmate.backend.entity.User;
 import com.checkmate.backend.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -17,38 +19,50 @@ public class UserController {
         this.service = service;
     }
 
-    // ✅ GET ALL USERS
+    // GET ALL USERS
     @GetMapping
     public List<User> getAllUsers() {
         return service.getAllUsers();
     }
 
-    // ✅ CREATE USER
+    // CREATE USER
     @PostMapping
     public User createUser(@RequestBody User user) {
         return service.createUser(user);
     }
 
-    // ✅ GET USER BY ID
+    // GET USER BY ID
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        return service.getUserById(id);
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(service.getUserById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // ✅ UPDATE USER
+    // UPDATE USER
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return service.updateUser(id, user);
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            return ResponseEntity.ok(service.updateUser(id, user));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // ✅ DELETE USER
+    // DELETE USER
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        service.deleteUser(id);
-        return "User deleted";
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            service.deleteUser(id);
+            return ResponseEntity.ok(Map.of("message", "User deleted"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // 🔥 NEW: GET TASKS FROM CHECKLIST
+    // GET TASKS FOR USER (from checklist)
     @GetMapping("/{name}/tasks")
     public List<String> getTasksForUser(@PathVariable String name) {
         return service.getTasksForUser(name);

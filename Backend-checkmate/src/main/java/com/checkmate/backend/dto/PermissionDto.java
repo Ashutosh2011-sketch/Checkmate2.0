@@ -1,10 +1,14 @@
 package com.checkmate.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PermissionDto {
 
     private Long id;
     private String name;
     private String category;
+
+    @JsonProperty("isEnabled")
     private boolean isEnabled;
 
     // ===== GETTERS & SETTERS =====
@@ -18,6 +22,7 @@ public class PermissionDto {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
+    @JsonProperty("isEnabled")
     public boolean isEnabled() { return isEnabled; }
     public void setEnabled(boolean enabled) { isEnabled = enabled; }
 }

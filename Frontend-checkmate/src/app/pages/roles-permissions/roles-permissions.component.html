@@ -1,6 +1,8 @@
 <div class="main-content" [class.drawer-open]="isAddRoleDrawerOpen">
   
   <div class="content-card">
+
+    <!-- ===== LEFT PANEL: ROLE LIST ===== -->
     <div class="role-list-panel">
       <h2>Role List</h2>
       <ul class="role-list">
@@ -16,33 +18,101 @@
       </button>
     </div>
 
-    <div class="permissions-panel" *ngIf="selectedRole">
-      <h2>Permissions for: {{ selectedRole.name }}</h2>
-      
-      <div class="permission-groups">
-        <div class="permission-group" *ngFor="let category of permissionCategories">
-          <h3>{{ category }}</h3>
-          <div class="permission-item" *ngFor="let permission of groupedPermissions[category]">
-            <span>{{ permission.name }}</span>
-            <label class="switch">
-              <input type="checkbox" 
-                     [checked]="permission.isEnabled"
-                     (change)="onPermissionToggle(permission)">
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
+    <!-- ===== MIDDLE PANEL: USERS WITH THIS ROLE ===== -->
+    <div class="users-panel" *ngIf="selectedRole">
+      <h2>{{ selectedRole.name }} Users</h2>
+
+      <div *ngIf="roleUsers.length === 0" class="empty-users">
+        No users with this role
       </div>
 
-      <div class="panel-footer">
-        <div class="unsaved-changes" *ngIf="hasUnsavedChanges">
-          <span class="dot"></span> Unsaved Changes
+      <ul class="user-list">
+        <li *ngFor="let user of roleUsers"
+            [class.selected]="selectedUser?.userId === user.userId"
+            (click)="selectUser(user)">
+          <div class="user-avatar">{{ user.userName.charAt(0) || '?' }}</div>
+          <div class="user-details">
+            <span class="user-name">{{ user.userName }}</span>
+            <span class="user-email">{{ user.email }}</span>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Button to go back to role-level permissions -->
+      <button class="btn btn-outline-secondary back-btn"
+              *ngIf="viewMode === 'user'"
+              (click)="backToRoleView()">
+        ← Back to Role Permissions
+      </button>
+    </div>
+
+    <!-- ===== RIGHT PANEL: PERMISSIONS (ROLE OR USER) ===== -->
+    <div class="permissions-panel" *ngIf="selectedRole">
+
+      <!-- ROLE-LEVEL PERMISSIONS VIEW -->
+      <ng-container *ngIf="viewMode === 'role'">
+        <h2>Permissions for Role: {{ selectedRole.name }}</h2>
+        <p class="panel-subtitle">These are default permissions for all {{ selectedRole.name }} users</p>
+
+        <div class="permission-groups">
+          <div class="permission-group" *ngFor="let category of permissionCategories">
+            <h3>{{ category }}</h3>
+            <div class="permission-item" *ngFor="let permission of groupedPermissions[category]">
+              <span>{{ permission.name }}</span>
+              <label class="switch">
+                <input type="checkbox" 
+                       [checked]="permission.isEnabled"
+                       (change)="onPermissionToggle(permission)">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
         </div>
-        <div class="footer-actions">
-          <button class="btn btn-primary" [disabled]="!hasUnsavedChanges" (click)="saveChanges()">Save Changes</button>
-          <button class="btn btn-outline-secondary" (click)="discardChanges()">Discard</button>
+
+        <div class="panel-footer">
+          <div class="unsaved-changes" *ngIf="hasUnsavedChanges">
+            <span class="dot"></span> Unsaved Changes
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-primary" [disabled]="!hasUnsavedChanges" (click)="saveChanges()">Save Changes</button>
+            <button class="btn btn-outline-secondary" (click)="discardChanges()">Discard</button>
+          </div>
         </div>
-      </div>
+      </ng-container>
+
+      <!-- USER-LEVEL PERMISSIONS VIEW -->
+      <ng-container *ngIf="viewMode === 'user' && selectedUser">
+        <h2>Permissions for: {{ selectedUser.userName }}</h2>
+        <p class="panel-subtitle">
+          Override {{ selectedRole.name }} defaults for this specific user
+        </p>
+
+        <div class="permission-groups">
+          <div class="permission-group" *ngFor="let category of userPermissionCategories">
+            <h3>{{ category }}</h3>
+            <div class="permission-item" *ngFor="let permission of userGroupedPermissions[category]">
+              <span>{{ permission.name }}</span>
+              <label class="switch">
+                <input type="checkbox" 
+                       [checked]="permission.isEnabled"
+                       (change)="onUserPermissionToggle(permission)">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <div class="unsaved-changes" *ngIf="hasUnsavedUserChanges">
+            <span class="dot"></span> Unsaved Changes
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-primary" [disabled]="!hasUnsavedUserChanges" (click)="saveUserChanges()">Save User Permissions</button>
+            <button class="btn btn-outline-secondary" (click)="discardUserChanges()">Discard</button>
+          </div>
+        </div>
+      </ng-container>
+
     </div>
   </div>
 

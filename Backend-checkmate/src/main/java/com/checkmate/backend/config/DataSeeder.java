@@ -4,10 +4,12 @@ import com.checkmate.backend.entity.AppUser;
 import com.checkmate.backend.entity.Permission;
 import com.checkmate.backend.entity.Role;
 import com.checkmate.backend.entity.RolePermission;
+import com.checkmate.backend.entity.User;
 import com.checkmate.backend.repository.AppUserRepository;
 import com.checkmate.backend.repository.PermissionRepository;
 import com.checkmate.backend.repository.RolePermissionRepository;
 import com.checkmate.backend.repository.RoleRepository;
+import com.checkmate.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +22,10 @@ import java.util.Map;
 public class DataSeeder implements CommandLineRunner {
 
     @Autowired
-    private AppUserRepository userRepository;
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -37,19 +42,84 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // 1. Seed admin user
-        if (userRepository.count() == 0) {
+        // 1. Seed admin user if DB is empty
+        if (appUserRepository.count() == 0) {
             AppUser admin = new AppUser();
+            admin.setName("Admin User");
             admin.setEmail("admin@checkmate.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole("ADMIN");
-            userRepository.save(admin);
-            System.out.println("First Admin user created successfully in the database!");
-        } else {
-            System.out.println("Users already exist in the database, skipping creation.");
+            admin.setDesignation("Approver");
+            appUserRepository.save(admin);
+            System.out.println("Admin user created successfully!");
         }
 
-        // 2. Seed default permissions
+        // 2. Sync: Ensure every AppUser has a matching User record in the users table
+        for (AppUser appUser : appUserRepository.findAll()) {
+            if (appUser.getEmail() != null) {
+                boolean userExists = userRepository.findAll().stream()
+                        .anyMatch(u -> appUser.getEmail().equals(u.getEmail()));
+                if (!userExists) {
+                    User teammateUser = new User();
+                    teammateUser.setName(appUser.getName() != null ? appUser.getName() : appUser.getEmail());
+                    teammateUser.setDepartment(appUser.getDepartment() != null ? appUser.getDepartment() : "General");
+                    teammateUser.setRole(appUser.getDesignation() != null ? appUser.getDesignation() : "USER");
+                    teammateUser.setEmail(appUser.getEmail());
+                    teammateUser.setActive(true);
+                    userRepository.save(teammateUser);
+                    System.out.println("Synced User record for: " + appUser.getEmail());
+                }
+            }
+        }
+
+        // 2.5 REVERSE SYNC: Ensure every User record has a matching AppUser for login
+        for (User user : userRepository.findAll()) {
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                boolean appUserExists = appUserRepository.findByEmail(user.getEmail()).isPresent();
+                if (!appUserExists) {
+                    String name = user.getEmail().split("@")[0];
+                    String plainPassword = name + "234";
+                    AppUser newAppUser = new AppUser();
+                    newAppUser.setName(user.getName());
+                    newAppUser.setEmail(user.getEmail());
+                    newAppUser.setPassword(passwordEncoder.encode(plainPassword));
+                    newAppUser.setRole("USER");
+                    newAppUser.setDepartment(user.getDepartment());
+                    newAppUser.setDesignation(user.getRole());
+                    appUserRepository.save(newAppUser);
+                    System.out.println("Created AppUser for login: " + user.getEmail() + " -> password: " + plainPassword);
+                }
+            }
+        }
+
+        // 3. Re-hash ALL user passwords on every startup to fix any corruption
+        for (AppUser user : appUserRepository.findAll()) {
+            String plainPassword;
+            if ("ADMIN".equals(user.getRole())) {
+                plainPassword = "admin123";
+            } else {
+                String name = user.getEmail().split("@")[0];
+                plainPassword = name + "234";
+            }
+            user.setPassword(passwordEncoder.encode(plainPassword));
+            appUserRepository.save(user);
+            System.out.println("Password re-hashed for: " + user.getEmail() + " -> " + plainPassword);
+        }
+
+        // 4. Sync: Ensure every User record has a matching designation in AppUser
+        for (User user : userRepository.findAll()) {
+            if (user.getEmail() != null && user.getRole() != null) {
+                appUserRepository.findByEmail(user.getEmail()).ifPresent(appUser -> {
+                    if (appUser.getDesignation() == null || appUser.getDesignation().isEmpty()) {
+                        appUser.setDesignation(user.getRole());
+                        appUserRepository.save(appUser);
+                        System.out.println("Synced designation for: " + appUser.getEmail() + " -> " + user.getRole());
+                    }
+                });
+            }
+        }
+
+        // 4. Seed default permissions
         if (permissionRepository.count() == 0) {
             Permission p1 = createPermission("Create Checklists", "Checklist Permissions");
             Permission p2 = createPermission("Publish Workflows", "Checklist Permissions");
@@ -60,41 +130,38 @@ public class DataSeeder implements CommandLineRunner {
 
             List<Permission> allPerms = List.of(p1, p2, p3, p4, p5, p6);
             permissionRepository.saveAll(allPerms);
-            System.out.println("Default permissions seeded successfully!");
+            System.out.println("Default permissions seeded!");
 
-            // 3. Seed default roles with permissions
+            // 5. Seed default roles with permissions
             if (roleRepository.count() == 0) {
                 // Approver: all except Access Audit Logs
                 Role approver = new Role();
                 approver.setName("Approver");
                 approver.setDescription("Can approve checklists and manage workflows");
                 roleRepository.save(approver);
-                Map<Permission, Boolean> approverPerms = Map.of(
+                seedRolePermissions(approver, allPerms, Map.of(
                     p1, true, p2, true, p3, true, p4, false, p5, true, p6, true
-                );
-                seedRolePermissions(approver, allPerms, approverPerms);
+                ));
 
                 // Reviewer: Create Checklists + View Reports
                 Role reviewer = new Role();
                 reviewer.setName("Reviewer");
                 reviewer.setDescription("Can review checklists and view reports");
                 roleRepository.save(reviewer);
-                Map<Permission, Boolean> reviewerPerms = Map.of(
+                seedRolePermissions(reviewer, allPerms, Map.of(
                     p1, true, p2, false, p3, false, p4, false, p5, true, p6, false
-                );
-                seedRolePermissions(reviewer, allPerms, reviewerPerms);
+                ));
 
                 // Executor: Create Checklists only
                 Role executor = new Role();
                 executor.setName("Executor");
                 executor.setDescription("Can execute assigned checklists");
                 roleRepository.save(executor);
-                Map<Permission, Boolean> executorPerms = Map.of(
+                seedRolePermissions(executor, allPerms, Map.of(
                     p1, true, p2, false, p3, false, p4, false, p5, false, p6, false
-                );
-                seedRolePermissions(executor, allPerms, executorPerms);
+                ));
 
-                System.out.println("Default roles seeded successfully!");
+                System.out.println("Default roles seeded!");
             }
         } else {
             System.out.println("Permissions already exist, skipping seeding.");

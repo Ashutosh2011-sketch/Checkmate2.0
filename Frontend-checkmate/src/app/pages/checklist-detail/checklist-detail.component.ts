@@ -22,6 +22,8 @@ export class ChecklistDetailComponent implements OnInit {
   priorityFilters: string[] = ['All', 'High', 'Medium', 'Low'];
   activePriority: string = 'All';
 
+  workflowType: string = 'PARALLEL';
+
   constructor(
     private route: ActivatedRoute,
     private checklistService: ChecklistService
@@ -35,7 +37,13 @@ export class ChecklistDetailComponent implements OnInit {
   loadTasks() {
     this.checklistService.getTasksByChecklist(this.checklistId).subscribe({
       next: (data: any[]) => {
+
         this.tasks = data;
+
+        if (data.length && data[0].workflowType) {
+          this.workflowType = data[0].workflowType;
+        }
+
         this.applyFilters();
         this.calculateProgress();
       }
@@ -64,36 +72,46 @@ export class ChecklistDetailComponent implements OnInit {
     this.groupTasks(filtered);
   }
 
-  setStatusFilter(f: string) {
-    this.activeStatus = f;
-    this.applyFilters();
-  }
+  // 🔥 MAIN LOCK LOGIC (NEW)
+  isTaskLocked(task: any): boolean {
 
-  setPriorityFilter(f: string) {
-    this.activePriority = f;
-    this.applyFilters();
-  }
+    // Dependency check
+    if (task.dependsOn && task.dependsOn !== 'None') {
+      const parent = this.tasks.find(t => t.title === task.dependsOn);
+      if (!parent || parent.status !== 'Completed') return true;
+    }
 
-  resetFilters() {
-    this.searchText = '';
-    this.activeStatus = 'All';
-    this.activePriority = 'All';
-    this.applyFilters();
+    // Sequential logic
+    if (this.workflowType === 'SEQUENTIAL') {
+
+      const sorted = [...this.tasks].sort((a, b) => a.sortOrder - b.sortOrder);
+      const firstIncomplete = sorted.find(t => t.status !== 'Completed');
+
+      if (!firstIncomplete) return false;
+
+      const indexTask = sorted.findIndex(t => t.id === task.id);
+      const indexFirst = sorted.findIndex(t => t.id === firstIncomplete.id);
+
+      if (indexTask > indexFirst) return true;
+    }
+
+    return false;
   }
 
   groupTasks(taskList: any[]) {
-    const grouped: any = {};
+    const sorted = [...taskList].sort((a, b) => a.sortOrder - b.sortOrder);
 
-    taskList.forEach(task => {
+    const map = new Map<string, any[]>();
+
+    sorted.forEach(task => {
       const section = task.sectionName || 'General';
-
-      if (!grouped[section]) grouped[section] = [];
-      grouped[section].push(task);
+      if (!map.has(section)) map.set(section, []);
+      map.get(section)?.push(task);
     });
 
-    this.groupedTasks = Object.keys(grouped).map(key => ({
+    this.groupedTasks = Array.from(map.entries()).map(([key, value]) => ({
       key,
-      value: grouped[key],
+      value,
       expanded: true
     }));
   }
@@ -126,5 +144,22 @@ export class ChecklistDetailComponent implements OnInit {
     if (priority === 'High') return 'priority-high';
     if (priority === 'Medium') return 'priority-medium';
     return 'priority-low';
+  }
+
+  setStatusFilter(f: string) {
+    this.activeStatus = f;
+    this.applyFilters();
+  }
+
+  setPriorityFilter(f: string) {
+    this.activePriority = f;
+    this.applyFilters();
+  }
+
+  resetFilters() {
+    this.searchText = '';
+    this.activeStatus = 'All';
+    this.activePriority = 'All';
+    this.applyFilters();
   }
 }

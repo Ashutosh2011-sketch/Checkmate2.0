@@ -1,6 +1,5 @@
 /* roles-permissions.component.css */
 
-/* Variables (using standard CSS variables for compatibility) */
 :root {
   --primary-color: #6f42c1;
   --primary-hover: #5a32a3;
@@ -13,15 +12,6 @@
   --danger-color: #ffc107;
 }
 
-/* Page Layout */
-.page-container {
-  display: flex;
-  height: 100vh;
-  background-color: var(--bg-main);
-  overflow: hidden;
-  position: relative;
-}
-
 .main-content {
   flex: 1;
   padding: 24px 32px;
@@ -29,45 +19,7 @@
   transition: margin-right 0.3s ease-in-out;
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.header h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: var(--text-muted);
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 6px 12px;
-}
-
-.search-bar input {
-  border: none;
-  outline: none;
-  margin-left: 8px;
-  font-size: 14px;
-}
-
-/* Main Content Card */
+/* Main Content Card — 3-panel layout */
 .content-card {
   display: flex;
   background: var(--bg-card);
@@ -77,9 +29,10 @@
   overflow: hidden;
 }
 
-/* Left Panel: Role List */
+/* ===== LEFT PANEL: ROLE LIST ===== */
 .role-list-panel {
-  width: 280px;
+  width: 220px;
+  min-width: 220px;
   border-right: 1px solid var(--border-color);
   padding: 24px;
   display: flex;
@@ -117,13 +70,11 @@
   transition: all 0.2s ease;
 }
 
-.role-list li:hover {
-  border-color: #d1d5db;
-}
+.role-list li:hover { border-color: #d1d5db; }
 
 .role-list li.selected {
   background-color: var(--primary-light);
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
   color: var(--text-dark);
 }
 
@@ -141,7 +92,105 @@
   font-weight: 500;
 }
 
-/* Right Panel: Permissions */
+/* ===== MIDDLE PANEL: USERS ===== */
+.users-panel {
+  width: 240px;
+  min-width: 240px;
+  border-right: 1px solid var(--border-color);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fdfdfe;
+}
+
+.users-panel h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-dark);
+}
+
+.empty-users {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.user-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.user-list li:hover {
+  border-color: #d1d5db;
+  background: #f8f9ff;
+}
+
+.user-list li.selected {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6f42c1, #5a32a3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.back-btn {
+  margin-top: 12px;
+  width: 100%;
+  font-size: 12px;
+}
+
+/* ===== RIGHT PANEL: PERMISSIONS ===== */
 .permissions-panel {
   flex: 1;
   padding: 24px 32px;
@@ -154,17 +203,19 @@
 .permissions-panel h2 {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   color: var(--text-dark);
 }
 
-.permission-groups {
-  flex: 1;
+.panel-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
 }
 
-.permission-group {
-  margin-bottom: 32px;
-}
+.permission-groups { flex: 1; }
+
+.permission-group { margin-bottom: 32px; }
 
 .permission-group h3 {
   font-size: 14px;
@@ -183,11 +234,9 @@
   color: var(--text-dark);
 }
 
-.permission-item:last-child {
-  border-bottom: none;
-}
+.permission-item:last-child { border-bottom: none; }
 
-/* Footer & Actions */
+/* Footer */
 .panel-footer {
   display: flex;
   justify-content: flex-end;
@@ -214,10 +263,7 @@
   margin-right: 8px;
 }
 
-.footer-actions {
-  display: flex;
-  gap: 12px;
-}
+.footer-actions { display: flex; gap: 12px; }
 
 /* Buttons */
 .btn {
@@ -230,95 +276,21 @@
   border: 1px solid transparent;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: #fff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-}
-
-.btn-primary:disabled {
-  background-color: #ced4da;
-  cursor: not-allowed;
-}
-
-.btn-outline-primary {
-  color: var(--primary-color);
-  border-color: var(--border-color);
-  background: var(--bg-card);
-}
-
-.btn-outline-primary:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.btn-outline-secondary {
-  color: var(--text-dark);
-  border-color: var(--border-color);
-  background: var(--bg-card);
-}
-
-.btn-outline-secondary:hover {
-  background-color: var(--bg-main);
-}
+.btn-primary { background-color: var(--primary-color); color: #fff; }
+.btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); }
+.btn-primary:disabled { background-color: #ced4da; cursor: not-allowed; }
+.btn-outline-primary { color: var(--primary-color); border-color: var(--border-color); background: var(--bg-card); }
+.btn-outline-primary:hover { border-color: var(--primary-color); }
+.btn-outline-secondary { color: var(--text-dark); border-color: var(--border-color); background: var(--bg-card); }
+.btn-outline-secondary:hover { background-color: var(--bg-main); }
 
 /* Toggle Switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(20px); }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #cbd5e1;
-  transition: .3s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-input:checked + .slider {
-  background-color: var(--primary-color);
-}
-
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-/* Overlay for Drawer */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 90;
-}
+/* Overlay */
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); z-index: 90; }
