@@ -1,33 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { Dashboard, ChecklistInfo, TaskInfo } from '../../core/models/dashboard.model';
+import { NotificationService } from '../../core/services/notification.service';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-user-dashboard',
   templateUrl: './user-dashboard.component.html',
   styleUrls: ['./user-dashboard.component.css']
 })
-export class UserDashboardComponent implements OnInit {
+export class UserDashboardComponent implements OnInit, OnDestroy {
 
   dashboard: Dashboard | null = null;
   userName: string = '';
+  notifications: any[] = [];
 
-  // Tab state: 'inprogress' or 'completed'
+  private pollingSub?: Subscription;
+
+  // Tab state
   activeTab: string = 'inprogress';
 
-  // Selected checklist for detail view
+  // Selected checklist
   selectedChecklist: ChecklistInfo | null = null;
-
-  // Tasks for the selected checklist
   checklistTasks: TaskInfo[] = [];
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.userName = localStorage.getItem('userName') || 'User';
+
     this.loadDashboard();
+    this.loadNotifications();
+
+    // Poll every 30 seconds
+    this.pollingSub = interval(30000).subscribe(() => {
+      this.loadDashboard();
+      this.loadNotifications();
+    });
   }
 
+  // ================= DASHBOARD =================
   loadDashboard(): void {
     this.dashboardService.getDashboardData(this.userName)
       .subscribe({
@@ -35,45 +50,62 @@ export class UserDashboardComponent implements OnInit {
           console.log('Dashboard:', data);
           this.dashboard = data;
         },
-        error: (err) => {
-          console.error('Error:', err);
-        }
+        error: (err) => console.error('Dashboard Error:', err)
       });
   }
 
-  // Switch tab
+  // ================= NOTIFICATIONS =================
+  loadNotifications(): void {
+    this.notificationService.getNotifications().subscribe({
+      next: (data) => {
+        console.log('Notifications:', data);
+        this.notifications = data;
+      },
+      error: (err) => console.error('Notification Error:', err)
+    });
+  }
+
+  markAsRead(id: number): void {
+    this.notificationService.markAsRead(id).subscribe({
+      next: () => {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+      },
+      error: (err) => console.error('Error marking notification:', err)
+    });
+  }
+
+  // ================= UI LOGIC =================
   setTab(tab: string): void {
     this.activeTab = tab;
     this.selectedChecklist = null;
     this.checklistTasks = [];
   }
 
-  // Get checklists for active tab
   get displayedChecklists(): ChecklistInfo[] {
     if (!this.dashboard) return [];
+
     return this.activeTab === 'inprogress'
       ? (this.dashboard.assignedChecklists || [])
       : (this.dashboard.completedChecklists || []);
   }
 
-  // Select a checklist -> show its tasks
   selectChecklist(checklist: ChecklistInfo): void {
     this.selectedChecklist = checklist;
-    // Filter claimed tasks by checklist name
+
     this.checklistTasks = (this.dashboard?.claimedTasks || [])
       .filter(t => t.checklistName === checklist.name);
   }
 
-  // Close task detail panel
   closeDetail(): void {
     this.selectedChecklist = null;
     this.checklistTasks = [];
   }
 
-  // Update task completion percentage
+  // ================= TASK ACTIONS =================
   updateTaskPercent(task: TaskInfo, event: Event): void {
     const input = event.target as HTMLInputElement;
     const percent = parseInt(input.value, 10);
+
     this.dashboardService.updateTaskStatus(task.id, percent).subscribe({
       next: (updated) => {
         task.completionPercent = updated.completionPercent;
@@ -85,10 +117,9 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  // Mark a single task as complete
   markTaskComplete(task: TaskInfo): void {
     this.dashboardService.markTaskComplete(task.id).subscribe({
-      next: (updated) => {
+      next: () => {
         task.completionPercent = 100;
         task.completed = true;
         task.status = 'Completed';
@@ -98,64 +129,72 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  // Mark entire checklist as completed
   markChecklistComplete(): void {
     if (!this.selectedChecklist?.checklistId) return;
-    this.dashboardService.markChecklistComplete(this.selectedChecklist.checklistId).subscribe({
-      next: () => {
-        // Reload everything
-        this.selectedChecklist = null;
-        this.checklistTasks = [];
-        this.loadDashboard();
-      },
-      error: (err) => console.error('Error marking checklist complete:', err)
-    });
+
+    this.dashboardService.markChecklistComplete(this.selectedChecklist.checklistId)
+      .subscribe({
+        next: () => {
+          this.selectedChecklist = null;
+          this.checklistTasks = [];
+          this.loadDashboard();
+        },
+        error: (err) => console.error('Error marking checklist complete:', err)
+      });
   }
 
-  // Recalculate checklist progress after a task update
+  // ================= PROGRESS CALC =================
   private refreshChecklistProgress(): void {
     if (!this.selectedChecklist) return;
+
     const tasks = this.checklistTasks;
     const total = tasks.length;
     if (total === 0) return;
 
-    let sumPercent = 0;
-    let completedCount = 0;
+    let sum = 0;
+    let completed = 0;
+
     for (const t of tasks) {
-      sumPercent += t.completed ? 100 : t.completionPercent;
-      if (t.completed) completedCount++;
+      sum += t.completed ? 100 : (t.completionPercent || 0);
+      if (t.completed) completed++;
     }
 
-    this.selectedChecklist.progress = Math.round(sumPercent / total);
-    this.selectedChecklist.completedTasks = completedCount;
+    this.selectedChecklist.progress = Math.round(sum / total);
+    this.selectedChecklist.completedTasks = completed;
 
-    // If all tasks completed, move checklist to completed list
-    if (completedCount === total) {
+    // Move to completed if all tasks done
+    if (completed === total) {
       this.selectedChecklist.status = 'Completed';
       this.selectedChecklist.progress = 100;
-      // Reload to move it to the right list
+
       this.loadDashboard();
       this.selectedChecklist = null;
       this.checklistTasks = [];
     }
 
-    // Recalculate overall progress
+    // Update overall dashboard progress
     if (this.dashboard) {
-      const allTasks = this.dashboard.claimedTasks;
-      const totalP = allTasks.reduce((sum, t) => sum + (t.completed ? 100 : t.completionPercent), 0);
-      this.dashboard.progress = allTasks.length > 0 ? Math.round(totalP / allTasks.length) : 0;
+      const all = this.dashboard.claimedTasks || [];
+      const totalP = all.reduce(
+        (s, t) => s + (t.completed ? 100 : (t.completionPercent || 0)),
+        0
+      );
+
+      this.dashboard.progress = all.length
+        ? Math.round(totalP / all.length)
+        : 0;
     }
   }
 
-  // Dynamic conic-gradient for progress circle
+  // ================= UI HELPERS =================
   getProgressGradient(): string {
     const progress = this.dashboard?.progress || 0;
     return `conic-gradient(#2a5298 0% ${progress}%, #e6e6e6 ${progress}% 100%)`;
   }
 
-  // Badge class based on priority
   getPriorityClass(priority: string): string {
     if (!priority) return 'badge-default';
+
     switch (priority.toLowerCase()) {
       case 'high': return 'badge-high';
       case 'medium': return 'badge-medium';
@@ -164,14 +203,19 @@ export class UserDashboardComponent implements OnInit {
     }
   }
 
-  // Status badge class
   getStatusClass(status: string): string {
     if (!status) return 'status-pending';
+
     switch (status.toLowerCase()) {
       case 'completed': return 'status-completed';
       case 'in progress': return 'status-inprogress';
       case 'pending': return 'status-pending';
       default: return 'status-pending';
     }
+  }
+
+  // ================= CLEANUP =================
+  ngOnDestroy(): void {
+    this.pollingSub?.unsubscribe();
   }
 }

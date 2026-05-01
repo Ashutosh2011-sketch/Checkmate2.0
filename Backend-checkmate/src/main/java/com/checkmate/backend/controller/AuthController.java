@@ -62,7 +62,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Name is required!"));
         }
 
-        // 1. Save Original Role to Designation
         String originalRoleFromFrontend = appUser.getRole();
         if (appUser.getRole() != null && !appUser.getRole().isEmpty()) {
             appUser.setDesignation(appUser.getRole());
@@ -136,11 +135,9 @@ public class AuthController {
         response.put("message", "Login Successful!");
         response.put("name", user.getName());
 
-        // Return the user's designation (which is the role name from roles table)
         String designation = user.getDesignation();
         response.put("designation", designation != null ? designation : "");
 
-        // Look up actual permissions for this user's designation (role name)
         List<String> permissions = new ArrayList<>();
         if (designation != null && !designation.isEmpty()) {
             Optional<Role> roleOpt = roleRepository.findByName(designation);
@@ -153,12 +150,10 @@ public class AuthController {
             }
         }
 
-        // ADMIN gets all permissions automatically
         if ("ADMIN".equals(user.getRole())) {
             permissions = List.of(
-                "Create Checklists", "Publish Workflows", "Manage Users",
-                "Access Audit Logs", "View All Reports", "Manage Workflows"
-            );
+                    "Create Checklists", "Publish Workflows", "Manage Users",
+                    "Access Audit Logs", "View All Reports", "Manage Workflows");
         }
 
         response.put("permissions", permissions);

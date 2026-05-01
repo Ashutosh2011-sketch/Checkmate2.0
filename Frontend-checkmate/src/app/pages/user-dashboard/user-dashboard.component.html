@@ -1,115 +1,157 @@
 <div class="dashboard-grid" *ngIf="dashboard">
 
-  <!-- ================= CHECKLIST STATUS (TABBED) ================= -->
+  <!-- ================= CHECKLIST STATUS ================= -->
   <div class="card large">
     <div class="checklist-header">
       <h3>Checklist Status</h3>
+
       <div class="tab-bar">
-        <button class="tab-btn" [class.active]="activeTab === 'inprogress'"
+        <button class="tab-btn"
+                [class.active]="activeTab === 'inprogress'"
                 (click)="setTab('inprogress')">
           In Progress
-          <span class="tab-count" *ngIf="dashboard.assignedChecklists">
-            {{ dashboard.assignedChecklists.length }}
+          <span class="tab-count">
+            {{ dashboard.assignedChecklists.length || 0 }}
           </span>
         </button>
-        <button class="tab-btn" [class.active]="activeTab === 'completed'"
+
+        <button class="tab-btn"
+                [class.active]="activeTab === 'completed'"
                 (click)="setTab('completed')">
           Completed
-          <span class="tab-count" *ngIf="dashboard.completedChecklists">
-            {{ dashboard.completedChecklists.length }}
+          <span class="tab-count">
+            {{ dashboard.completedChecklists.length || 0 }}
           </span>
         </button>
       </div>
     </div>
 
-    <!-- Checklist list -->
+    <!-- Checklist List -->
     <div *ngIf="!selectedChecklist">
       <div *ngIf="displayedChecklists.length === 0" class="empty-state">
-        {{ activeTab === 'inprogress' ? 'No checklists in progress' : 'No completed checklists' }}
+        {{ activeTab === 'inprogress'
+          ? 'No checklists in progress'
+          : 'No completed checklists' }}
       </div>
 
-      <div class="checklist-item" *ngFor="let checklist of displayedChecklists"
+      <div class="checklist-item"
+           *ngFor="let checklist of displayedChecklists"
            (click)="selectChecklist(checklist)">
+
         <div class="left">
           <div class="circle-avatar">
             {{ checklist.name.charAt(0) || '?' }}
           </div>
+
           <div>
             <strong>{{ checklist.name }}</strong>
-            <div class="task-count">{{ checklist.totalTasks }} tasks · {{ checklist.completedTasks }} done</div>
+            <div class="task-count">
+              {{ checklist.totalTasks }} tasks · {{ checklist.completedTasks }} done
+            </div>
           </div>
         </div>
+
         <div class="right">
-          <span class="badge" [ngClass]="checklist.status === 'Completed' ? 'badge-completed' : 'badge-active'">
+          <span class="badge"
+                [ngClass]="checklist.status === 'Completed'
+                  ? 'badge-completed'
+                  : 'badge-active'">
             {{ checklist.status }}
           </span>
+
           <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="checklist.progress || 0"></div>
+            <div class="progress-fill"
+                 [style.width.%]="checklist.progress || 0">
+            </div>
           </div>
-          <small class="progress-text">{{ checklist.progress || 0 }}%</small>
+
+          <small class="progress-text">
+            {{ checklist.progress || 0 }}%
+          </small>
         </div>
       </div>
     </div>
 
-    <!-- Task Detail Panel (when checklist selected) -->
+    <!-- Checklist Detail -->
     <div *ngIf="selectedChecklist" class="task-detail-panel">
+
       <div class="detail-header">
         <button class="back-btn" (click)="closeDetail()">← Back</button>
         <h4>{{ selectedChecklist.name }}</h4>
-        <span class="badge" [ngClass]="selectedChecklist.status === 'Completed' ? 'badge-completed' : 'badge-active'">
+
+        <span class="badge"
+              [ngClass]="selectedChecklist.status === 'Completed'
+                ? 'badge-completed'
+                : 'badge-active'">
           {{ selectedChecklist.progress }}%
         </span>
       </div>
 
       <div class="detail-progress-bar">
-        <div class="detail-progress-fill" [style.width.%]="selectedChecklist.progress || 0"></div>
+        <div class="detail-progress-fill"
+             [style.width.%]="selectedChecklist.progress || 0">
+        </div>
       </div>
 
       <div *ngIf="checklistTasks.length === 0" class="empty-state">
-        No tasks found for this checklist
+        No tasks found
       </div>
 
-      <div class="task-detail-item" *ngFor="let task of checklistTasks"
+      <div class="task-detail-item"
+           *ngFor="let task of checklistTasks"
            [class.task-completed]="task.completed">
 
         <div class="task-detail-top">
+
           <div class="task-detail-info">
             <span class="task-check" [class.checked]="task.completed">
               {{ task.completed ? '✓' : '○' }}
             </span>
-            <span class="task-detail-title" [class.done]="task.completed">{{ task.title }}</span>
+
+            <span class="task-detail-title"
+                  [class.done]="task.completed">
+              {{ task.title }}
+            </span>
           </div>
+
           <div class="task-detail-badges">
-            <span class="status-badge" [ngClass]="getStatusClass(task.status)">
+            <span class="status-badge"
+                  [ngClass]="getStatusClass(task.status)">
               {{ task.status }}
             </span>
-            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+
+            <span class="priority-badge"
+                  [ngClass]="getPriorityClass(task.priority)">
               {{ task.priority }}
             </span>
           </div>
         </div>
 
-        <div class="task-detail-controls" *ngIf="!task.completed">
+        <!-- Controls -->
+        <div *ngIf="!task.completed" class="task-detail-controls">
           <div class="slider-row">
             <label>Completion:</label>
-            <input type="range" min="0" max="100" step="5"
+            <input type="range"
+                   min="0" max="100" step="5"
                    [value]="task.completionPercent"
                    (change)="updateTaskPercent(task, $event)">
-            <span class="percent-label">{{ task.completionPercent }}%</span>
+            <span>{{ task.completionPercent }}%</span>
           </div>
-          <button class="btn-complete" (click)="markTaskComplete(task)">
+
+          <button class="btn-complete"
+                  (click)="markTaskComplete(task)">
             ✓ Mark as Completed
           </button>
         </div>
 
-        <div class="task-completed-badge" *ngIf="task.completed">
-          <span>✓ Completed — 100%</span>
+        <div *ngIf="task.completed" class="task-completed-badge">
+          ✓ Completed — 100%
         </div>
       </div>
 
-      <!-- Mark All Complete Button -->
       <div class="mark-all-section" *ngIf="activeTab === 'inprogress'">
-        <button class="btn-mark-all" (click)="markChecklistComplete()">
+        <button class="btn-mark-all"
+                (click)="markChecklistComplete()">
           ✓ Mark Entire Checklist as Completed
         </button>
       </div>
@@ -120,8 +162,10 @@
   <!-- ================= OVERALL PROGRESS ================= -->
   <div class="card progress-card">
     <h3>Overall Progress</h3>
+
     <div class="circle-wrap">
-      <div class="circle" [style.background]="getProgressGradient()">
+      <div class="circle"
+           [style.background]="getProgressGradient()">
         <span>{{ dashboard.progress || 0 }}%</span>
         <small>Complete</small>
       </div>
@@ -133,24 +177,34 @@
   <div class="card">
     <h3>Claimed Tasks</h3>
 
-    <div *ngIf="dashboard.claimedTasks?.length === 0" class="empty-state">
+    <div *ngIf="dashboard.claimedTasks.length === 0" class="empty-state">
       No claimed tasks
     </div>
 
-    <div class="task-box" *ngFor="let task of dashboard.claimedTasks">
+    <div class="task-box"
+         *ngFor="let task of dashboard.claimedTasks">
+
       <div class="task-row">
+
         <div class="task-info">
           <span class="task-title">{{ task.title }}</span>
           <span class="task-checklist">{{ task.checklistName }}</span>
         </div>
+
         <div class="task-meta">
-          <span class="status-badge" [ngClass]="getStatusClass(task.status)">
+          <span class="status-badge"
+                [ngClass]="getStatusClass(task.status)">
             {{ task.status }}
           </span>
-          <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+
+          <span class="priority-badge"
+                [ngClass]="getPriorityClass(task.priority)">
             {{ task.priority }}
           </span>
-          <span class="percent-chip">{{ task.completionPercent }}%</span>
+
+          <span class="percent-chip">
+            {{ task.completionPercent }}%
+          </span>
         </div>
       </div>
     </div>
@@ -161,19 +215,32 @@
   <div class="card">
     <h3>Notifications</h3>
 
-    <div *ngIf="dashboard.notifications?.length === 0" class="empty-state">
-      No notifications
+    <div *ngIf="notifications.length === 0" class="empty-state">
+      <span>🔔</span>
+      <p>No notifications yet</p>
     </div>
 
-    <div class="notification" *ngFor="let note of dashboard.notifications">
-      <span class="notif-icon">🔔</span> {{ note }}
+    <div *ngIf="notifications.length > 0" class="notification-list">
+      <div class="notification-box unread"
+           *ngFor="let note of notifications"
+           (click)="markAsRead(note.id)">
+
+        <div class="notif-header">
+          <span class="notif-icon">🔔</span>
+          <span>{{ note.message }}</span>
+        </div>
+
+        <div class="notif-time">
+          {{ note.createdAt | date:'shortTime' }}
+        </div>
+      </div>
     </div>
   </div>
 
 </div>
 
 
-<!-- ================= LOADING STATE ================= -->
+<!-- ================= LOADING ================= -->
 <div *ngIf="!dashboard" class="loading">
   Loading dashboard...
 </div>
