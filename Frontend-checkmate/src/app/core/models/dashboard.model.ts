@@ -32,3 +32,28 @@ export interface AdminDashboardSummary {
   pendingTasks: number;
   completedChecklists: number;
 }
+
+// ==================== COLLABORATION ====================
+
+export interface TaskComment {
+  id: number;
+  taskId: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface TaskAttachment {
+  id: number;
+  taskId: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+export interface CollaborationCounts {
+  commentCount: number;
+  attachmentCount: number;
+}

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { Dashboard, ChecklistInfo, TaskInfo } from '../../core/models/dashboard.model';
+import { Dashboard, ChecklistInfo, TaskInfo, TaskComment, TaskAttachment } from '../../core/models/dashboard.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { interval, Subscription } from 'rxjs';
 
@@ -23,6 +23,22 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   // Selected checklist
   selectedChecklist: ChecklistInfo | null = null;
   checklistTasks: TaskInfo[] = [];
+
+  // ==================== COLLABORATION STATE ====================
+  expandedTaskId: number | null = null;
+  activeCollabTab: string = 'comments'; // 'comments' | 'attachments'
+
+  // Comments
+  taskComments: TaskComment[] = [];
+  newCommentText: string = '';
+  loadingComments: boolean = false;
+
+  // Attachments
+  taskAttachments: TaskAttachment[] = [];
+  loadingAttachments: boolean = false;
+
+  // Counts cache: taskId -> {commentCount, attachmentCount}
+  collabCounts: Map<number, { commentCount: number; attachmentCount: number }> = new Map();
 
   constructor(
     private dashboardService: DashboardService,
@@ -49,6 +65,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
         next: (data: Dashboard) => {
           console.log('Dashboard:', data);
           this.dashboard = data;
+          // Load collaboration counts for all tasks
+          this.loadAllCollabCounts();
         },
         error: (err) => console.error('Dashboard Error:', err)
       });
@@ -79,6 +97,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
     this.selectedChecklist = null;
     this.checklistTasks = [];
+    this.closeCollabPanel();
   }
 
   get displayedChecklists(): ChecklistInfo[] {
@@ -91,6 +110,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   selectChecklist(checklist: ChecklistInfo): void {
     this.selectedChecklist = checklist;
+    this.closeCollabPanel();
 
     this.checklistTasks = (this.dashboard?.claimedTasks || [])
       .filter(t => t.checklistName === checklist.name);
@@ -99,6 +119,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   closeDetail(): void {
     this.selectedChecklist = null;
     this.checklistTasks = [];
+    this.closeCollabPanel();
   }
 
   // ================= TASK ACTIONS =================
@@ -141,6 +162,192 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => console.error('Error marking checklist complete:', err)
       });
+  }
+
+  // ================= COLLABORATION =================
+
+  loadAllCollabCounts(): void {
+    const tasks = this.dashboard?.claimedTasks || [];
+    for (const task of tasks) {
+      this.dashboardService.getCollaborationCounts(task.id).subscribe({
+        next: (counts) => {
+          this.collabCounts.set(task.id, counts);
+        },
+        error: () => {
+          this.collabCounts.set(task.id, { commentCount: 0, attachmentCount: 0 });
+        }
+      });
+    }
+  }
+
+  getCommentCount(taskId: number): number {
+    return this.collabCounts.get(taskId)?.commentCount || 0;
+  }
+
+  getAttachmentCount(taskId: number): number {
+    return this.collabCounts.get(taskId)?.attachmentCount || 0;
+  }
+
+  toggleCollabPanel(task: TaskInfo): void {
+    if (this.expandedTaskId === task.id) {
+      this.closeCollabPanel();
+    } else {
+      this.expandedTaskId = task.id;
+      this.activeCollabTab = 'comments';
+      this.loadComments(task.id);
+      this.loadAttachments(task.id);
+    }
+  }
+
+  closeCollabPanel(): void {
+    this.expandedTaskId = null;
+    this.taskComments = [];
+    this.taskAttachments = [];
+    this.newCommentText = '';
+  }
+
+  setCollabTab(tab: string): void {
+    this.activeCollabTab = tab;
+  }
+
+  // --- Comments ---
+  loadComments(taskId: number): void {
+    this.loadingComments = true;
+    this.dashboardService.getComments(taskId).subscribe({
+      next: (comments) => {
+        this.taskComments = comments;
+        this.loadingComments = false;
+      },
+      error: (err) => {
+        console.error('Error loading comments:', err);
+        this.taskComments = [];
+        this.loadingComments = false;
+      }
+    });
+  }
+
+  addComment(): void {
+    if (!this.expandedTaskId || !this.newCommentText.trim()) return;
+
+    this.dashboardService.addComment(this.expandedTaskId, this.newCommentText.trim(), this.userName)
+      .subscribe({
+        next: (comment) => {
+          this.taskComments.unshift(comment);
+          this.newCommentText = '';
+          // Update count
+          const counts = this.collabCounts.get(this.expandedTaskId!) || { commentCount: 0, attachmentCount: 0 };
+          counts.commentCount++;
+          this.collabCounts.set(this.expandedTaskId!, counts);
+        },
+        error: (err) => console.error('Error adding comment:', err)
+      });
+  }
+
+  deleteComment(commentId: number): void {
+    if (!this.expandedTaskId) return;
+
+    this.dashboardService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.taskComments = this.taskComments.filter(c => c.id !== commentId);
+        const counts = this.collabCounts.get(this.expandedTaskId!) || { commentCount: 0, attachmentCount: 0 };
+        counts.commentCount = Math.max(0, counts.commentCount - 1);
+        this.collabCounts.set(this.expandedTaskId!, counts);
+      },
+      error: (err) => console.error('Error deleting comment:', err)
+    });
+  }
+
+  // --- Attachments ---
+  loadAttachments(taskId: number): void {
+    this.loadingAttachments = true;
+    this.dashboardService.getAttachments(taskId).subscribe({
+      next: (attachments) => {
+        this.taskAttachments = attachments;
+        this.loadingAttachments = false;
+      },
+      error: (err) => {
+        console.error('Error loading attachments:', err);
+        this.taskAttachments = [];
+        this.loadingAttachments = false;
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length || !this.expandedTaskId) return;
+
+    const file = input.files[0];
+
+    // 10MB limit
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit');
+      return;
+    }
+
+    this.dashboardService.uploadAttachment(this.expandedTaskId, file, this.userName)
+      .subscribe({
+        next: (attachment) => {
+          this.taskAttachments.push(attachment);
+          const counts = this.collabCounts.get(this.expandedTaskId!) || { commentCount: 0, attachmentCount: 0 };
+          counts.attachmentCount++;
+          this.collabCounts.set(this.expandedTaskId!, counts);
+          // Reset file input
+          input.value = '';
+        },
+        error: (err) => {
+          console.error('Error uploading file:', err);
+          alert('Error uploading file. Please try again.');
+        }
+      });
+  }
+
+  downloadFile(attachment: TaskAttachment): void {
+    this.dashboardService.downloadAttachment(attachment.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = attachment.fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Error downloading file:', err)
+    });
+  }
+
+  deleteAttachment(attachmentId: number): void {
+    if (!this.expandedTaskId) return;
+
+    this.dashboardService.deleteAttachment(attachmentId).subscribe({
+      next: () => {
+        this.taskAttachments = this.taskAttachments.filter(a => a.id !== attachmentId);
+        const counts = this.collabCounts.get(this.expandedTaskId!) || { commentCount: 0, attachmentCount: 0 };
+        counts.attachmentCount = Math.max(0, counts.attachmentCount - 1);
+        this.collabCounts.set(this.expandedTaskId!, counts);
+      },
+      error: (err) => console.error('Error deleting attachment:', err)
+    });
+  }
+
+  isImageFile(fileType: string): boolean {
+    return fileType ? fileType.startsWith('image/') : false;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getFileIcon(fileType: string): string {
+    if (!fileType) return '📄';
+    if (fileType.startsWith('image/')) return '🖼️';
+    if (fileType.includes('pdf')) return '📕';
+    if (fileType.includes('word') || fileType.includes('document')) return '📘';
+    if (fileType.includes('sheet') || fileType.includes('excel')) return '📊';
+    if (fileType.includes('zip') || fileType.includes('rar')) return '📦';
+    return '📄';
   }
 
   // ================= PROGRESS CALC =================

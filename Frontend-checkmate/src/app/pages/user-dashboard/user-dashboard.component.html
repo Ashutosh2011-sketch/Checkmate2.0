@@ -124,10 +124,18 @@
                   [ngClass]="getPriorityClass(task.priority)">
               {{ task.priority }}
             </span>
+
+            <!-- Collaboration Toggle Button -->
+            <button class="collab-toggle-btn"
+                    [class.active]="expandedTaskId === task.id"
+                    (click)="toggleCollabPanel(task); $event.stopPropagation()">
+              💬 {{ getCommentCount(task.id) }}
+              📎 {{ getAttachmentCount(task.id) }}
+            </button>
           </div>
         </div>
 
-        <!-- Controls -->
+        <!-- Controls (only for non-completed tasks) -->
         <div *ngIf="!task.completed" class="task-detail-controls">
           <div class="slider-row">
             <label>Completion:</label>
@@ -147,6 +155,109 @@
         <div *ngIf="task.completed" class="task-completed-badge">
           ✓ Completed — 100%
         </div>
+
+        <!-- ==================== COLLABORATION PANEL ==================== -->
+        <div *ngIf="expandedTaskId === task.id" class="collab-panel" (click)="$event.stopPropagation()">
+
+          <div class="collab-tabs">
+            <button class="collab-tab"
+                    [class.active]="activeCollabTab === 'comments'"
+                    (click)="setCollabTab('comments')">
+              💬 Comments ({{ taskComments.length }})
+            </button>
+            <button class="collab-tab"
+                    [class.active]="activeCollabTab === 'attachments'"
+                    (click)="setCollabTab('attachments')">
+              📎 Attachments ({{ taskAttachments.length }})
+            </button>
+          </div>
+
+          <!-- ===== COMMENTS TAB ===== -->
+          <div *ngIf="activeCollabTab === 'comments'" class="collab-content">
+
+            <!-- Add Comment -->
+            <div class="comment-input-row">
+              <div class="comment-avatar">{{ userName.charAt(0) }}</div>
+              <input type="text"
+                     class="comment-input"
+                     placeholder="Write a comment or feedback..."
+                     [(ngModel)]="newCommentText"
+                     (keyup.enter)="addComment()">
+              <button class="comment-send-btn"
+                      [disabled]="!newCommentText.trim()"
+                      (click)="addComment()">
+                Send
+              </button>
+            </div>
+
+            <!-- Comments List -->
+            <div *ngIf="loadingComments" class="collab-loading">Loading comments...</div>
+
+            <div *ngIf="!loadingComments && taskComments.length === 0" class="collab-empty">
+              No comments yet. Be the first to leave feedback!
+            </div>
+
+            <div class="comment-list">
+              <div class="comment-item" *ngFor="let comment of taskComments">
+                <div class="comment-header">
+                  <div class="comment-author-avatar">{{ comment.authorName.charAt(0) }}</div>
+                  <div class="comment-meta">
+                    <strong class="comment-author">{{ comment.authorName }}</strong>
+                    <span class="comment-time">{{ comment.createdAt | date:'short' }}</span>
+                  </div>
+                  <button class="comment-delete"
+                          title="Delete comment"
+                          (click)="deleteComment(comment.id)">✕</button>
+                </div>
+                <div class="comment-body">{{ comment.content }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== ATTACHMENTS TAB ===== -->
+          <div *ngIf="activeCollabTab === 'attachments'" class="collab-content">
+
+            <!-- Upload Button -->
+            <div class="attachment-upload-row">
+              <label class="upload-btn">
+                📁 Upload File
+                <input type="file"
+                       (change)="onFileSelected($event)"
+                       style="display: none">
+              </label>
+              <span class="upload-hint">Max 10MB · Images, PDFs, Docs, etc.</span>
+            </div>
+
+            <!-- Attachments List -->
+            <div *ngIf="loadingAttachments" class="collab-loading">Loading attachments...</div>
+
+            <div *ngIf="!loadingAttachments && taskAttachments.length === 0" class="collab-empty">
+              No files attached yet. Upload documents or images for context.
+            </div>
+
+            <div class="attachment-list">
+              <div class="attachment-item" *ngFor="let att of taskAttachments">
+                <div class="attachment-icon">{{ getFileIcon(att.fileType) }}</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">{{ att.fileName }}</div>
+                  <div class="attachment-meta">
+                    {{ formatFileSize(att.fileSize) }} · {{ att.uploadedBy }} · {{ att.uploadedAt | date:'short' }}
+                  </div>
+                </div>
+                <div class="attachment-actions">
+                  <button class="att-download-btn"
+                          (click)="downloadFile(att)"
+                          title="Download">⬇</button>
+                  <button class="att-delete-btn"
+                          (click)="deleteAttachment(att.id)"
+                          title="Delete">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END COLLABORATION PANEL -->
+
       </div>
 
       <div class="mark-all-section" *ngIf="activeTab === 'inprogress'">
@@ -204,6 +315,12 @@
 
           <span class="percent-chip">
             {{ task.completionPercent }}%
+          </span>
+
+          <!-- Collab badge on claimed tasks list -->
+          <span class="collab-badge-small"
+                *ngIf="getCommentCount(task.id) > 0 || getAttachmentCount(task.id) > 0">
+            💬{{ getCommentCount(task.id) }} 📎{{ getAttachmentCount(task.id) }}
           </span>
         </div>
       </div>
