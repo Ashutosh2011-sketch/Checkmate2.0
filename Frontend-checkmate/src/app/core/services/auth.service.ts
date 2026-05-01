@@ -21,24 +21,23 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register`, userData);
   }
 
-  // Save token, role, and permissions
+  
   saveTokenAndRole(token: string, role: string) {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
   }
 
-  // Save permissions from login response
+
   savePermissions(permissions: string[]) {
     localStorage.setItem('permissions', JSON.stringify(permissions));
   }
 
-  // Get stored permissions
   getPermissions(): string[] {
     const perms = localStorage.getItem('permissions');
     return perms ? JSON.parse(perms) : [];
   }
 
-  // Check if user has a specific permission
+  
   hasPermission(permissionName: string): boolean {
     if (this.isAdmin()) return true; // Admin has all permissions
     return this.getPermissions().includes(permissionName);

@@ -36,7 +36,6 @@ public class UserProfileController {
 
             userProfileService.updateUserDetails(currentUserEmail, request);
 
-            // 2. 🔔 YAHAN TRIGGER KARO!
             AppUser user = userRepository.findByEmail(currentUserEmail).get();
             notificationService.createNotification(
                     user,

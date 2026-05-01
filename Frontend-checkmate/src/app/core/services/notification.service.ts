@@ -17,12 +17,12 @@ export class NotificationService {
     });
   }
 
-  // Database se notifications lane ke liye
+  
   getNotifications(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
-  // notification.service.ts mein ye method add karo:
+
 
 markAsRead(id: number): Observable<void> {
   const url = `http://localhost:8080/api/notifications/${id}/read`;

@@ -17,7 +17,7 @@ public class Notification {
     private String message;
 
     @Column(nullable = false)
-    private String type; // SUCCESS, INFO, WARNING, ALERT
+    private String type;
 
     @Column(nullable = false)
     private boolean isRead = false;
@@ -25,13 +25,10 @@ public class Notification {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Kis user ke liye ye notification hai
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
-
-    // Getters and Setters (Bhai, tum Generate kar lena ya manually likh lena)
 
     public Long getId() {
         return id;
