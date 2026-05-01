@@ -302,3 +302,60 @@
 .dashboard-wrapper-box {
   margin-bottom: 80px;
 }
+
+.notification-box {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background 0.3s;
+}
+
+.notification-box:hover {
+  background-color: #f9f9f9;
+}
+
+.notif-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.notif-time {
+  font-size: 0.75rem;
+  color: #888;
+  align-self: flex-end;
+}
+
+.success .notif-icon {
+  color: #28a745;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+.notification-box {
+  cursor: pointer;
+  border-left: 4px solid #2a5298; /* Unread ke liye dark blue border */
+}
+
+.notification-box.is-read {
+  opacity: 0.6; /* Read hone par thoda dhundla */
+  border-left: 4px solid #ccc; /* Gray border */
+  background-color: #fcfcfc;
+}
+
+.new-tag {
+  background: #ff4757;
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 5px;
+}

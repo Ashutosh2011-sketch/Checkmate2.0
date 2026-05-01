@@ -25,6 +25,7 @@
         <span class="badge" [ngClass]="checklist.progress >= 100 ? 'badge-completed' : 'badge-active'">
           {{ checklist.progress >= 100 ? 'Completed' : 'In Progress' }}
         </span>
+        
 
         <div class="progress-bar">
           <div class="progress-fill"
@@ -82,7 +83,7 @@
 
 
   <!-- ================= NOTIFICATIONS ================= -->
-  <div class="card">
+  <!-- <div class="card">
     <h3>Notifications</h3>
 
     <div *ngIf="dashboard.notifications?.length === 0" class="empty-state">
@@ -93,7 +94,65 @@
          *ngFor="let note of dashboard.notifications">
       <span class="notif-icon">🔔</span> {{ note }}
     </div>
+  </div> -->
+
+
+  <div class="card">
+  <h3>Notifications</h3>
+
+  <div *ngIf="notifications.length === 0" class="empty-state">
+    <div class="no-notif-content">
+      <span class="bell-muted">🔔</span>
+      <p>No notifications assigned to you yet.</p>
+    </div>
   </div>
+
+  <!-- <div class="notification-list" *ngIf="notifications.length > 0">
+    <div class="notification-box" *ngFor="let note of notifications" [ngClass]="note.type?.toLowerCase()">
+      <div class="notif-header">
+        <span class="notif-icon">
+          {{ note.type === 'SUCCESS' ? '✅' : '🔔' }}
+        </span>
+        <span class="notif-message">{{ note.message }}</span>
+      </div>
+      <div class="notif-time">
+        {{ note.createdAt | date:'shortTime' }}
+      </div>
+    </div>
+  </div> -->
+  <!-- <div class="notification-list" *ngIf="notifications.length > 0">
+  <div class="notification-box" 
+       *ngFor="let note of notifications" 
+       [ngClass]="{'is-read': note.isRead, 'success': note.type === 'SUCCESS'}"
+       (click)="markAsRead(note.id)"> <div class="notif-header">
+      <span class="notif-icon">
+        {{ note.isRead ? '📖' : (note.type === 'SUCCESS' ? '✅' : '🔔') }}
+      </span>
+      <span class="notif-message">{{ note.message }}</span>
+    </div>
+    
+    <div class="notif-time">
+      {{ note.createdAt | date:'shortTime' }}
+      <span *ngIf="!note.isRead" class="new-tag">New</span> </div>
+  </div>
+</div> -->
+<div class="notification-list" *ngIf="notifications.length > 0">
+  <div class="notification-box unread" 
+       *ngFor="let note of notifications" 
+       (click)="markAsRead(note.id)" 
+       title="Click to mark as read and dismiss">
+       
+    <div class="notif-header">
+      <span class="notif-icon">🔔</span>
+      <span class="notif-message">{{ note.message }}</span>
+    </div>
+    
+    <div class="notif-time">
+      {{ note.createdAt | date:'shortTime' }}
+    </div>
+  </div>
+</div>
+</div>
 
 </div>
 

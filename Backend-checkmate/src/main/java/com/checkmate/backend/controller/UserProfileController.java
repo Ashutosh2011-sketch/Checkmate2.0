@@ -3,6 +3,7 @@ package com.checkmate.backend.controller;
 import com.checkmate.backend.dto.ProfileUpdateRequest;
 import com.checkmate.backend.entity.AppUser;
 import com.checkmate.backend.repository.AppUserRepository;
+import com.checkmate.backend.service.NotificationService;
 import com.checkmate.backend.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,8 @@ public class UserProfileController {
     private UserProfileService userProfileService;
     @Autowired
     private AppUserRepository userRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * @param request   - DTO
@@ -32,6 +35,13 @@ public class UserProfileController {
             String currentUserEmail = principal.getName();
 
             userProfileService.updateUserDetails(currentUserEmail, request);
+
+            // 2. 🔔 YAHAN TRIGGER KARO!
+            AppUser user = userRepository.findByEmail(currentUserEmail).get();
+            notificationService.createNotification(
+                    user,
+                    "Profile updated successfully",
+                    "SUCCESS");
 
             return ResponseEntity.ok("Profile updated successfully!");
 
