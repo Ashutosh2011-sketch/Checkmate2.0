@@ -11,8 +11,11 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     
-    // Skip auth for login/register endpoints
-    if (req.url.includes('/api/auth/')) {
+    // Skip JWT only for unauthenticated auth endpoints (logout needs the token)
+    const url = req.url;
+    const isPublicAuth =
+      url.includes('/api/auth/login') || url.includes('/api/auth/register');
+    if (isPublicAuth) {
       return next.handle(req);
     }
 
@@ -31,7 +34,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
         // Only redirect to login if token is missing or truly expired
         // Do NOT clear localStorage on every 401 — only on actual auth failures
-        if (error.status === 401 && !req.url.includes('/api/auth/')) {
+        if (error.status === 401 && !isPublicAuth) {
           // Only redirect if we don't have a token (means session expired)
           if (!token) {
             this.router.navigate(['/login']);

@@ -1,11 +1,17 @@
+
 package com.checkmate.backend.controller;
 
 import com.checkmate.backend.dto.DashboardDto;
 import com.checkmate.backend.dto.TaskInfoDto;
+import com.checkmate.backend.entity.AppUser;
+import com.checkmate.backend.repository.AppUserRepository;
 import com.checkmate.backend.service.DashboardService;
+import com.checkmate.backend.util.ClientIpResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -15,9 +21,11 @@ import java.util.Map;
 public class DashboardController {
 
     private final DashboardService service;
+    private final AppUserRepository userRepository;
 
-    public DashboardController(DashboardService service) {
+    public DashboardController(DashboardService service, AppUserRepository userRepository) {
         this.service = service;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/{userName}")
@@ -52,7 +60,7 @@ public class DashboardController {
 
     @PutMapping("/tasks/{taskId}/status")
     public ResponseEntity<?> updateTaskStatus(@PathVariable Long taskId,
-                                               @RequestBody Map<String, Object> body) {
+            @RequestBody Map<String, Object> body, Principal principal, HttpServletRequest httpRequest) {
         System.out.println("=== UPDATE TASK STATUS: taskId=" + taskId + " body=" + body + " ===");
         try {
             int percent = 0;
@@ -60,41 +68,48 @@ public class DashboardController {
             if (val instanceof Number) {
                 percent = ((Number) val).intValue();
             }
-            TaskInfoDto result = service.updateTaskCompletion(taskId, percent);
+            String completedBy = principal != null ? principal.getName() : null;
+            TaskInfoDto result = service.updateTaskCompletion(taskId, percent, completedBy,
+                    ClientIpResolver.resolve(httpRequest));
             System.out.println("=== TASK STATUS UPDATED OK ===");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            System.out.println("=== TASK STATUS ERROR: " + e.getClass().getName() + " : " + e.getMessage() + " ===");
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
         }
     }
 
     @PutMapping("/tasks/{taskId}/complete")
-    public ResponseEntity<?> markTaskComplete(@PathVariable Long taskId) {
+    public ResponseEntity<?> markTaskComplete(@PathVariable Long taskId, Principal principal) {
         System.out.println("=== MARK TASK COMPLETE: taskId=" + taskId + " ===");
         try {
-            TaskInfoDto result = service.markTaskComplete(taskId);
+            TaskInfoDto result = service.markTaskComplete(taskId, principal.getName());
             System.out.println("=== TASK MARKED COMPLETE OK ===");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            System.out.println("=== MARK TASK ERROR: " + e.getClass().getName() + " : " + e.getMessage() + " ===");
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
         }
     }
 
     @PutMapping("/checklists/{checklistId}/complete")
-    public ResponseEntity<?> markChecklistComplete(@PathVariable Long checklistId) {
+    public ResponseEntity<?> markChecklistComplete(@PathVariable Long checklistId, Principal principal) {
         System.out.println("=== MARK CHECKLIST COMPLETE: checklistId=" + checklistId + " ===");
         try {
-            service.markChecklistComplete(checklistId);
+            String email = principal.getName();
+            String userName = getUserName(email);
+            service.markChecklistComplete(checklistId, userName, email);
             System.out.println("=== CHECKLIST MARKED COMPLETE OK ===");
             return ResponseEntity.ok(Map.of("message", "Checklist marked as completed"));
         } catch (Exception e) {
-            System.out.println("=== MARK CHECKLIST ERROR: " + e.getClass().getName() + " : " + e.getMessage() + " ===");
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
         }
+    }
+
+    private String getUserName(String email) {
+        return userRepository.findByEmail(email)
+                .map(AppUser::getName)
+                .orElse("A user");
     }
 }

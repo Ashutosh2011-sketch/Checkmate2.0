@@ -560,3 +560,435 @@
   font-size: 16px;
   color: #6c757d;
 }
+
+/* Avatar Group */
+.avatar-group img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-left: -8px;
+  border: 2px solid white;
+}
+
+/* space from bottom */
+.dashboard-wrapper-box {
+  margin-bottom: 80px;
+}
+
+.notification-box {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background 0.3s;
+}
+
+.notification-box:hover {
+  background-color: #f9f9f9;
+}
+
+.notif-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.notif-time {
+  font-size: 0.75rem;
+  color: #888;
+  align-self: flex-end;
+}
+
+.success .notif-icon {
+  color: #28a745;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+.notification-box {
+  cursor: pointer;
+  border-left: 4px solid #2a5298; /* Unread ke liye dark blue border */
+}
+
+.notification-box.is-read {
+  opacity: 0.6; /* Read hone par thoda dhundla */
+  border-left: 4px solid #ccc; /* Gray border */
+  background-color: #fcfcfc;
+}
+
+.new-tag {
+  background: #ff4757;
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+/* ======================================================
+   COLLABORATION PANEL STYLES
+   ====================================================== */
+
+/* Toggle Button on each task */
+.collab-toggle-btn {
+  padding: 4px 10px;
+  border: 1px solid #dde1e7;
+  border-radius: 8px;
+  background: #f7f9fc;
+  cursor: pointer;
+  font-size: 11px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.collab-toggle-btn:hover {
+  background: #e8f0fe;
+  border-color: #2a5298;
+  color: #2a5298;
+}
+
+.collab-toggle-btn.active {
+  background: #2a5298;
+  color: white;
+  border-color: #2a5298;
+}
+
+/* Collab badge on claimed tasks */
+.collab-badge-small {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e8f0fe;
+  color: #2a5298;
+  white-space: nowrap;
+}
+
+/* ===== PANEL ===== */
+.collab-panel {
+  margin-top: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e6ea;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TABS ===== */
+.collab-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f0f2f5;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 14px;
+}
+
+.collab-tab {
+  flex: 1;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.collab-tab.active {
+  background: #2a5298;
+  color: white;
+  box-shadow: 0 2px 6px rgba(42, 82, 152, 0.25);
+}
+
+.collab-tab:hover:not(.active) {
+  background: #e2e6ea;
+}
+
+/* ===== CONTENT ===== */
+.collab-content {
+  min-height: 80px;
+}
+
+.collab-loading {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.collab-empty {
+  text-align: center;
+  padding: 20px;
+  color: #adb5bd;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ===== COMMENT INPUT ===== */
+.comment-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-avatar, .comment-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.comment-author-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.comment-input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid #dde1e7;
+  border-radius: 10px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.comment-input:focus {
+  border-color: #2a5298;
+  box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.08);
+}
+
+.comment-send-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2a5298;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.comment-send-btn:hover:not(:disabled) {
+  background: #1e3c72;
+  box-shadow: 0 2px 8px rgba(42, 82, 152, 0.3);
+}
+
+.comment-send-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* ===== COMMENT LIST ===== */
+.comment-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-meta {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.comment-author {
+  font-size: 13px;
+  color: #212529;
+}
+
+.comment-time {
+  font-size: 11px;
+  color: #adb5bd;
+}
+
+.comment-delete {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.comment-delete:hover {
+  background: #fee2e2;
+  color: #e74c3c;
+}
+
+.comment-body {
+  font-size: 13px;
+  color: #495057;
+  line-height: 1.5;
+  padding-left: 36px;
+}
+
+/* ===== ATTACHMENTS ===== */
+.attachment-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.upload-btn {
+  padding: 8px 16px;
+  border: 1.5px dashed #2a5298;
+  border-radius: 10px;
+  background: #f0f4fa;
+  color: #2a5298;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  background: #e0eaf7;
+  border-color: #1e3c72;
+}
+
+.upload-hint {
+  font-size: 11px;
+  color: #adb5bd;
+}
+
+.attachment-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  background: #f7f9fc;
+  transition: all 0.2s;
+}
+
+.attachment-item:hover {
+  background: #eef3fb;
+}
+
+.attachment-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.attachment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachment-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-meta {
+  font-size: 11px;
+  color: #adb5bd;
+  margin-top: 2px;
+}
+
+.attachment-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.att-download-btn, .att-delete-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.att-download-btn {
+  background: #e8f0fe;
+  color: #2a5298;
+}
+
+.att-download-btn:hover {
+  background: #2a5298;
+  color: white;
+}
+
+.att-delete-btn {
+  background: transparent;
+  color: #ccc;
+}
+
+.att-delete-btn:hover {
+  background: #fee2e2;
+  color: #e74c3c;
+}

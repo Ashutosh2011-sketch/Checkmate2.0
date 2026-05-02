@@ -21,7 +21,7 @@ export class ChecklistService extends ApiService {
     return this.get<any[]>('/tasks');
   }
 
-  // ✅ ADD THIS METHOD (IMPORTANT)
+  
   getTasksByChecklist(id: number): Observable<any[]> {
     return this.get<any[]>(`/tasks/checklist/${id}`);
   }

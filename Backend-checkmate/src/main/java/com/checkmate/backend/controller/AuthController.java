@@ -11,6 +11,10 @@ import com.checkmate.backend.entity.RolePermission;
 import com.checkmate.backend.repository.RoleRepository;
 
 import com.checkmate.backend.security.JwtUtil;
+import com.checkmate.backend.service.UserAuthSessionService;
+import com.checkmate.backend.util.ClientIpResolver;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,6 +50,9 @@ public class AuthController {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private UserAuthSessionService userAuthSessionService;
+
     private String generateRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
         SecureRandom random = new SecureRandom();
@@ -62,7 +70,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Name is required!"));
         }
 
-        // 1. Save Original Role to Designation
         String originalRoleFromFrontend = appUser.getRole();
         if (appUser.getRole() != null && !appUser.getRole().isEmpty()) {
             appUser.setDesignation(appUser.getRole());
@@ -104,7 +111,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletRequest httpRequest) {
 
         String email = loginData.get("email");
         String password = loginData.get("password");
@@ -136,11 +143,9 @@ public class AuthController {
         response.put("message", "Login Successful!");
         response.put("name", user.getName());
 
-        // Return the user's designation (which is the role name from roles table)
         String designation = user.getDesignation();
         response.put("designation", designation != null ? designation : "");
 
-        // Look up actual permissions for this user's designation (role name)
         List<String> permissions = new ArrayList<>();
         if (designation != null && !designation.isEmpty()) {
             Optional<Role> roleOpt = roleRepository.findByName(designation);
@@ -153,16 +158,25 @@ public class AuthController {
             }
         }
 
-        // ADMIN gets all permissions automatically
         if ("ADMIN".equals(user.getRole())) {
             permissions = List.of(
-                "Create Checklists", "Publish Workflows", "Manage Users",
-                "Access Audit Logs", "View All Reports", "Manage Workflows"
-            );
+                    "Create Checklists", "Publish Workflows", "Manage Users",
+                    "Access Audit Logs", "View All Reports", "Manage Workflows");
         }
 
         response.put("permissions", permissions);
 
+        userAuthSessionService.recordLogin(email, ClientIpResolver.resolve(httpRequest));
+
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        userAuthSessionService.recordLogout(principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Logout recorded"));
     }
 }

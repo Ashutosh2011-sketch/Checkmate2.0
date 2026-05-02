@@ -16,10 +16,7 @@ export class ChecklistBuilderComponent implements OnInit {
 
   departments = ['HR', 'IT', 'Engineering', 'Finance'];
 
-  //  OLD
-  // availableUsers = ['John (IT)', 'Sarah (HR)', 'Admin', 'Vikram (DevOps)'];
-
-  // NEW (dynamic)
+ 
   availableUsers: string[] = [];
 
   availableTasksForDependency: string[] = [];
@@ -28,7 +25,7 @@ export class ChecklistBuilderComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private checklistService: ChecklistService,
-    private userService: UserService // ✅ NEW
+    private userService: UserService 
   ) {}
 
   ngOnInit(): void {
@@ -41,15 +38,14 @@ export class ChecklistBuilderComponent implements OnInit {
       sections: this.fb.array([])
     });
 
-    this.loadUsers(); // ✅ NEW
+    this.loadUsers(); 
     this.addSection();
   }
 
-  // ✅ LOAD USERS FROM BACKEND
   loadUsers() {
     this.userService.getAll().subscribe((res: any[]) => {
 
-      // keep SAME format → no data loss
+    
       this.availableUsers = res.map(user => `${user.name} (${user.department})`);
 
       console.log("Checklist Users:", this.availableUsers);

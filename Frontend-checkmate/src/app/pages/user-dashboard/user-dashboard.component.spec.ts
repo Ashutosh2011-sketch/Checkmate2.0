@@ -43,7 +43,7 @@ describe('UserDashboardComponent', () => {
 
   it('should load dashboard data correctly', () => {
     expect(component.dashboard).toBeTruthy();
-    expect(component.dashboard.progress).toBe(65);
+    expect(component.dashboard!.progress).toBe(65);
   });
 
 });
