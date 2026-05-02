@@ -197,27 +197,6 @@ public class DashboardService {
         return result;
     }
 
-    // @Transactional
-    // public void markChecklistComplete(Long checklistId) {
-    // System.out.println("SERVICE: markChecklistComplete checklistId=" +
-    // checklistId);
-    // List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
-    // System.out.println("SERVICE: Found " + tasks.size() + " tasks for checklist "
-    // + checklistId);
-    // for (Task task : tasks) {
-    // task.setCompletionPercent(100);
-    // task.setCompleted(true);
-    // task.setStatus("Completed");
-    // }
-    // taskRepository.saveAll(tasks);
-
-    // checklistRepository.findById(checklistId).ifPresent(checklist -> {
-    // checklist.setCompleted(true);
-    // checklistRepository.save(checklist);
-    // });
-    // System.out.println("SERVICE: Checklist marked complete OK");
-    // }
-
     @Transactional
     public void markChecklistComplete(Long checklistId, String userName) {
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
