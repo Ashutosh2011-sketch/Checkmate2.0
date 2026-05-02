@@ -1,110 +1,19 @@
 <div class="sidebar">
-
-  <!-- ================= USER SIDEBAR ================= -->
-  <!-- Show for non-admin users: only show items they have permission for -->
-  <ul class="menu" *ngIf="!isAdmin()">
-
-    <li routerLink="/dashboard" routerLinkActive="active">
-      <span class="material-icons icon">dashboard</span>
-      <span class="menu-text">My Dashboard</span>
+  <ul class="menu">
+    <li
+      *ngFor="let item of visibleMenuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+    >
+      <span class="material-icons icon">{{ item.icon }}</span>
+      <span class="menu-text">{{ item.label }}</span>
     </li>
-
-    <li routerLink="/checklists" routerLinkActive="active">
-      <span class="material-icons icon">checklist</span>
-      <span class="menu-text">Checklists</span>
-    </li>
-
-    <li routerLink="/checklist-tracker" routerLinkActive="active">
-      <span class="material-icons icon">assignment</span>
-      <span class="menu-text">Checklist Tracker</span>
-    </li>
-
-    <!-- Show Checklist Builder only if user has "Create Checklists" permission -->
-    <li routerLink="/checklist-builder" routerLinkActive="active"
-        *ngIf="hasPermission('Create Checklists')">
-      <span class="material-icons icon">build</span>
-      <span class="menu-text">Checklist Builder</span>
-    </li>
-
-    <!-- Show User Management only if user has "Manage Users" permission -->
-    <li routerLink="/user-management" routerLinkActive="active"
-        *ngIf="hasPermission('Manage Users')">
-      <span class="material-icons icon">group</span>
-      <span class="menu-text">User Management</span>
-    </li>
-
-    <!-- Show Reports only if user has "View All Reports" permission -->
-    <li routerLink="/reports" routerLinkActive="active"
-        *ngIf="hasPermission('View All Reports')">
-      <span class="material-icons icon">bar_chart</span>
-      <span class="menu-text">Reports</span>
-    </li>
-
-    <li routerLink="/profile" routerLinkActive="active">
-      <span class="material-icons icon">person</span>
-      <span class="menu-text">Profile</span>
-    </li>
-
   </ul>
 
-
-  <!-- ================= ADMIN SIDEBAR ================= -->
-  <ul class="menu" *ngIf="isAdmin()">
-
-    <li routerLink="/admin-dashboard" routerLinkActive="active">
-      <span class="material-icons icon">home</span>
-      <span class="menu-text">Dashboard</span>
-    </li>
-
-    <li routerLink="/admin/checklists" routerLinkActive="active">
-      <span class="material-icons icon">assignment</span>
-      <span class="menu-text">All Checklists</span>
-    </li>
-
-    <li routerLink="/admin/checklist-builder" routerLinkActive="active">
-      <span class="material-icons icon">checklist</span>
-      <span class="menu-text">Checklist Builder</span>
-    </li>
-
-    <li routerLink="/admin/users" routerLinkActive="active">
-      <span class="material-icons icon">group</span>
-      <span class="menu-text">User Management</span>
-    </li>
-
-    <li routerLink="/admin/roles-permissions" routerLinkActive="active">
-      <span class="material-icons icon">verified_user</span>
-      <span class="menu-text">Roles &amp; Permissions</span>
-    </li>
-
-    <li routerLink="/admin/reports" routerLinkActive="active">
-      <span class="material-icons icon">analytics</span>
-      <span class="menu-text">Reports</span>
-    </li>
-
-    <li routerLink="/admin/security" routerLinkActive="active">
-      <span class="material-icons icon">security</span>
-      <span class="menu-text">Security &amp; Compliance</span>
-    </li>
-
-    <li routerLink="/admin/notifications" routerLinkActive="active">
-      <span class="material-icons icon">notifications</span>
-      <span class="menu-text">Notifications</span>
-    </li>
-
-    <li routerLink="/admin/profile" routerLinkActive="active">
-      <span class="material-icons icon">person</span>
-      <span class="menu-text">Profile</span>
-    </li>
-
-  </ul>
-
-
-  <!-- ================= LOGOUT ================= -->
   <ul class="menu logout-section">
     <li (click)="onLogout()">
       <span class="material-icons icon">logout</span>
       <span class="menu-text">Logout</span>
     </li>
   </ul>
-
 </div>

@@ -72,7 +72,6 @@ export class ChecklistDetailComponent implements OnInit {
     this.groupTasks(filtered);
   }
 
-  // 🔥 MAIN LOCK LOGIC (NEW)
   isTaskLocked(task: any): boolean {
 
     // Dependency check

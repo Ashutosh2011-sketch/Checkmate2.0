@@ -35,7 +35,6 @@ export class ChecklistTrackerComponent {
     this.loadFromBackend();
   }
 
-  // 🔥 LOAD USER TASKS
   loadFromBackend() {
 
     const user = localStorage.getItem('userName') || 'Yuvraj';
@@ -62,7 +61,6 @@ export class ChecklistTrackerComponent {
       });
   }
 
-  // 🔥 DEPENDENCY LOCK CHECK
   isTaskLocked(task: Task, checklist: Checklist): boolean {
 
   if (!task.dependsOn) return false;
@@ -75,17 +73,14 @@ export class ChecklistTrackerComponent {
 
     if (!prevTask) return false;
 
-    // ❌ if ANY previous task incomplete → LOCK
     if (!prevTask.completed) return true;
 
-    // move to next dependency safely
     currentDependency = prevTask.dependsOn;
   }
 
   return false;
 }
 
-  // 🔥 SORT → UNLOCKED TASK FIRST
   getOrderedTasks(checklist: Checklist): Task[] {
     return [...checklist.tasks].sort((a, b) => {
       const aLocked = this.isTaskLocked(a, checklist);
@@ -96,7 +91,6 @@ export class ChecklistTrackerComponent {
     });
   }
 
-  // 🔥 TOGGLE TASK (DB + UI SYNC)
   toggleTask(checklist: Checklist, task: Task) {
 
     const prev = checklist.tasks.find(t => t.id === task.dependsOn);
