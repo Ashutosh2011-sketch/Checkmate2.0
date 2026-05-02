@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.transaction.Transactional; // ✅ FIX: Required for PostgreSQL @Lob / oid streaming
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,6 +36,7 @@ public class CollaborationController {
     // ==================== COMMENTS ====================
 
     @GetMapping("/tasks/{taskId}/comments")
+    @Transactional // ✅ keeps JPA session open so lazy fields can be read
     public ResponseEntity<?> getComments(@PathVariable Long taskId) {
         try {
             List<TaskComment> comments = commentRepository.findByTaskIdOrderByCreatedAtDesc(taskId);
@@ -45,7 +47,7 @@ public class CollaborationController {
                 map.put("taskId", taskId);
                 map.put("authorName", c.getAuthorName());
                 map.put("content", c.getContent());
-                map.put("createdAt", c.getCreatedAt().toString());
+                map.put("createdAt", c.getCreatedAt() != null ? c.getCreatedAt().toString() : "");
                 result.add(map);
             }
             return ResponseEntity.ok(result);
@@ -56,6 +58,7 @@ public class CollaborationController {
     }
 
     @PostMapping("/tasks/{taskId}/comments")
+    @Transactional
     public ResponseEntity<?> addComment(@PathVariable Long taskId,
                                          @RequestBody Map<String, String> body) {
         try {
@@ -91,6 +94,7 @@ public class CollaborationController {
     }
 
     @DeleteMapping("/comments/{commentId}")
+    @Transactional
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         try {
             commentRepository.deleteById(commentId);
@@ -104,10 +108,12 @@ public class CollaborationController {
     // ==================== ATTACHMENTS ====================
 
     @GetMapping("/tasks/{taskId}/attachments")
+    @Transactional // THE KEY FIX — keeps lob stream accessible
     public ResponseEntity<?> getAttachments(@PathVariable Long taskId) {
         try {
             List<TaskAttachment> attachments = attachmentRepository.findByTaskId(taskId);
             List<Map<String, Object>> result = new ArrayList<>();
+
             for (TaskAttachment a : attachments) {
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("id", a.getId());
@@ -116,10 +122,13 @@ public class CollaborationController {
                 map.put("fileType", a.getFileType());
                 map.put("fileSize", a.getFileSize());
                 map.put("uploadedBy", a.getUploadedBy());
-                map.put("uploadedAt", a.getUploadedAt().toString());
+                map.put("uploadedAt", a.getUploadedAt() != null ? a.getUploadedAt().toString() : "");
+                // ✅ fileData intentionally excluded — use /download endpoint for actual bytes
                 result.add(map);
             }
+
             return ResponseEntity.ok(result);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
@@ -127,6 +136,7 @@ public class CollaborationController {
     }
 
     @PostMapping("/tasks/{taskId}/attachments")
+    @Transactional
     public ResponseEntity<?> uploadAttachment(@PathVariable Long taskId,
                                                @RequestParam("file") MultipartFile file,
                                                @RequestParam(value = "uploadedBy", defaultValue = "User") String uploadedBy) {
@@ -138,7 +148,6 @@ public class CollaborationController {
                 return ResponseEntity.badRequest().body(Map.of("error", "File is empty"));
             }
 
-            // Limit file size to 10MB
             if (file.getSize() > 10 * 1024 * 1024) {
                 return ResponseEntity.badRequest().body(Map.of("error", "File size exceeds 10MB limit"));
             }
@@ -170,17 +179,26 @@ public class CollaborationController {
     }
 
     @GetMapping("/attachments/{attachmentId}/download")
+    @Transactional // ✅ Also needed here — lob must be streamed within transaction
     public ResponseEntity<?> downloadAttachment(@PathVariable Long attachmentId) {
         try {
             TaskAttachment attachment = attachmentRepository.findById(attachmentId)
                     .orElseThrow(() -> new RuntimeException("Attachment not found: " + attachmentId));
 
+            byte[] data = attachment.getFileData();
+            if (data == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No file data stored for this attachment"));
+            }
+
+            String contentType = attachment.getFileType() != null
+                    ? attachment.getFileType()
+                    : "application/octet-stream";
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(
-                            attachment.getFileType() != null ? attachment.getFileType() : "application/octet-stream"))
+                    .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + attachment.getFileName() + "\"")
-                    .body(attachment.getFileData());
+                    .body(data);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
@@ -188,6 +206,7 @@ public class CollaborationController {
     }
 
     @DeleteMapping("/attachments/{attachmentId}")
+    @Transactional
     public ResponseEntity<?> deleteAttachment(@PathVariable Long attachmentId) {
         try {
             attachmentRepository.deleteById(attachmentId);
@@ -198,7 +217,7 @@ public class CollaborationController {
         }
     }
 
-    // ==================== COUNTS (for badge display) ====================
+    // ==================== COUNTS ====================
 
     @GetMapping("/tasks/{taskId}/counts")
     public ResponseEntity<?> getCounts(@PathVariable Long taskId) {
