@@ -6,11 +6,13 @@ import com.checkmate.backend.dto.AdminDashboardSummaryDto;
 import com.checkmate.backend.dto.TaskInfoDto;
 import com.checkmate.backend.entity.Task;
 import com.checkmate.backend.entity.Checklist;
+import com.checkmate.backend.repository.AppUserRepository;
 import com.checkmate.backend.repository.ChecklistRepository;
 import com.checkmate.backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -19,9 +21,15 @@ public class DashboardService {
     private final TaskRepository taskRepository;
     private final ChecklistRepository checklistRepository;
 
-    public DashboardService(TaskRepository taskRepository, ChecklistRepository checklistRepository) {
+    private final NotificationService notificationService;
+    private final AppUserRepository userRepository;
+
+    public DashboardService(TaskRepository taskRepository, ChecklistRepository checklistRepository,
+            NotificationService notificationService, AppUserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.checklistRepository = checklistRepository;
+        this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -119,9 +127,12 @@ public class DashboardService {
             } else {
                 long pending = claimedTasks.stream().filter(t -> !t.isCompleted()).count();
                 long done = claimedTasks.stream().filter(TaskInfoDto::isCompleted).count();
-                if (pending > 0) notifications.add("You have " + pending + " pending task" + (pending > 1 ? "s" : "") + ".");
-                if (done > 0) notifications.add("Completed " + done + " task" + (done > 1 ? "s" : "") + "!");
-                if (!completedChecklists.isEmpty()) notifications.add(completedChecklists.size() + " checklist(s) done.");
+                if (pending > 0)
+                    notifications.add("You have " + pending + " pending task" + (pending > 1 ? "s" : "") + ".");
+                if (done > 0)
+                    notifications.add("Completed " + done + " task" + (done > 1 ? "s" : "") + "!");
+                if (!completedChecklists.isEmpty())
+                    notifications.add(completedChecklists.size() + " checklist(s) done.");
             }
 
             dto.setAssignedChecklists(inProgressChecklists);
@@ -131,7 +142,8 @@ public class DashboardService {
             dto.setProgress(overallProgress);
 
         } catch (Exception e) {
-            System.out.println("Dashboard error for user '" + userName + "': " + e.getClass().getName() + " - " + e.getMessage());
+            System.out.println(
+                    "Dashboard error for user '" + userName + "': " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace();
             dto.setAssignedChecklists(new ArrayList<>());
             dto.setCompletedChecklists(new ArrayList<>());
@@ -164,22 +176,51 @@ public class DashboardService {
         }
 
         task = taskRepository.save(task);
-        System.out.println("SERVICE: Task saved OK - completed=" + task.isCompleted() + " percent=" + task.getCompletionPercent());
+        System.out.println(
+                "SERVICE: Task saved OK - completed=" + task.isCompleted() + " percent=" + task.getCompletionPercent());
 
         return new TaskInfoDto(task.getId(), task.getTitle(), task.getStatus(),
                 task.getPriority(), null, task.getCompletionPercent(), task.isCompleted());
     }
 
     @Transactional
-    public TaskInfoDto markTaskComplete(Long taskId) {
-        return updateTaskCompletion(taskId, 100);
+    public TaskInfoDto markTaskComplete(Long taskId, String userName) {
+        TaskInfoDto result = updateTaskCompletion(taskId, 100);
+
+        userRepository.findByRole("ADMIN").ifPresent(admin -> {
+            notificationService.createNotification(
+                    admin,
+                    userName + " completed task: \"" + result.getTitle() + "\"",
+                    "TASK_COMPLETE");
+        });
+
+        return result;
     }
 
+    // @Transactional
+    // public void markChecklistComplete(Long checklistId) {
+    // System.out.println("SERVICE: markChecklistComplete checklistId=" +
+    // checklistId);
+    // List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
+    // System.out.println("SERVICE: Found " + tasks.size() + " tasks for checklist "
+    // + checklistId);
+    // for (Task task : tasks) {
+    // task.setCompletionPercent(100);
+    // task.setCompleted(true);
+    // task.setStatus("Completed");
+    // }
+    // taskRepository.saveAll(tasks);
+
+    // checklistRepository.findById(checklistId).ifPresent(checklist -> {
+    // checklist.setCompleted(true);
+    // checklistRepository.save(checklist);
+    // });
+    // System.out.println("SERVICE: Checklist marked complete OK");
+    // }
+
     @Transactional
-    public void markChecklistComplete(Long checklistId) {
-        System.out.println("SERVICE: markChecklistComplete checklistId=" + checklistId);
+    public void markChecklistComplete(Long checklistId, String userName) {
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
-        System.out.println("SERVICE: Found " + tasks.size() + " tasks for checklist " + checklistId);
         for (Task task : tasks) {
             task.setCompletionPercent(100);
             task.setCompleted(true);
@@ -189,9 +230,17 @@ public class DashboardService {
 
         checklistRepository.findById(checklistId).ifPresent(checklist -> {
             checklist.setCompleted(true);
+
             checklistRepository.save(checklist);
+
+            // Notify admin
+            userRepository.findByRole("ADMIN").ifPresent(admin -> {
+                notificationService.createNotification(
+                        admin,
+                        userName + " completed entire checklist: \"" + checklist.getChecklistName() + "\"",
+                        "CHECKLIST_COMPLETE");
+            });
         });
-        System.out.println("SERVICE: Checklist marked complete OK");
     }
 
     @Transactional(readOnly = true)

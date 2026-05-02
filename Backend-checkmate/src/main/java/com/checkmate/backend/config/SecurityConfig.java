@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/checklists/**").hasRole("ADMIN")
                         .requestMatchers("/api/roles/**").authenticated()
+                        .requestMatchers("/api/reports/**").authenticated()
                         .requestMatchers("/api/permissions/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/users/update-profile").authenticated()
