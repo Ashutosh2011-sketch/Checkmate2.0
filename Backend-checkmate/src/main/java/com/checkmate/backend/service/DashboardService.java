@@ -4,8 +4,8 @@ import com.checkmate.backend.dto.ChecklistInfoDto;
 import com.checkmate.backend.dto.DashboardDto;
 import com.checkmate.backend.dto.AdminDashboardSummaryDto;
 import com.checkmate.backend.dto.TaskInfoDto;
+import com.checkmate.backend.entity.AppUser;
 import com.checkmate.backend.entity.Task;
-import com.checkmate.backend.entity.Checklist;
 import com.checkmate.backend.repository.AppUserRepository;
 import com.checkmate.backend.repository.ChecklistRepository;
 import com.checkmate.backend.repository.TaskRepository;
@@ -23,13 +23,16 @@ public class DashboardService {
 
     private final NotificationService notificationService;
     private final AppUserRepository userRepository;
+    private final ActivityLogService activityLogService;
 
     public DashboardService(TaskRepository taskRepository, ChecklistRepository checklistRepository,
-            NotificationService notificationService, AppUserRepository userRepository) {
+            NotificationService notificationService, AppUserRepository userRepository,
+            ActivityLogService activityLogService) {
         this.taskRepository = taskRepository;
         this.checklistRepository = checklistRepository;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
+        this.activityLogService = activityLogService;
     }
 
     @Transactional(readOnly = true)
@@ -57,14 +60,20 @@ public class DashboardService {
                     String status = "Pending";
                     int completionPercent = 0;
                     boolean completed = false;
+                    LocalDateTime completedAt = null;
+                    String completedBy = null;
 
                     try {
                         Optional<Task> optTask = taskRepository.findById(taskId);
                         if (optTask.isPresent()) {
                             Task entity = optTask.get();
                             status = entity.getStatus();
-                            completionPercent = entity.getCompletionPercent();
+                            completionPercent = entity.getCompletionPercent() != null
+                                    ? entity.getCompletionPercent()
+                                    : 0;
                             completed = entity.isCompleted();
+                            completedAt = entity.getCompletedAt();
+                            completedBy = entity.getCompletedBy();
                         }
                     } catch (Exception e) {
                         System.out.println("DASH-DEBUG: Could not load task " + taskId + ": " + e.getMessage());
@@ -72,6 +81,8 @@ public class DashboardService {
 
                     TaskInfoDto taskDto = new TaskInfoDto(taskId, title, status, priority,
                             checklistName, completionPercent, completed);
+                    taskDto.setCompletedAt(completedAt);
+                    taskDto.setCompletedBy(completedBy);
                     claimedTasks.add(taskDto);
 
                     checklistNames.put(checklistId, checklistName);
@@ -156,7 +167,7 @@ public class DashboardService {
     }
 
     @Transactional
-    public TaskInfoDto updateTaskCompletion(Long taskId, int percent) {
+    public TaskInfoDto updateTaskCompletion(Long taskId, int percent, String completedByEmail, String clientIp) {
         System.out.println("SERVICE: updateTaskCompletion taskId=" + taskId + " percent=" + percent);
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
@@ -167,30 +178,56 @@ public class DashboardService {
         if (percent >= 100) {
             task.setCompleted(true);
             task.setStatus("Completed");
-        } else if (percent > 0) {
-            task.setCompleted(false);
-            task.setStatus("In Progress");
+            task.setCompletedAt(LocalDateTime.now());
+            task.setCompletedBy(
+                    completedByEmail != null && !completedByEmail.isBlank() ? completedByEmail : null);
         } else {
             task.setCompleted(false);
-            task.setStatus("Pending");
+            task.setCompletedAt(null);
+            task.setCompletedBy(null);
+            if (percent > 0) {
+                task.setStatus("In Progress");
+            } else {
+                task.setStatus("Pending");
+            }
         }
 
         task = taskRepository.save(task);
         System.out.println(
                 "SERVICE: Task saved OK - completed=" + task.isCompleted() + " percent=" + task.getCompletionPercent());
 
-        return new TaskInfoDto(task.getId(), task.getTitle(), task.getStatus(),
+        if (percent > 0 && percent < 100 && completedByEmail != null && !completedByEmail.isBlank()) {
+            String checklistTitle = "—";
+            try {
+                if (task.getSection() != null && task.getSection().getChecklist() != null) {
+                    checklistTitle = task.getSection().getChecklist().getChecklistName();
+                }
+            } catch (Exception ignored) {
+                /* lazy load edge cases */
+            }
+            String summary = task.getTitle() + " — " + checklistTitle + " (" + percent + "%)";
+            activityLogService.appendTaskUpdated(completedByEmail, summary, clientIp);
+        }
+
+        TaskInfoDto dto = new TaskInfoDto(task.getId(), task.getTitle(), task.getStatus(),
                 task.getPriority(), null, task.getCompletionPercent(), task.isCompleted());
+        dto.setCompletedAt(task.getCompletedAt());
+        dto.setCompletedBy(task.getCompletedBy());
+        return dto;
     }
 
     @Transactional
-    public TaskInfoDto markTaskComplete(Long taskId, String userName) {
-        TaskInfoDto result = updateTaskCompletion(taskId, 100);
+    public TaskInfoDto markTaskComplete(Long taskId, String userEmail) {
+        TaskInfoDto result = updateTaskCompletion(taskId, 100, userEmail, null);
+
+        String displayName = userRepository.findByEmail(userEmail)
+                .map(AppUser::getName)
+                .orElse("A user");
 
         userRepository.findByRole("ADMIN").ifPresent(admin -> {
             notificationService.createNotification(
                     admin,
-                    userName + " completed task: \"" + result.getTitle() + "\"",
+                    displayName + " completed task: \"" + result.getTitle() + "\"",
                     "TASK_COMPLETE");
         });
 
@@ -198,12 +235,16 @@ public class DashboardService {
     }
 
     @Transactional
-    public void markChecklistComplete(Long checklistId, String userName) {
+    public void markChecklistComplete(Long checklistId, String userName, String completedByEmail) {
+        LocalDateTime now = LocalDateTime.now();
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
         for (Task task : tasks) {
             task.setCompletionPercent(100);
             task.setCompleted(true);
             task.setStatus("Completed");
+            task.setCompletedAt(now);
+            task.setCompletedBy(
+                    completedByEmail != null && !completedByEmail.isBlank() ? completedByEmail : null);
         }
         taskRepository.saveAll(tasks);
 

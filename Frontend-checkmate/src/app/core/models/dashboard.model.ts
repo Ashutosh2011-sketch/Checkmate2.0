@@ -15,6 +15,8 @@ export interface TaskInfo {
   checklistName: string;
   completionPercent: number;
   completed: boolean;
+  completedAt?: string | null;
+  completedBy?: string | null;
 }
 
 export interface Dashboard {

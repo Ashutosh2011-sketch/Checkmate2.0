@@ -3,6 +3,7 @@ package com.checkmate.backend.entity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,12 @@ public class Task {
     @Column(name = "completed")
     private Boolean completed = false;
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "completed_by", length = 255)
+    private String completedBy;
+
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
 
@@ -106,6 +113,10 @@ public class Task {
 
     public Integer getCompletionPercent() { return completionPercent; }
 
+    public LocalDateTime getCompletedAt() { return completedAt; }
+
+    public String getCompletedBy() { return completedBy; }
+
     // ---------------- SETTERS ----------------
 
     public void setId(Long id) { this.id = id; }
@@ -143,6 +154,10 @@ public class Task {
     }
 
     public void setCompleted(Boolean completed) { this.completed = completed; }
+
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public void setCompletedBy(String completedBy) { this.completedBy = completedBy; }
 
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 

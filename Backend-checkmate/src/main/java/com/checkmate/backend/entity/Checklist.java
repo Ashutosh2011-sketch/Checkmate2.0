@@ -29,6 +29,15 @@ public class Checklist {
     @Column(nullable = false)
     private boolean completed = false;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "created_ip", length = 45)
+    private String createdIp;
+
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private List<Section> sections = new ArrayList<>();
@@ -79,6 +88,30 @@ public class Checklist {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getCreatedIp() {
+        return createdIp;
+    }
+
+    public void setCreatedIp(String createdIp) {
+        this.createdIp = createdIp;
     }
 
     public List<Section> getSections() {

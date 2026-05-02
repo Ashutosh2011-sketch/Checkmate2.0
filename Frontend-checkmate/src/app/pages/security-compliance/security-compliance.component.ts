@@ -1,13 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { interval, Subscription } from 'rxjs';
-
-interface AccessLog {
-  user: string;
-  activityType: 'Login' | 'Logout' | 'Task Completed' | 'Task Updated';
-  taskName: string;
-  timestamp: Date;
-  ipAddress: string;
-}
+import { interval, Subscription, switchMap, startWith } from 'rxjs';
+import { AccessLogEntry, SecurityLogsService } from '../../core/services/security-logs.service';
 
 interface AuditLogEntry {
   user: string;
@@ -23,30 +16,19 @@ interface ComplianceStatus {
   description: string;
 }
 
+type SecuritySettingKey = 'twoFactorAuth' | 'loginAlerts' | 'activityMonitoring' | 'dataEncryption';
+
 @Component({
   selector: 'app-security-compliance',
   templateUrl: './security-compliance.component.html',
   styleUrls: ['./security-compliance.component.css']
 })
 export class SecurityComplianceComponent implements OnInit, OnDestroy {
-  
-  // Mock data arrays
-  accessLogs: AccessLog[] = [
-    { user: 'John Smith', activityType: 'Login', taskName: '-', timestamp: new Date(), ipAddress: '192.168.1.101' },
-    { user: 'Sarah Johnson', activityType: 'Task Completed', taskName: 'Q4 Compliance Audit', timestamp: new Date(Date.now() - 3600000), ipAddress: '192.168.1.102' },
-    { user: 'Mike Wilson', activityType: 'Task Updated', taskName: 'IT Infrastructure Review', timestamp: new Date(Date.now() - 7200000), ipAddress: '192.168.1.103' },
-    { user: 'Emily Brown', activityType: 'Logout', taskName: '-', timestamp: new Date(Date.now() - 10800000), ipAddress: '192.168.1.104' },
-    { user: 'David Lee', activityType: 'Task Completed', taskName: 'Security Assessment', timestamp: new Date(Date.now() - 14400000), ipAddress: '192.168.1.105' }
-  ];
 
-  auditLogs: AuditLogEntry[] = [
-    { user: 'John Smith', action: 'Logged into system', time: '2 mins ago', ip: '192.168.1.101', icon: 'login' },
-    { user: 'Sarah Johnson', action: 'Completed checklist: Q4 Audit', time: '15 mins ago', ip: '192.168.1.102', icon: 'check_circle' },
-    { user: 'Admin', action: 'Updated user permissions', time: '1 hour ago', ip: '192.168.1.1', icon: 'admin_panel_settings' },
-    { user: 'Mike Wilson', action: 'Modified task priority', time: '2 hours ago', ip: '192.168.1.103', icon: 'edit' },
-    { user: 'Emily Brown', action: 'Exported report', time: '3 hours ago', ip: '192.168.1.104', icon: 'download' },
-    { user: 'David Lee', action: 'Created new template', time: '5 hours ago', ip: '192.168.1.105', icon: 'add_circle' }
-  ];
+  accessLogs: AccessLogEntry[] = [];
+  auditLogs: AuditLogEntry[] = [];
+  logsLoadError = '';
+  isLoadingLogs = true;
 
   complianceItems: ComplianceStatus[] = [
     { name: 'GDPR Compliance', status: false, description: 'Data protection regulation' },
@@ -63,51 +45,123 @@ export class SecurityComplianceComponent implements OnInit, OnDestroy {
   };
 
   private logSubscription?: Subscription;
-  private users = ['John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Brown', 'David Lee', 'Lisa Anderson'];
-  private activities: Array<'Login' | 'Logout' | 'Task Completed' | 'Task Updated'> = ['Login', 'Logout', 'Task Completed', 'Task Updated'];
-  private tasks = ['Q4 Compliance Audit', 'IT Infrastructure Review', 'Security Assessment', 'Monthly Report', 'User Onboarding'];
+
+  constructor(private securityLogsService: SecurityLogsService) {}
 
   ngOnInit(): void {
-    // Simulate real-time log updates
-    this.logSubscription = interval(5000).subscribe(() => {
-      this.addNewLog();
-    });
+    this.logSubscription = interval(8000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.securityLogsService.getAccessLogs(200))
+      )
+      .subscribe({
+        next: (rows) => {
+          this.accessLogs = rows;
+          this.auditLogs = this.mapToAuditTrail(rows);
+          this.logsLoadError = '';
+          this.isLoadingLogs = false;
+        },
+        error: () => {
+          this.logsLoadError = 'Could not load access logs.';
+          this.isLoadingLogs = false;
+        }
+      });
   }
 
   ngOnDestroy(): void {
-    if (this.logSubscription) {
-      this.logSubscription.unsubscribe();
+    this.logSubscription?.unsubscribe();
+  }
+
+  private mapToAuditTrail(rows: AccessLogEntry[]): AuditLogEntry[] {
+    return rows.slice(0, 15).map((log) => ({
+      user: log.username,
+      action: this.formatAuditAction(log),
+      time: this.formatRelative(log.occurredAt),
+      ip: log.ipAddress,
+      icon: this.iconForActivity(log.activityType)
+    }));
+  }
+
+  private formatAuditAction(log: AccessLogEntry): string {
+    const detail = log.resourceDetail && log.resourceDetail !== '—' ? log.resourceDetail : '';
+    switch (log.activityType) {
+      case 'Login':
+        return 'Logged in';
+      case 'Logout':
+        return 'Logged out';
+      case 'Checklist created':
+        return detail ? `Created checklist: ${detail}` : 'Created checklist';
+      case 'Task Completed':
+        return detail ? `Completed task: ${detail}` : 'Completed task';
+      case 'Task Updated':
+        return detail ? `Updated task: ${detail}` : 'Updated task progress';
+      default:
+        return log.activityType;
     }
   }
 
-  private addNewLog(): void {
-    const randomUser = this.users[Math.floor(Math.random() * this.users.length)];
-    const randomActivity = this.activities[Math.floor(Math.random() * this.activities.length)];
-    const randomTask = this.tasks[Math.floor(Math.random() * this.tasks.length)];
-    const randomIp = `192.168.1.${Math.floor(Math.random() * 255)}`;
-
-    const newLog: AccessLog = {
-      user: randomUser,
-      activityType: randomActivity,
-      taskName: randomActivity === 'Login' || randomActivity === 'Logout' ? '-' : randomTask,
-      timestamp: new Date(),
-      ipAddress: randomIp
-    };
-
-    this.accessLogs.unshift(newLog);
-    
-    // Keep only last 20 logs
-    if (this.accessLogs.length > 20) {
-      this.accessLogs.pop();
+  private iconForActivity(activityType: string): string {
+    switch (activityType) {
+      case 'Login':
+        return 'login';
+      case 'Logout':
+        return 'logout';
+      case 'Checklist created':
+        return 'playlist_add_check';
+      case 'Task Completed':
+        return 'check_circle';
+      case 'Task Updated':
+        return 'edit';
+      default:
+        return 'history';
     }
   }
 
-  toggleSetting(setting: keyof typeof this.securitySettings): void {
+  private formatRelative(iso: string): string {
+    if (!iso) {
+      return '—';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return iso;
+    }
+    const diffMs = Date.now() - d.getTime();
+    const sec = Math.floor(diffMs / 1000);
+    if (sec < 45) {
+      return 'Just now';
+    }
+    const mins = Math.floor(sec / 60);
+    if (mins < 60) {
+      return `${mins} min ago`;
+    }
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) {
+      return `${hrs} hr ago`;
+    }
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days === 1 ? '' : 's'} ago`;
+  }
+
+  toggleSetting(setting: SecuritySettingKey): void {
     this.securitySettings[setting] = !this.securitySettings[setting];
   }
 
-formatTimestamp(date: Date): string {
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  formatTimestamp(iso: string): string {
+    if (!iso) {
+      return '—';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return iso;
+    }
+    return d.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   }
 
   getActivityBadgeClass(activityType: string): string {
@@ -116,6 +170,8 @@ formatTimestamp(date: Date): string {
         return 'login';
       case 'Logout':
         return 'logout';
+      case 'Checklist created':
+        return 'checklist-created';
       case 'Task Completed':
         return 'task-completed';
       case 'Task Updated':

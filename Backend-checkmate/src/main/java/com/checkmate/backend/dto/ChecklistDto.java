@@ -1,5 +1,6 @@
 package com.checkmate.backend.dto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,9 @@ public class ChecklistDto {
     private String visibility;
     private String workflowType;
     private boolean completed;
+    private LocalDateTime createdAt;
+    private String createdBy;
+    private String createdIp;
     private List<SectionDto> sections = new ArrayList<>();
 
     public Long getId() { return id; }
@@ -24,6 +28,12 @@ public class ChecklistDto {
     public void setWorkflowType(String workflowType) { this.workflowType = workflowType; }
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public String getCreatedIp() { return createdIp; }
+    public void setCreatedIp(String createdIp) { this.createdIp = createdIp; }
     public List<SectionDto> getSections() { return sections; }
     public void setSections(List<SectionDto> sections) { this.sections = sections == null ? new ArrayList<>() : sections; }
 }

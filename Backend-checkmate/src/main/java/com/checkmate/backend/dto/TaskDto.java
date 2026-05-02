@@ -1,5 +1,6 @@
 package com.checkmate.backend.dto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class TaskDto {
     private int remindBefore;
     private String escalateTo;
     private boolean showAdvanced;
+    private LocalDateTime completedAt;
+    private String completedBy;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -63,4 +66,10 @@ public class TaskDto {
 
     public boolean isShowAdvanced() { return showAdvanced; }
     public void setShowAdvanced(boolean showAdvanced) { this.showAdvanced = showAdvanced; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public String getCompletedBy() { return completedBy; }
+    public void setCompletedBy(String completedBy) { this.completedBy = completedBy; }
 }

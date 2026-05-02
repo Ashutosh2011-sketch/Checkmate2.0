@@ -11,6 +11,10 @@ import com.checkmate.backend.entity.RolePermission;
 import com.checkmate.backend.repository.RoleRepository;
 
 import com.checkmate.backend.security.JwtUtil;
+import com.checkmate.backend.service.UserAuthSessionService;
+import com.checkmate.backend.util.ClientIpResolver;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,6 +49,9 @@ public class AuthController {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserAuthSessionService userAuthSessionService;
 
     private String generateRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
@@ -103,7 +111,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletRequest httpRequest) {
 
         String email = loginData.get("email");
         String password = loginData.get("password");
@@ -158,6 +166,17 @@ public class AuthController {
 
         response.put("permissions", permissions);
 
+        userAuthSessionService.recordLogin(email, ClientIpResolver.resolve(httpRequest));
+
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        userAuthSessionService.recordLogout(principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Logout recorded"));
     }
 }
