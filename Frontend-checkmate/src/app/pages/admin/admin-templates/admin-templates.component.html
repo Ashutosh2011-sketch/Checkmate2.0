@@ -1,0 +1,212 @@
+<div class="tm-wrapper">
+
+  <!-- Header -->
+  <div class="tm-header">
+    <div>
+      <h1 class="tm-title">Template Management</h1>
+      <p class="tm-subtitle">Create, manage and version control checklist templates.</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">+ New Template</button>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Filters -->
+  <div class="tm-filters">
+    <input class="filter-input" type="text" placeholder="Search templates..."
+           [(ngModel)]="searchQuery" (input)="applyFilters()" />
+    <select class="filter-select" [(ngModel)]="filterDept" (change)="applyFilters()">
+      <option value="">All Departments</option>
+      <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+    </select>
+    <select class="filter-select" [(ngModel)]="filterVisibility" (change)="applyFilters()">
+      <option value="">All Visibility</option>
+      <option value="Public">Public</option>
+      <option value="Private">Private</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading templates...</span>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loading && filteredTemplates.length === 0">
+    <span class="empty-icon">📋</span>
+    <p>No templates found. Create your first template!</p>
+  </div>
+
+  <!-- Template Cards Grid -->
+  <div class="tm-grid" *ngIf="!loading && filteredTemplates.length > 0">
+    <div class="tm-card" *ngFor="let t of filteredTemplates">
+      <div class="card-top">
+        <div class="card-icon-wrap">
+          <span class="card-icon">📄</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge" [ngClass]="t.visibility === 'Public' ? 'badge-green' : 'badge-gray'">
+            {{ t.visibility }}
+          </span>
+          <span class="badge badge-blue">v{{ t.currentVersion }}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ t.templateName }}</h3>
+        <p class="card-desc">{{ t.description || 'No description provided.' }}</p>
+        <div class="card-meta">
+          <span class="meta-item">🏢 {{ t.department }}</span>
+          <span class="meta-item">⚡ {{ t.workflowType }}</span>
+        </div>
+        <div class="card-footer-meta">
+          <span class="created-by">By {{ t.createdBy || 'Admin' }}</span>
+          <span class="updated-at">{{ t.updatedAt | date:'dd MMM yyyy' }}</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="btn-icon btn-edit" title="Edit" (click)="openEditModal(t)">✏️</button>
+        <button class="btn-icon btn-versions" title="Version History" (click)="openVersionModal(t)">🕐</button>
+        <button class="btn-icon btn-delete" title="Delete" (click)="confirmDelete(t)">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Create / Edit Modal ── -->
+  <div class="modal-backdrop" *ngIf="showFormModal" (click)="closeFormModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editMode ? 'Edit Template' : 'Create New Template' }}</h2>
+        <button class="modal-close" (click)="closeFormModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Template Name *</label>
+          <input class="form-input" [(ngModel)]="form.templateName" placeholder="e.g. Employee Onboarding" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Department *</label>
+            <select class="form-input" [(ngModel)]="form.department">
+              <option value="">Select Department</option>
+              <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Visibility *</label>
+            <select class="form-input" [(ngModel)]="form.visibility">
+              <option value="Public">Public</option>
+              <option value="Private">Private</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Workflow Type *</label>
+          <select class="form-input" [(ngModel)]="form.workflowType">
+            <option value="Sequential">Sequential</option>
+            <option value="Parallel">Parallel</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-input form-textarea" [(ngModel)]="form.description"
+                    placeholder="Describe this template..."></textarea>
+        </div>
+
+        <!-- Sections -->
+        <div class="sections-header">
+          <label>Sections & Tasks</label>
+          <button class="btn-add-section" (click)="addSection()">+ Add Section</button>
+        </div>
+
+        <div class="sections-list">
+          <div class="section-block" *ngFor="let section of form.sections; let si = index">
+            <div class="section-header">
+              <input class="section-name-input" [(ngModel)]="section.sectionName"
+                     placeholder="Section Name" />
+              <button class="btn-remove" (click)="removeSection(si)">✕</button>
+            </div>
+            <div class="tasks-list">
+              <div class="task-row" *ngFor="let task of section.tasks; let ti = index">
+                <input class="task-input" [(ngModel)]="task.title" placeholder="Task title" />
+                <select class="task-priority" [(ngModel)]="task.priority">
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+                <button class="btn-remove-sm" (click)="removeTask(si, ti)">✕</button>
+              </div>
+            </div>
+            <button class="btn-add-task" (click)="addTask(si)">+ Add Task</button>
+          </div>
+        </div>
+
+        <!-- Change note for edits -->
+        <div class="form-group" *ngIf="editMode">
+          <label>Change Note (optional)</label>
+          <input class="form-input" [(ngModel)]="changeNote" placeholder="What changed in this version?" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeFormModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveTemplate()" [disabled]="saving">
+          {{ saving ? 'Saving...' : (editMode ? 'Update Template' : 'Create Template') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Version History Modal ── -->
+  <div class="modal-backdrop" *ngIf="showVersionModal" (click)="closeVersionModal()">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Version History — {{ selectedTemplate?.templateName }}</h2>
+        <button class="modal-close" (click)="closeVersionModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="loading-wrap" *ngIf="loadingVersions">
+          <div class="spinner"></div><span>Loading versions...</span>
+        </div>
+        <div class="version-list" *ngIf="!loadingVersions">
+          <div class="version-row" *ngFor="let v of versions">
+            <div class="version-badge">v{{ v.version }}</div>
+            <div class="version-info">
+              <span class="version-note">{{ v.changeNote || 'No note' }}</span>
+              <span class="version-meta">By {{ v.createdBy }} · {{ v.createdAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+            </div>
+            <button class="btn-restore"
+                    [disabled]="v.version === selectedTemplate?.currentVersion"
+                    (click)="restoreVersion(v)">
+              {{ v.version === selectedTemplate?.currentVersion ? 'Current' : 'Restore' }}
+            </button>
+          </div>
+          <div class="empty-state" *ngIf="versions.length === 0">
+            <p>No versions found.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Delete Confirm Modal ── -->
+  <div class="modal-backdrop" *ngIf="showDeleteModal" (click)="showDeleteModal = false">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Delete Template</h2>
+        <button class="modal-close" (click)="showDeleteModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ templateToDelete?.templateName }}</strong>?
+          This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showDeleteModal = false">Cancel</button>
+        <button class="btn-danger" (click)="deleteTemplate()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" [ngClass]="{ 'toast-visible': showToast }">{{ toastMessage }}</div>
+
+</div>

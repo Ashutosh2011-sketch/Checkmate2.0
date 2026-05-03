@@ -110,14 +110,15 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             t.id, t.title, t.priority, t.due_date_days,
             c.checklist_name, c.id as checklist_id,
             STRING_AGG(DISTINCT ta.assignee, ', ') as assignees,
-            COALESCE(c.department, 'Unassigned') as department
+            COALESCE(c.department, 'Unassigned') as department,
+            t.created_at
         FROM tasks t
         JOIN sections s ON t.section_id = s.id
         JOIN checklists c ON s.checklist_id = c.id
         LEFT JOIN task_assignees ta ON ta.task_id = t.id
         WHERE t.completed = false 
         AND t.due_date_days < :currentDayOfYear
-        GROUP BY t.id, t.title, t.priority, t.due_date_days, c.checklist_name, c.id, c.department
+        GROUP BY t.id, t.title, t.priority, t.due_date_days, c.checklist_name, c.id, c.department,t.created_at
         ORDER BY t.due_date_days ASC
     """, nativeQuery = true)
     List<Object[]> findAllOverdueTasks(@Param("currentDayOfYear") int currentDayOfYear);

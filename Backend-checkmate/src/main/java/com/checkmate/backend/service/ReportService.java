@@ -4,6 +4,7 @@ import com.checkmate.backend.dto.*;
 import com.checkmate.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.temporal.ChronoUnit;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -67,10 +68,20 @@ public class ReportService {
             dto.setTaskId(((Number) row[0]).longValue());
             dto.setTaskName((String) row[1]);
             dto.setPriority((String) row[2]);
-
+//             LocalDate dueDate;
+// if (row[8] != null) {
+//     LocalDate createdAt = ((java.sql.Date) row[8]).toLocalDate();
+//     dueDate = createdAt.plusDays(((Number) row[3]).intValue());
+// } else {
+//     dueDate = LocalDate.now().minusDays(((Number) row[3]).intValue());
+// }
+           // int daysOverdue = (int) ChronoUnit.DAYS.between(dueDate, LocalDate.now());
             int dueDay = ((Number) row[3]).intValue();
             int daysOverdue = currentDayOfYear - dueDay;
-            dto.setDaysOverdue(daysOverdue);
+             dto.setDaysOverdue(daysOverdue);
+
+            //dto.setDueDate(dueDate);
+           // dto.setDaysOverdue(Math.max(0, daysOverdue));
 
             dto.setChecklistName((String) row[4]);
             dto.setAssignedTo((String) row[6]);

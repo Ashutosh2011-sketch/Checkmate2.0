@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/collaboration/**").authenticated()
                         .requestMatchers("/api/dashboard/**").authenticated()
+                        .requestMatchers("/api/templates/**").authenticated()
+                        .requestMatchers("/api/reports/**").authenticated()
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

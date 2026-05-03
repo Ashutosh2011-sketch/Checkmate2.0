@@ -1,6 +1,8 @@
 package com.checkmate.backend.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,12 @@ public class Checklist {
 
     @Column(nullable = false)
     private boolean completed = false;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+   @Column(name = "completed_at")
+   private LocalDateTime completedAt;
 
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
@@ -54,6 +62,12 @@ public class Checklist {
     public boolean isCompleted() { return completed; }
 
     public void setCompleted(boolean completed) { this.completed = completed; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 
     public List<Section> getSections() { return sections; }
 

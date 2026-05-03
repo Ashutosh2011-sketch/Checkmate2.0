@@ -38,62 +38,55 @@ public interface ChecklistRepository extends JpaRepository<Checklist, Long> {
 
     // 📊 Monthly Completion Trends
     @Query(value = """
-        SELECT 
-            TO_CHAR(DATE_TRUNC('month', c.completed_at), 'Mon YYYY') as period,
-            COUNT(*) as completed_count,
-            (SELECT COUNT(*) FROM checklists 
-             WHERE completed = true 
-             AND completed_at BETWEEN :startDate AND :endDate) as total_completed
-        FROM checklists c
-        WHERE c.completed = true 
-        AND c.completed_at BETWEEN :startDate AND :endDate
-        GROUP BY DATE_TRUNC('month', c.completed_at)
-        ORDER BY DATE_TRUNC('month', c.completed_at)
-    """, nativeQuery = true)
-    List<Object[]> getMonthlyCompletionTrend(@Param("startDate") LocalDate startDate, 
-                                              @Param("endDate") LocalDate endDate);
+    SELECT 
+        TO_CHAR(DATE_TRUNC('month', c.created_at), 'Mon YYYY') as period,
+        COUNT(*) as completed_count,
+        COUNT(*) as total_completed
+    FROM checklists c
+    WHERE c.created_at BETWEEN :startDate AND :endDate
+    GROUP BY DATE_TRUNC('month', c.created_at)
+    ORDER BY DATE_TRUNC('month', c.created_at)
+""", nativeQuery = true)
+List<Object[]> getMonthlyCompletionTrend(@Param("startDate") LocalDate startDate, 
+                                          @Param("endDate") LocalDate endDate);
 
     // 📊 Weekly Completion Trends
-    @Query(value = """
-        SELECT 
-            CONCAT('Week ', TO_CHAR(DATE_TRUNC('week', c.completed_at), 'IW')) as period,
-            COUNT(*) as completed_count,
-            (SELECT COUNT(*) FROM checklists 
-             WHERE completed = true 
-             AND completed_at BETWEEN :startDate AND :endDate) as total_completed
-        FROM checklists c
-        WHERE c.completed = true 
-        AND c.completed_at BETWEEN :startDate AND :endDate
-        GROUP BY DATE_TRUNC('week', c.completed_at)
-        ORDER BY DATE_TRUNC('week', c.completed_at)
-    """, nativeQuery = true)
-    List<Object[]> getWeeklyCompletionTrend(@Param("startDate") LocalDate startDate, 
-                                             @Param("endDate") LocalDate endDate);
+   @Query(value = """
+    SELECT 
+        CONCAT('Week ', TO_CHAR(DATE_TRUNC('week', c.created_at), 'IW')) as period,
+        COUNT(*) as completed_count,
+        COUNT(*) as total_completed
+    FROM checklists c
+    WHERE c.created_at BETWEEN :startDate AND :endDate
+    GROUP BY DATE_TRUNC('week', c.created_at)
+    ORDER BY DATE_TRUNC('week', c.created_at)
+""", nativeQuery = true)
+List<Object[]> getWeeklyCompletionTrend(@Param("startDate") LocalDate startDate, 
+                                         @Param("endDate") LocalDate endDate);
 
     // 🚨 Bottleneck Analysis - Checklists stuck in progress
     @Query(value = """
-        SELECT 
-            c.id,
-            c.checklist_name,
-            'In Progress' as current_level,
-            COUNT(DISTINCT t.id) as pending_tasks,
-            EXTRACT(DAY FROM (NOW() - c.updated_at)) as days_stuck,
-            COALESCE(c.department, 'Unassigned') as department_name
-        FROM checklists c
-        JOIN sections s ON s.checklist_id = c.id
-        JOIN tasks t ON t.section_id = s.id
-        WHERE c.completed = false 
-        AND t.completed = false
-        GROUP BY c.id, c.checklist_name, c.updated_at, c.department
-        HAVING EXTRACT(DAY FROM (NOW() - c.updated_at)) > 3
-        ORDER BY days_stuck DESC
+    SELECT 
+        c.id,
+        c.checklist_name,
+        'In Progress' as current_level,
+        COUNT(DISTINCT t.id) as pending_tasks,
+       COALESCE(EXTRACT(DAY FROM (NOW() - c.created_at)), 0) as days_stuck,
+        COALESCE(c.department, 'Unassigned') as department_name
+    FROM checklists c
+    JOIN sections s ON s.checklist_id = c.id
+    JOIN tasks t ON t.section_id = s.id
+    WHERE c.completed = false 
+    AND t.completed = false
+    GROUP BY c.id, c.checklist_name, c.updated_at, c.department
+    ORDER BY days_stuck DESC
     """, nativeQuery = true)
-    List<Object[]> findBottlenecks();
+List<Object[]> findBottlenecks();
 
-    // 📋 Find checklists by department
-    @Query(value = """
-        SELECT * FROM checklists c
-        WHERE c.department = :department
-    """, nativeQuery = true)
-    List<Checklist> findByDepartment(@Param("department") String department);
-}
+        // 📋 Find checklists by department
+        @Query(value = """
+            SELECT * FROM checklists c
+            WHERE c.department = :department
+        """, nativeQuery = true)
+        List<Checklist> findByDepartment(@Param("department") String department);
+    }

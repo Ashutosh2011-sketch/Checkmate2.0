@@ -11,6 +11,7 @@ import com.checkmate.backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -189,6 +190,7 @@ public class DashboardService {
 
         checklistRepository.findById(checklistId).ifPresent(checklist -> {
             checklist.setCompleted(true);
+            checklist.setCompletedAt(LocalDateTime.now());
             checklistRepository.save(checklist);
         });
         System.out.println("SERVICE: Checklist marked complete OK");

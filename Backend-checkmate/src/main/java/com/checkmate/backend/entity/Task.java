@@ -3,6 +3,7 @@ package com.checkmate.backend.entity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,14 @@ public class Task {
     @Column(name = "escalate_to")
     private String escalateTo = "Manager";
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+    this.createdAt = LocalDateTime.now();
+    }
+
     @Column(name = "show_advanced")
     private boolean showAdvanced = false;
 
@@ -69,6 +78,8 @@ public class Task {
     // ---------------- GETTERS ----------------
 
     public Long getId() { return id; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
     public String getTitle() { return title; }
 
@@ -127,6 +138,9 @@ public class Task {
     public void setConditionDependentOn(String conditionDependentOn) {
         this.conditionDependentOn = conditionDependentOn;
     }
+
+    
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public void setConditionExpectedOutcome(String conditionExpectedOutcome) {
         this.conditionExpectedOutcome = conditionExpectedOutcome;
