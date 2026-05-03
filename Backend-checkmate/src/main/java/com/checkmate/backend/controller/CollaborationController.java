@@ -26,8 +26,8 @@ public class CollaborationController {
     private final TaskAttachmentRepository attachmentRepository;
 
     public CollaborationController(TaskRepository taskRepository,
-                                    TaskCommentRepository commentRepository,
-                                    TaskAttachmentRepository attachmentRepository) {
+            TaskCommentRepository commentRepository,
+            TaskAttachmentRepository attachmentRepository) {
         this.taskRepository = taskRepository;
         this.commentRepository = commentRepository;
         this.attachmentRepository = attachmentRepository;
@@ -60,7 +60,7 @@ public class CollaborationController {
     @PostMapping("/tasks/{taskId}/comments")
     @Transactional
     public ResponseEntity<?> addComment(@PathVariable Long taskId,
-                                         @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, String> body) {
         try {
             Task task = taskRepository.findById(taskId)
                     .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
@@ -138,8 +138,8 @@ public class CollaborationController {
     @PostMapping("/tasks/{taskId}/attachments")
     @Transactional
     public ResponseEntity<?> uploadAttachment(@PathVariable Long taskId,
-                                               @RequestParam("file") MultipartFile file,
-                                               @RequestParam(value = "uploadedBy", defaultValue = "User") String uploadedBy) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "uploadedBy", defaultValue = "User") String uploadedBy) {
         try {
             Task task = taskRepository.findById(taskId)
                     .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
@@ -226,8 +226,7 @@ public class CollaborationController {
             long attachmentCount = attachmentRepository.countByTaskId(taskId);
             return ResponseEntity.ok(Map.of(
                     "commentCount", commentCount,
-                    "attachmentCount", attachmentCount
-            ));
+                    "attachmentCount", attachmentCount));
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("commentCount", 0, "attachmentCount", 0));
         }

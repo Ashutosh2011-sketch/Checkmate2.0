@@ -12,6 +12,9 @@ import com.checkmate.backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.checkmate.backend.repository.TaskCommentRepository;
+import com.checkmate.backend.repository.TaskAttachmentRepository;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -25,14 +28,20 @@ public class DashboardService {
     private final AppUserRepository userRepository;
     private final ActivityLogService activityLogService;
 
+    private final TaskCommentRepository commentRepository;
+    private final TaskAttachmentRepository attachmentRepository;
+
     public DashboardService(TaskRepository taskRepository, ChecklistRepository checklistRepository,
             NotificationService notificationService, AppUserRepository userRepository,
-            ActivityLogService activityLogService) {
+            ActivityLogService activityLogService, TaskCommentRepository commentRepository,
+            TaskAttachmentRepository attachmentRepository) {
         this.taskRepository = taskRepository;
         this.checklistRepository = checklistRepository;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.activityLogService = activityLogService;
+        this.commentRepository = commentRepository;
+        this.attachmentRepository = attachmentRepository;
     }
 
     @Transactional(readOnly = true)
@@ -220,14 +229,39 @@ public class DashboardService {
     public TaskInfoDto markTaskComplete(Long taskId, String userEmail) {
         TaskInfoDto result = updateTaskCompletion(taskId, 100, userEmail, null);
 
-        String displayName = userRepository.findByEmail(userEmail)
+        long commentCount = commentRepository.countByTaskId(taskId);
+        long attachmentCount = attachmentRepository.countByTaskId(taskId);
+
+        String userName = userRepository.findByEmail(userEmail)
                 .map(AppUser::getName)
                 .orElse("A user");
+
+        Long checklistId = taskRepository.findById(taskId)
+                .map(t -> t.getSection().getChecklist().getId())
+                .orElse(null);
+
+        StringBuilder message = new StringBuilder();
+        message.append(userName)
+                .append(" completed task: \"")
+                .append(result.getTitle())
+                .append("\"");
+
+        if (commentCount > 0 && attachmentCount > 0) {
+            message.append(" and left a comment and attached a file");
+        } else if (commentCount > 0) {
+            message.append(" and left a comment");
+        } else if (attachmentCount > 0) {
+            message.append(" and attached a file");
+        }
+
+        if (checklistId != null) {
+            message.append(" | checklistId:").append(checklistId);
+        }
 
         userRepository.findByRole("ADMIN").ifPresent(admin -> {
             notificationService.createNotification(
                     admin,
-                    displayName + " completed task: \"" + result.getTitle() + "\"",
+                    message.toString(),
                     "TASK_COMPLETE");
         });
 
@@ -235,29 +269,50 @@ public class DashboardService {
     }
 
     @Transactional
-    public void markChecklistComplete(Long checklistId, String userName, String completedByEmail) {
-        LocalDateTime now = LocalDateTime.now();
+    public void markChecklistComplete(Long checklistId, String userName, String userEmail) {
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
+
+        long totalComments = 0;
+        long totalAttachments = 0;
+        for (Task task : tasks) {
+            totalComments += commentRepository.countByTaskId(task.getId());
+            totalAttachments += attachmentRepository.countByTaskId(task.getId());
+        }
+
+        final long finalComments = totalComments;
+        final long finalAttachments = totalAttachments;
+
         for (Task task : tasks) {
             task.setCompletionPercent(100);
             task.setCompleted(true);
             task.setStatus("Completed");
-            task.setCompletedAt(now);
-            task.setCompletedBy(
-                    completedByEmail != null && !completedByEmail.isBlank() ? completedByEmail : null);
         }
         taskRepository.saveAll(tasks);
 
         checklistRepository.findById(checklistId).ifPresent(checklist -> {
             checklist.setCompleted(true);
-
             checklistRepository.save(checklist);
 
-            // Notify admin
+            StringBuilder message = new StringBuilder();
+            message.append(userName)
+                    .append(" completed checklist: \"")
+                    .append(checklist.getChecklistName())
+                    .append("\"");
+
+            if (finalComments > 0 && finalAttachments > 0) {
+                message.append(" with comments and attachments");
+            } else if (finalComments > 0) {
+                message.append(" with comments");
+            } else if (finalAttachments > 0) {
+                message.append(" with attachments");
+            }
+
+            message.append(" | checklistId:").append(checklistId);
+
             userRepository.findByRole("ADMIN").ifPresent(admin -> {
                 notificationService.createNotification(
                         admin,
-                        userName + " completed entire checklist: \"" + checklist.getChecklistName() + "\"",
+                        message.toString(),
                         "CHECKLIST_COMPLETE");
             });
         });

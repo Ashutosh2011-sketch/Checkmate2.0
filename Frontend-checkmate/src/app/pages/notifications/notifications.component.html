@@ -16,19 +16,26 @@
   <!-- Notifications list -->
   <div class="notifications-grid" *ngIf="!loading && notificationsList.length > 0">
     <div class="notif-card" *ngFor="let notif of notificationsList"
-         [class.task-complete]="notif.type === 'TASK_COMPLETE'"
-         [class.checklist-complete]="notif.type === 'CHECKLIST_COMPLETE'">
+     [class.task-complete]="notif.type === 'TASK_COMPLETE'"
+     [class.checklist-complete]="notif.type === 'CHECKLIST_COMPLETE'">
 
-      <div class="card-top">
-        <span class="notif-icon">{{ getIcon(notif.type) }}</span>
-        <div class="notif-content">
-          <p class="notif-message">{{ notif.message }}</p>
-          <span class="notif-time">{{ getTimeAgo(notif.createdAt) }}</span>
-        </div>
-        <button class="dismiss-btn" (click)="markOneAsRead(notif.id)" title="Dismiss">✕</button>
-      </div>
+  <div class="card-top">
+    <span class="notif-icon">{{ getIcon(notif.type) }}</span>
+    <div class="notif-content">
+      <p class="notif-message">{{ getCleanMessage(notif.message) }}</p>
 
+      <a *ngIf="getChecklistId(notif.message)"
+         [routerLink]="['/admin/checklist-detail', getChecklistId(notif.message)]"
+         class="view-checklist-link">
+         View Checklist →
+      </a>
+
+      <span class="notif-time">{{ getTimeAgo(notif.createdAt) }}</span>
     </div>
+    <button class="dismiss-btn" (click)="markOneAsRead(notif.id)" title="Dismiss">✕</button>
+  </div>
+
+</div>
   </div>
 
   <!-- Empty state -->

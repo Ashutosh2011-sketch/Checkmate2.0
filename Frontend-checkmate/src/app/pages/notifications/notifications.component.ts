@@ -53,14 +53,29 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getIcon(type: string): string {
-    switch (type) {
-      case 'TASK_COMPLETE': return '✅';
-      case 'CHECKLIST_COMPLETE': return '🎉';
-      case 'INFO': return '🔔';
-      default: return '📋';
-    }
+  getCleanMessage(message: string): string {
+  return message.includes('| checklistId:')
+    ? message.split('| checklistId:')[0].trim()
+    : message;
+}
+
+getChecklistId(message: string): string | null {
+  if (message.includes('| checklistId:')) {
+    return message.split('| checklistId:')[1].trim();
   }
+  return null;
+}
+
+ getIcon(type: string): string {
+  switch (type) {
+    case 'TASK_COMPLETE': return '✅';
+    case 'CHECKLIST_COMPLETE': return '🎉';
+    case 'COMMENT': return '💬';
+    case 'ATTACHMENT': return '📎';
+    case 'INFO': return '🔔';
+    default: return '📋';
+  }
+}
 
   getTimeAgo(createdAt: string): string {
     const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);

@@ -140,3 +140,16 @@
 .mark-read-btn:hover {
   background: #1e3a6e;
 }
+
+.view-checklist-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  color: #2a5298;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.view-checklist-link:hover {
+  text-decoration: underline;
+}
