@@ -13,38 +13,53 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔐 LOGIN API
+  // LOGIN API
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, { email, password });
   }
 
-  // 💾 SAVE TOKEN + ROLE
+  // SAVE TOKEN + ROLE
   saveTokenAndRole(token: string, role: string) {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
   }
 
-  // 💾 SAVE PERMISSIONS
-  savePermissions(perms: any[]) {
-    localStorage.setItem('permissions', JSON.stringify(perms));
+  // SAVE PERMISSIONS
+  savePermissions(perms: string[]) {
+    localStorage.setItem('permissions', JSON.stringify(perms || []));
   }
 
-  // 🔍 GET TOKEN
+  // GET PERMISSIONS
+  getPermissions(): string[] {
+    const perms = localStorage.getItem('permissions');
+    return perms ? JSON.parse(perms) : [];
+  }
+
+  // CHECK PERMISSION
+  hasPermission(permissionName: string): boolean {
+    if (this.isAdmin()) {
+      return true;
+    }
+
+    return this.getPermissions().includes(permissionName);
+  }
+
+  // GET TOKEN
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  // 🔍 CHECK LOGIN
+  // CHECK LOGIN
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  // 🔍 CHECK ADMIN
+  // CHECK ADMIN
   isAdmin(): boolean {
     return localStorage.getItem('role') === 'ADMIN';
   }
 
-  // 🚪 LOGOUT
+  // LOGOUT
   logout() {
     localStorage.clear();
   }

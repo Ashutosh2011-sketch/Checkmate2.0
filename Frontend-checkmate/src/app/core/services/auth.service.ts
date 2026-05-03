@@ -52,10 +52,23 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('permissions');
-    localStorage.removeItem('userName');
-    this.router.navigate(['/login']); 
+    const clearAndGoLogin = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('permissions');
+      localStorage.removeItem('userName');
+      this.router.navigate(['/login']);
+    };
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      clearAndGoLogin();
+      return;
+    }
+
+    this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+      next: () => clearAndGoLogin(),
+      error: () => clearAndGoLogin()
+    });
   }
 }

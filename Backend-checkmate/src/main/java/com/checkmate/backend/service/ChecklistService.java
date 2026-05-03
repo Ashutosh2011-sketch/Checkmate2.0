@@ -1,6 +1,7 @@
 
 package com.checkmate.backend.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,9 +48,9 @@ public class ChecklistService {
     }
 
     @Transactional
-    public ChecklistDto save(ChecklistDto dto) {
+    public ChecklistDto save(ChecklistDto dto, String creatorEmail, String clientIp) {
 
-        Checklist entity = toEntity(dto);
+        Checklist entity = toEntity(dto, creatorEmail, clientIp);
         Checklist saved = repository.save(entity);
 
         triggerAssignmentNotifications(dto);
@@ -93,13 +94,16 @@ public class ChecklistService {
         }
     }
 
-    private Checklist toEntity(ChecklistDto dto) {
+    private Checklist toEntity(ChecklistDto dto, String creatorEmail, String clientIp) {
         Checklist checklist = new Checklist();
         checklist.setChecklistName(dto.getChecklistName());
         checklist.setDepartment(dto.getDepartment());
         checklist.setVisibility(dto.getVisibility());
         checklist.setWorkflowType(dto.getWorkflowType());
         checklist.setCompleted(dto.isCompleted());
+        checklist.setCreatedAt(LocalDateTime.now());
+        checklist.setCreatedBy(creatorEmail);
+        checklist.setCreatedIp(clientIp);
 
         List<Section> sections = new ArrayList<>();
 
@@ -150,6 +154,9 @@ public class ChecklistService {
         dto.setVisibility(checklist.getVisibility());
         dto.setWorkflowType(checklist.getWorkflowType());
         dto.setCompleted(checklist.isCompleted());
+        dto.setCreatedAt(checklist.getCreatedAt());
+        dto.setCreatedBy(checklist.getCreatedBy());
+        dto.setCreatedIp(checklist.getCreatedIp());
 
         List<SectionDto> sectionDtos = new ArrayList<>();
 
@@ -179,6 +186,8 @@ public class ChecklistService {
                         taskDto.setRemindBefore(task.getRemindBefore());
                         taskDto.setEscalateTo(task.getEscalateTo());
                         taskDto.setShowAdvanced(task.isShowAdvanced());
+                        taskDto.setCompletedAt(task.getCompletedAt());
+                        taskDto.setCompletedBy(task.getCompletedBy());
 
                         taskDtos.add(taskDto);
                     }

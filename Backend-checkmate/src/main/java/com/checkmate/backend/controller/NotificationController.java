@@ -50,4 +50,37 @@ public class NotificationController {
         notificationRepository.save(notification);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/admin")
+    public ResponseEntity<List<Notification>> getAdminNotifications(Principal principal) {
+        AppUser user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getRole().equals("ADMIN")) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<Notification> notifications = notificationRepository
+                .findByUserIdAndIsReadFalseOrderByCreatedAtDesc(user.getId());
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    @PutMapping("/admin/mark-all-read")
+    @Transactional
+    public ResponseEntity<Void> markAllAdminRead(Principal principal) {
+        AppUser user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getRole().equals("ADMIN")) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<Notification> notifications = notificationRepository
+                .findByUserIdAndIsReadFalseOrderByCreatedAtDesc(user.getId());
+
+        notifications.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(notifications);
+        return ResponseEntity.ok().build();
+    }
 }

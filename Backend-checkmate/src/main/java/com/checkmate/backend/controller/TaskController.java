@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,8 @@ public class TaskController {
             dto.conditionExpectedOutcome = task.getConditionExpectedOutcome();
             dto.sortOrder = task.getSortOrder();
             dto.workflowType = "SEQUENTIAL";
+            dto.completedAt = task.getCompletedAt();
+            dto.completedBy = task.getCompletedBy();
 
             return dto;
         }).collect(Collectors.toList());
@@ -82,7 +86,7 @@ public class TaskController {
 
     // 🔥 TOGGLE TASK (MAIN FIX)
     @PutMapping("/toggle/{taskId}")
-    public Task toggleTask(@PathVariable Long taskId) {
+    public Task toggleTask(@PathVariable Long taskId, Principal principal) {
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -92,6 +96,15 @@ public class TaskController {
         task.setCompleted(newStatus);
         task.setCompletionPercent(newStatus ? 100 : 0);
         task.setStatus(newStatus ? "Completed" : "Pending");
+        if (newStatus) {
+            task.setCompletedAt(LocalDateTime.now());
+            if (principal != null) {
+                task.setCompletedBy(principal.getName());
+            }
+        } else {
+            task.setCompletedAt(null);
+            task.setCompletedBy(null);
+        }
 
         return taskRepository.save(task);
     }
@@ -112,6 +125,8 @@ public class TaskController {
         public String conditionExpectedOutcome;
         public Integer sortOrder;
         public String workflowType;
+        public LocalDateTime completedAt;
+        public String completedBy;
 
         public TaskResponse() {}
     }

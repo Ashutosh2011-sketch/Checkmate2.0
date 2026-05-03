@@ -108,6 +108,21 @@
   color: #7b1fa2;
 }
 
+.badge.checklist-created {
+  background: #e0f7fa;
+  color: #00838f;
+}
+
+.logs-status {
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  color: #c62828;
+}
+
+.logs-status.muted {
+  color: #6c757d;
+}
+
 /* Audit Trail */
 .audit-list {
   max-height: 350px;

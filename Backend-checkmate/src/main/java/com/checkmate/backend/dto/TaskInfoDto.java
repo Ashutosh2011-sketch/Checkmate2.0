@@ -1,5 +1,7 @@
 package com.checkmate.backend.dto;
 
+import java.time.LocalDateTime;
+
 public class TaskInfoDto {
 
     private Long id;
@@ -9,6 +11,8 @@ public class TaskInfoDto {
     private String checklistName;
     private int completionPercent;
     private boolean completed;
+    private LocalDateTime completedAt;
+    private String completedBy;
 
     public TaskInfoDto() {}
 
@@ -45,4 +49,10 @@ public class TaskInfoDto {
 
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public String getCompletedBy() { return completedBy; }
+    public void setCompletedBy(String completedBy) { this.completedBy = completedBy; }
 }

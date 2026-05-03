@@ -11,27 +11,32 @@
     <!-- Card 1: Access Logs -->
     <div class="card">
       <h3>Access Logs</h3>
+      <p class="logs-status" *ngIf="logsLoadError">{{ logsLoadError }}</p>
+      <p class="logs-status muted" *ngIf="isLoadingLogs && !logsLoadError">Loading activity…</p>
       <div class="table-container">
         <table class="access-table">
           <thead>
             <tr>
               <th>User</th>
               <th>Activity</th>
-              <th>Task Name</th>
+              <th>Task / Checklist</th>
               <th>Timestamp</th>
               <th>IP Address</th>
             </tr>
           </thead>
           <tbody>
+            <tr *ngIf="!isLoadingLogs && accessLogs.length === 0 && !logsLoadError">
+              <td colspan="5">No activity recorded yet.</td>
+            </tr>
             <tr *ngFor="let log of accessLogs">
-              <td>{{ log.user }}</td>
+              <td>{{ log.username }}</td>
               <td>
                 <span class="badge" [ngClass]="getActivityBadgeClass(log.activityType)">
                   {{ log.activityType }}
                 </span>
               </td>
-              <td>{{ log.taskName }}</td>
-              <td>{{ formatTimestamp(log.timestamp) }}</td>
+              <td>{{ log.resourceDetail }}</td>
+              <td>{{ formatTimestamp(log.occurredAt) }}</td>
               <td>{{ log.ipAddress }}</td>
             </tr>
           </tbody>
