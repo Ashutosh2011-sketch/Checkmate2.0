@@ -56,6 +56,7 @@ public class TaskController {
     }
 
     // ✅ GET TASKS BY USER
+ // ✅ GET TASKS VISIBLE TO USER
     @GetMapping("/user/{username}")
     public ResponseEntity<List<TaskResponse>> getTasksByUser(@PathVariable String username) {
 
@@ -71,18 +72,28 @@ public class TaskController {
             dto.dueDateDays = ((Number) row[4]).intValue();
             dto.status = ((Boolean) row[5]) ? "Completed" : "Pending";
             dto.sectionName = (String) row[6];
-            dto.assignees = List.of(((String) row[7]).split(","));
 
-            dto.workflowType = "SEQUENTIAL";
+            String assigneeValue = row[7] != null ? (String) row[7] : "";
+            dto.assignees = assigneeValue.isBlank()
+                    ? List.of()
+                    : List.of(assigneeValue.split(","));
 
-         // 🔥 ADD THIS LINE (MAIN FIX)
-         dto.dependsOn = row[8] != null ? String.valueOf(row[8]) : null;
+            dto.dependsOn = row[8] != null ? String.valueOf(row[8]) : null;
+            dto.checklistId = row[9] != null ? ((Number) row[9]).longValue() : null;
+            dto.checklistName = row[10] != null ? (String) row[10] : "";
+            dto.department = row[11] != null ? (String) row[11] : "";
+            dto.visibility = row[12] != null ? (String) row[12] : "";
+            dto.workflowType = row[13] != null ? (String) row[13] : "Sequential";
+            dto.conditionDependentOn = row[14] != null ? String.valueOf(row[14]) : null;
+            dto.conditionExpectedOutcome = row[15] != null ? String.valueOf(row[15]) : null;
+            dto.sortOrder = row[16] != null ? ((Number) row[16]).intValue() : 0;
 
             return dto;
         }).toList();
 
         return ResponseEntity.ok(response);
     }
+
 
     // 🔥 TOGGLE TASK (MAIN FIX)
     @PutMapping("/toggle/{taskId}")
@@ -119,7 +130,10 @@ public class TaskController {
         public String status;
         public String sectionName;
         public List<String> assignees;
-
+        public Long checklistId;
+        public String checklistName;
+        public String department;
+        public String visibility;
         public String dependsOn;
         public String conditionDependentOn;
         public String conditionExpectedOutcome;

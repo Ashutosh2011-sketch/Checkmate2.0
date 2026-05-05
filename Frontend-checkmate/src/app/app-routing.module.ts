@@ -37,7 +37,8 @@ const routes: Routes = [
 
   // === USER ROUTES (AuthGuard = must be logged in) ===
   { path: 'dashboard', component: UserDashboardComponent, canActivate: [AuthGuard] },
-  { path: 'checklists', component: ChecklistDetailComponent, canActivate: [AuthGuard] },
+  { path: 'checklists', component: AllChecklistComponent, canActivate: [AuthGuard] },
+  { path: 'checklist-detail/:id', component: ChecklistDetailComponent, canActivate: [AuthGuard] },
   { path: 'checklist-tracker', component: ChecklistTrackerComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
 

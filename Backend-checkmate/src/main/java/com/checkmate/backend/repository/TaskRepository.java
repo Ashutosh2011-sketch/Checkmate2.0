@@ -12,7 +12,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	
 	
 
-    // ✅ EXISTING
+    // âœ… EXISTING
     @Query(value = """
         SELECT t.title
         FROM tasks t
@@ -41,7 +41,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     	        @Param("department") String department
     	);
 
-    // ✅ EXISTING
+    // âœ… EXISTING
     @Query(value = """
         SELECT t.id, t.title, t.priority, t.description,
                s.section_name, c.checklist_name, c.id as checklist_id
@@ -53,7 +53,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<Object[]> findFullTasksByUserName(@Param("userName") String userName);
 
-    // 🔥 NEW → THIS FIXES YOUR USER TASK API (USE THIS IN CONTROLLER)
+    // ðŸ”¥ NEW â†’ THIS FIXES YOUR USER TASK API (USE THIS IN CONTROLLER)
     @Query(value = """
     	    SELECT 
     	        t.id,
@@ -63,18 +63,50 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     	        t.due_date_days,
     	        t.completed,
     	        s.section_name,
-    	        STRING_AGG(ta.assignee, ',') as assignees,
-    	        t.depends_on   -- ✅ ADD THIS
+    	        COALESCE(STRING_AGG(DISTINCT ta.assignee, ','), '') as assignees,
+    	        t.depends_on,
+    	        c.id as checklist_id,
+    	        c.checklist_name,
+    	        c.department,
+    	        c.visibility,
+    	        c.workflow_type,
+    	        t.condition_dependent_on,
+    	        t.condition_expected_outcome,
+    	        t.sort_order
     	    FROM tasks t
     	    JOIN sections s ON t.section_id = s.id
-    	    JOIN task_assignees ta ON ta.task_id = t.id
-    	    WHERE LOWER(ta.assignee) = LOWER(:username)
-    	    GROUP BY t.id, t.title, t.description, t.priority, 
-    	             t.due_date_days, t.completed, s.section_name, t.depends_on
+    	    JOIN checklists c ON s.checklist_id = c.id
+    	    LEFT JOIN task_assignees ta ON ta.task_id = t.id
+    	    WHERE EXISTS (
+    	        SELECT 1
+    	        FROM task_assignees current_user_assignee
+    	        WHERE current_user_assignee.task_id = t.id
+    	          AND LOWER(TRIM(SPLIT_PART(current_user_assignee.assignee, '(', 1))) = LOWER(TRIM(:username))
+    	    )
+    	    GROUP BY 
+    	        t.id,
+	        s.id,
+    	        t.title,
+    	        t.description,
+    	        t.priority,
+    	        t.due_date_days,
+    	        t.completed,
+    	        s.section_name,
+    	        t.depends_on,
+    	        c.id,
+    	        c.checklist_name,
+    	        c.department,
+    	        c.visibility,
+    	        c.workflow_type,
+    	        t.condition_dependent_on,
+    	        t.condition_expected_outcome,
+    	        t.sort_order
+    	    ORDER BY c.id, s.id, t.sort_order, t.id
     	""", nativeQuery = true)
     	List<Object[]> findTasksByExactUser(@Param("username") String username);
 
-    // ✅ EXISTING
+
+    // âœ… EXISTING
     @Query(value = """
         SELECT COUNT(t.id)
         FROM tasks t
@@ -83,7 +115,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     int countTasksByChecklistId(@Param("checklistId") Long checklistId);
 
-    // ✅ EXISTING
+    // âœ… EXISTING
     @Query(value = """
         SELECT COUNT(t.id)
         FROM tasks t
@@ -93,18 +125,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     long countCompletedTasks();
 
-    // 📊 Total tasks
+    // ðŸ“Š Total tasks
     @Query(value = "SELECT COUNT(*) FROM tasks", nativeQuery = true)
     long countTotalTasks();
 
-    // 📊 Pending tasks
+    // ðŸ“Š Pending tasks
     @Query(value = """
         SELECT COUNT(*) FROM tasks t
         WHERE t.completed = false
     """, nativeQuery = true)
     long countPendingTasks();
 
-    // ⏰ Overdue
+    // â° Overdue
     @Query(value = """
         SELECT 
             t.id, t.title, t.priority, t.due_date_days,
@@ -122,7 +154,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<Object[]> findAllOverdueTasks(@Param("currentDayOfYear") int currentDayOfYear);
 
-    // 👤 Tasks assigned
+    // ðŸ‘¤ Tasks assigned
     @Query(value = """
         SELECT 
             t.id, t.title, t.priority, t.completed,
@@ -135,7 +167,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<Object[]> findTasksByAssignee(@Param("userName") String userName);
 
-    // 📊 Department stats
+    // ðŸ“Š Department stats
     @Query(value = """
         SELECT 
             COALESCE(c.department, 'Unassigned') as department,
@@ -149,7 +181,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<Object[]> getTaskStatsByDepartment(@Param("currentDayOfYear") int currentDayOfYear);
 
-    // 👤 User performance
+    // ðŸ‘¤ User performance
     @Query(value = """
         SELECT 
             ta.assignee,
@@ -166,7 +198,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     """, nativeQuery = true)
     List<Object[]> getUserPerformanceStats(@Param("currentDayOfYear") int currentDayOfYear);
 
-    // ✅ CHECKLIST DETAIL PAGE
+    // âœ… CHECKLIST DETAIL PAGE
     @Query("""
         SELECT t FROM Task t
         JOIN FETCH t.section s

@@ -90,8 +90,25 @@
 .card-title {
   font-size: 18px;
   color: #0f172a;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   font-weight: 600;
+}
+
+.visibility-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin-bottom: 14px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.visibility-badge.public {
+  background: #dcfce7;
+  color: #15803d;
 }
 
 .progress-section {

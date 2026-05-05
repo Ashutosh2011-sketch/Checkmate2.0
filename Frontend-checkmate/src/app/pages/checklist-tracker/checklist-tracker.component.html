@@ -1,56 +1,62 @@
 <div class="page">
 
-<h1>Checklist Tracker</h1>
+  <h1>Checklist Tracker</h1>
 
-<div class="card-container">
+  <div class="card-container">
 
-<div *ngFor="let checklist of checklists" class="card">
+    <div *ngFor="let checklist of checklists" class="card">
 
-<h3>{{checklist.name}}</h3>
-<p><b>Department:</b> {{checklist.department}}</p>
+      <h3>{{ checklist.name }}</h3>
+      <p><b>Department:</b> {{ checklist.department }}</p>
+      <p><b>Visibility:</b> {{ checklist.visibility }}</p>
+      <p><b>Workflow:</b> {{ checklist.workflowType }}</p>
 
-<div class="progress-bar">
-  <div class="progress-fill"
-       [style.width.%]="getProgress(checklist)">
+      <div class="progress-bar">
+        <div class="progress-fill"
+             [style.width.%]="getProgress(checklist)">
+        </div>
+      </div>
+
+      <p>{{ getProgress(checklist) }}% Complete</p>
+      <span class="status">{{ getStatus(checklist) }}</span>
+
+      <hr>
+
+      <div *ngFor="let task of getOrderedTasks(checklist)"
+           class="task"
+           [class.locked]="isTaskLocked(task, checklist)"
+           [class.completed]="task.completed">
+
+        <label class="task-row">
+
+          <input type="checkbox"
+                 [checked]="task.completed"
+                 (change)="toggleTask(checklist, task)"
+                 [disabled]="isTaskLocked(task, checklist)">
+
+          <span class="task-title">{{ task.title }}</span>
+
+        </label>
+
+        <p *ngIf="isTaskLocked(task, checklist)" class="lock-message">
+          {{ getLockMessage(task, checklist) }}
+        </p>
+
+        <div class="meta">
+
+          <span class="priority {{ task.priority.toLowerCase() }}">
+            {{ task.priority }}
+          </span>
+
+          <span class="user">
+            Assigned: {{ task.assignees.join(', ') || 'Unassigned' }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
-</div>
-
-<p>{{getProgress(checklist)}}% Complete</p>
-<span class="status">{{getStatus(checklist)}}</span>
-
-<hr>
-
-<!-- 🔥 ORDERED TASK FLOW -->
-<div *ngFor="let task of getOrderedTasks(checklist)"
-     class="task"
-     [class.locked]="isTaskLocked(task, checklist)">
-
-<label class="task-row">
-
-<input type="checkbox"
-       [checked]="task.completed"
-       (change)="toggleTask(checklist, task)"
-       [disabled]="isTaskLocked(task, checklist)">
-
-<span class="task-title">{{task.title}}</span>
-
-</label>
-
-<div class="meta">
-
-<span class="priority {{task.priority.toLowerCase()}}">
-  {{task.priority}}
-</span>
-
-<span class="user">
-  👤 {{task.assignedTo || 'Unassigned'}}
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
 </div>

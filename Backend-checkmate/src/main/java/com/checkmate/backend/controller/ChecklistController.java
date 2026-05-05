@@ -28,7 +28,9 @@ public class ChecklistController {
     }
 
     @GetMapping("/all")
-    public List<ChecklistSummaryDto> getAllChecklists() {
-        return checklistService.getAllSummaries();
+    public List<ChecklistSummaryDto> getAllChecklists(
+            @RequestParam(required = false) String userName,
+            @RequestParam(required = false) String role) {
+        return checklistService.getVisibleSummaries(userName, role);
     }
 }

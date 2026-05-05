@@ -19,6 +19,7 @@ export interface ChecklistSummary {
   status: string;
   deadline: string;
   priority: string;
+  visibility: string;
 }
 
 

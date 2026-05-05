@@ -47,6 +47,16 @@ public class ChecklistService {
         return repository.findAllSummaries();
     }
 
+    @Transactional(readOnly = true)
+    public List<ChecklistSummaryDto> getVisibleSummaries(String userName, String role) {
+        if (role != null && role.toUpperCase().contains("ADMIN")) {
+            return repository.findAllSummaries();
+        }
+
+        String safeUserName = userName == null ? "" : userName.trim();
+        return repository.findVisibleSummariesForUser(safeUserName);
+    }
+
     @Transactional
     public ChecklistDto save(ChecklistDto dto, String creatorEmail, String clientIp) {
 
