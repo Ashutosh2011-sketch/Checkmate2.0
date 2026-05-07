@@ -29,6 +29,9 @@ public class AppUser {
     @Column
     private String designation;
 
+    @Column(name = "personal_email")
+    private String personalEmail;
+
     public Long getId() {
         return id;
     }
@@ -83,5 +86,13 @@ public class AppUser {
 
     public void setDesignation(String designation) {
         this.designation = designation;
+    }
+
+    public String getPersonalEmail() {
+        return personalEmail;
+    }
+
+    public void setPersonalEmail(String personalEmail) {
+        this.personalEmail = personalEmail;
     }
 }

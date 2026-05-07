@@ -28,13 +28,16 @@ public class ChecklistService {
     private final ChecklistRepository repository;
     private final NotificationService notificationService;
     private final AppUserRepository userRepository;
+    private final EmailService emailService;
 
     public ChecklistService(ChecklistRepository repository,
             NotificationService notificationService,
-            AppUserRepository userRepository) {
+            AppUserRepository userRepository,
+            EmailService emailService) {
         this.repository = repository;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @Transactional(readOnly = true)
@@ -69,37 +72,88 @@ public class ChecklistService {
     }
 
     private void triggerAssignmentNotifications(ChecklistDto dto) {
-        Set<String> uniqueAssigneeFullNames = new HashSet<>();
 
-        if (dto.getSections() != null) {
-            for (SectionDto section : dto.getSections()) {
-                if (section.getTasks() != null) {
-                    for (TaskDto task : section.getTasks()) {
-                        if (task.getAssignees() != null) {
-                            uniqueAssigneeFullNames.addAll(task.getAssignees());
+        if (dto.getSections() == null)
+            return;
+
+        Set<String> globalNotifiedUsers = new HashSet<>();
+
+        for (SectionDto section : dto.getSections()) {
+            if (section.getTasks() == null)
+                continue;
+            for (TaskDto taskDto : section.getTasks()) {
+                if (taskDto.getAssignees() == null)
+                    continue;
+                for (String fullName : taskDto.getAssignees()) {
+                    String nameOnly = fullName.contains("(")
+                            ? fullName.split("\\(")[0].trim()
+                            : fullName.trim();
+
+                    if (globalNotifiedUsers.contains(nameOnly))
+                        continue;
+                    globalNotifiedUsers.add(nameOnly);
+
+                    userRepository.findByName(nameOnly).ifPresent(user -> {
+
+                        // Assignment in-app notification — ONCE per user
+                        notificationService.createNotification(
+                                user,
+                                "Admin has assigned you a new checklist: "
+                                        + dto.getChecklistName(),
+                                "INFO");
+
+                        // Assignment email — ONCE per user
+                        if (user.getPersonalEmail() != null
+                                && !user.getPersonalEmail().isEmpty()) {
+                            emailService.sendChecklistAssignedEmail(
+                                    user.getPersonalEmail(),
+                                    user.getName(),
+                                    dto.getChecklistName());
                         }
-                    }
+                    });
                 }
             }
         }
 
-        for (String fullName : uniqueAssigneeFullNames) {
-            try {
+        for (SectionDto section : dto.getSections()) {
+            if (section.getTasks() == null)
+                continue;
 
-                String nameOnly = fullName.contains("(")
-                        ? fullName.split("\\(")[0].trim()
-                        : fullName.trim();
+            for (TaskDto taskDto : section.getTasks()) {
+                if (taskDto.getAssignees() == null)
+                    continue;
 
-                userRepository.findByName(nameOnly).ifPresent(user -> {
-                    notificationService.createNotification(
-                            user,
-                            "Admin has assigned you a new checklist: " + dto.getChecklistName(),
-                            "INFO");
-                    System.out.println("DEBUG: Notification successfully sent to " + nameOnly);
-                });
-            } catch (Exception e) {
+                // Only process tasks with 1 day due date
+                if (taskDto.getDueDateDays() != 1)
+                    continue;
 
-                System.err.println("DEBUG: Failed to notify " + fullName + ". Reason: " + e.getMessage());
+                for (String fullName : taskDto.getAssignees()) {
+                    String nameOnly = fullName.contains("(")
+                            ? fullName.split("\\(")[0].trim()
+                            : fullName.trim();
+
+                    userRepository.findByName(nameOnly).ifPresent(user -> {
+
+                        // Reminder in-app notification
+                        notificationService.createNotification(
+                                user,
+                                "Reminder: Task \""
+                                        + taskDto.getTitle()
+                                        + "\" is due tomorrow! Checklist: "
+                                        + dto.getChecklistName(),
+                                "REMINDER");
+
+                        // Reminder email
+                        if (user.getPersonalEmail() != null
+                                && !user.getPersonalEmail().isEmpty()) {
+                            emailService.sendReminderEmail(
+                                    user.getPersonalEmail(),
+                                    user.getName(),
+                                    taskDto.getTitle(),
+                                    dto.getChecklistName());
+                        }
+                    });
+                }
             }
         }
     }

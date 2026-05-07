@@ -87,23 +87,10 @@ public class DataSeeder implements CommandLineRunner {
                     newAppUser.setDepartment(user.getDepartment());
                     newAppUser.setDesignation(user.getRole());
                     appUserRepository.save(newAppUser);
-                    System.out.println("Created AppUser for login: " + user.getEmail() + " -> password: " + plainPassword);
+                    System.out.println(
+                            "Created AppUser for login: " + user.getEmail() + " -> password: " + plainPassword);
                 }
             }
-        }
-
-        // 3. Re-hash ALL user passwords on every startup to fix any corruption
-        for (AppUser user : appUserRepository.findAll()) {
-            String plainPassword;
-            if ("ADMIN".equals(user.getRole())) {
-                plainPassword = "admin123";
-            } else {
-                String name = user.getEmail().split("@")[0];
-                plainPassword = name + "234";
-            }
-            user.setPassword(passwordEncoder.encode(plainPassword));
-            appUserRepository.save(user);
-            System.out.println("Password re-hashed for: " + user.getEmail() + " -> " + plainPassword);
         }
 
         // 4. Sync: Ensure every User record has a matching designation in AppUser
@@ -140,8 +127,7 @@ public class DataSeeder implements CommandLineRunner {
                 approver.setDescription("Can approve checklists and manage workflows");
                 roleRepository.save(approver);
                 seedRolePermissions(approver, allPerms, Map.of(
-                    p1, true, p2, true, p3, true, p4, false, p5, true, p6, true
-                ));
+                        p1, true, p2, true, p3, true, p4, false, p5, true, p6, true));
 
                 // Reviewer: Create Checklists + View Reports
                 Role reviewer = new Role();
@@ -149,8 +135,7 @@ public class DataSeeder implements CommandLineRunner {
                 reviewer.setDescription("Can review checklists and view reports");
                 roleRepository.save(reviewer);
                 seedRolePermissions(reviewer, allPerms, Map.of(
-                    p1, true, p2, false, p3, false, p4, false, p5, true, p6, false
-                ));
+                        p1, true, p2, false, p3, false, p4, false, p5, true, p6, false));
 
                 // Executor: Create Checklists only
                 Role executor = new Role();
@@ -158,8 +143,7 @@ public class DataSeeder implements CommandLineRunner {
                 executor.setDescription("Can execute assigned checklists");
                 roleRepository.save(executor);
                 seedRolePermissions(executor, allPerms, Map.of(
-                    p1, true, p2, false, p3, false, p4, false, p5, false, p6, false
-                ));
+                        p1, true, p2, false, p3, false, p4, false, p5, false, p6, false));
 
                 System.out.println("Default roles seeded!");
             }
