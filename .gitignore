@@ -17,3 +17,5 @@ Checkmate/*.log
 .DS_Store
 Thumbs.db
 .vscode/
+
+Backend-checkmate/src/main/resources/application.properties

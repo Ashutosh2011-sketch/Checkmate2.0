@@ -10,6 +10,8 @@ spring.datasource.url=jdbc:postgresql://ep-quiet-leaf-a1xr1nuj.ap-southeast-1.aw
 spring.datasource.username=neondb_owner
 spring.datasource.password=npg_UrR43LvHsaPu
 spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
 
 # Hibernate/JPA + Flyway
 spring.jpa.hibernate.ddl-auto=update
@@ -23,3 +25,8 @@ spring.flyway.baseline-version=1
 # File Upload Config
 spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
+
+# SendGrid
+sendgrid.api.key=SENDGRID_API_KEY
+sendgrid.from.email=SENDGRID_EMAIL
+sendgrid.from.name=Checkmate

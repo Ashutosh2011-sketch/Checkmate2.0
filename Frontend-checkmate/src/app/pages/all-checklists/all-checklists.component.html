@@ -25,6 +25,9 @@
      (click)="openDetail(item)">
   
   <h3 class="card-title">{{ item.title }}</h3>
+  <span class="visibility-badge" [class.public]="item.visibility.toLowerCase() === 'public'">
+    {{ item.visibility }}
+  </span>
 
   <div class="card-footer">
     <div class="assignee-info">

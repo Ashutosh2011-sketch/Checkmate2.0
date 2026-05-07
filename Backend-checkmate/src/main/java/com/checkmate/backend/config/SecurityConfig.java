@@ -59,19 +59,31 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // User-side tracker APIs
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/user/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/toggle/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/checklist/**").authenticated()
+
+                        // User-side checklist listing
+                        .requestMatchers(HttpMethod.GET, "/api/checklists/all").authenticated()
+
+                        // Allow Spring error page so real backend exceptions are visible while debugging
+                        .requestMatchers("/error").permitAll()
+
+                        // Admin-only APIs
                         .requestMatchers("/api/checklists/**").hasRole("ADMIN")
                         .requestMatchers("/api/security/**").hasRole("ADMIN")
+
                         .requestMatchers("/api/roles/**").authenticated()
                         .requestMatchers("/api/reports/**").authenticated()
                         .requestMatchers("/api/permissions/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/users/update-profile").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/collaboration/**").authenticated()
                         .requestMatchers("/api/dashboard/**").authenticated()
@@ -80,9 +92,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authenticationProvider(authenticationProvider())
-
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

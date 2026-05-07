@@ -10,6 +10,7 @@ interface User {
   department: string;
   role: string;
   email?: string;
+   personalEmail?: string; 
   active: boolean;
 }
 

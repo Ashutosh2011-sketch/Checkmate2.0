@@ -10,6 +10,7 @@ interface ChecklistItem {
   status: string;
   deadline: string;
   priority: string;
+  visibility: string;
 }
 
 @Component({
@@ -42,7 +43,8 @@ export class AllChecklistComponent implements OnInit {
           assignee: summary.assignee,
           status: summary.status,
           deadline: summary.deadline,
-          priority: summary.priority
+          priority: summary.priority,
+          visibility: summary.visibility || 'Private'
         }));
         this.filteredChecklists = [...this.allChecklists];
         this.loading = false;
@@ -86,13 +88,18 @@ export class AllChecklistComponent implements OnInit {
       const matchPriority = this.currentPriority === 'All' || item.priority === this.currentPriority;
 
       const matchSearch = item.title.toLowerCase().includes(this.searchQuery) || 
-       item.assignee.toLowerCase().includes(this.searchQuery);
+       item.assignee.toLowerCase().includes(this.searchQuery) ||
+       item.visibility.toLowerCase().includes(this.searchQuery);
       
       return matchStatus && matchPriority && matchSearch;
     });
   }
 
   openDetail(item: any) {
-      this.router.navigate(['/admin/checklist-detail', item.id]); 
+      const route = localStorage.getItem('role') === 'ADMIN'
+        ? ['/admin/checklist-detail', item.id]
+        : ['/checklist-detail', item.id];
+
+      this.router.navigate(route); 
   }
 }

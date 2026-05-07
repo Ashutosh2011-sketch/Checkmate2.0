@@ -12,7 +12,6 @@ export class TaskService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔥 GET TASKS BY USER (MAIN FUNCTION YOU NEED)
   getTasksByUser(userName: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/user/${userName}`);
   }

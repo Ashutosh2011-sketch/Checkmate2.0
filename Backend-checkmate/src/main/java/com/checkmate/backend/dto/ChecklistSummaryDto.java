@@ -7,16 +7,18 @@ public class ChecklistSummaryDto {
     private String status;
     private String deadline;
     private String priority;
+    private String visibility;
 
     public ChecklistSummaryDto() {}
 
-    public ChecklistSummaryDto(Long id, String title, String assignee, String status, Integer dueDays, String priority) {
+    public ChecklistSummaryDto(Long id, String title, String assignee, String status, Integer dueDays, String priority, String visibility) {
         this.id = id;
         this.title = title;
         this.assignee = assignee;
         this.status = status;
         this.deadline = formatDeadline(dueDays);
         this.priority = priority;
+        this.visibility = visibility;
     }
 
     public Long getId() {
@@ -65,6 +67,14 @@ public class ChecklistSummaryDto {
 
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
     }
 
     private String formatDeadline(Integer dueDays) {

@@ -13,7 +13,10 @@ export class ChecklistService extends ApiService {
   }
 
   getAllChecklists(): Observable<ChecklistSummary[]> {
-    return this.get<ChecklistSummary[]>('/checklists/all');
+    const userName = encodeURIComponent(localStorage.getItem('userName') || '');
+    const role = encodeURIComponent(localStorage.getItem('role') || '');
+
+    return this.get<ChecklistSummary[]>(`/checklists/all?userName=${userName}&role=${role}`);
   }
 
   // Existing method (KEEP IT)

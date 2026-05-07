@@ -24,13 +24,38 @@ public interface ChecklistRepository extends JpaRepository<Checklist, Long> {
            "COALESCE(STRING_AGG(DISTINCT ta.assignee, ', '), 'Unassigned') as assignee, " +
            "CASE WHEN c.completed THEN 'Completed' ELSE 'Pending' END as status, " +
            "MAX(t.due_date_days) as due_date_days, " +
-           "MAX(t.priority) as priority " +
+           "MAX(t.priority) as priority, " +
+           "c.visibility as visibility " +
            "FROM checklists c " +
            "LEFT JOIN sections s ON s.checklist_id = c.id " +
            "LEFT JOIN tasks t ON t.section_id = s.id " +
            "LEFT JOIN task_assignees ta ON ta.task_id = t.id " +
-           "GROUP BY c.id, c.checklist_name, c.completed", nativeQuery = true)
+           "GROUP BY c.id, c.checklist_name, c.completed, c.visibility", nativeQuery = true)
     List<ChecklistSummaryDto> findAllSummaries();
+
+    @Query(value = "SELECT " +
+           "c.id, " +
+           "c.checklist_name as title, " +
+           "COALESCE(STRING_AGG(DISTINCT ta.assignee, ', '), 'Unassigned') as assignee, " +
+           "CASE WHEN c.completed THEN 'Completed' ELSE 'Pending' END as status, " +
+           "MAX(t.due_date_days) as due_date_days, " +
+           "MAX(t.priority) as priority, " +
+           "c.visibility as visibility " +
+           "FROM checklists c " +
+           "LEFT JOIN sections s ON s.checklist_id = c.id " +
+           "LEFT JOIN tasks t ON t.section_id = s.id " +
+           "LEFT JOIN task_assignees ta ON ta.task_id = t.id " +
+           "WHERE LOWER(COALESCE(c.visibility, '')) = 'public' " +
+           "OR EXISTS ( " +
+           "    SELECT 1 " +
+           "    FROM sections visible_s " +
+           "    JOIN tasks visible_t ON visible_t.section_id = visible_s.id " +
+           "    JOIN task_assignees visible_ta ON visible_ta.task_id = visible_t.id " +
+           "    WHERE visible_s.checklist_id = c.id " +
+           "    AND LOWER(TRIM(SPLIT_PART(visible_ta.assignee, '(', 1))) = LOWER(TRIM(:userName)) " +
+           ") " +
+           "GROUP BY c.id, c.checklist_name, c.completed, c.visibility", nativeQuery = true)
+    List<ChecklistSummaryDto> findVisibleSummariesForUser(@Param("userName") String userName);
 
     // ─────────────────────────────────────────────────────────────────────────
     // 🆕 NEW METHODS FOR REPORTS
