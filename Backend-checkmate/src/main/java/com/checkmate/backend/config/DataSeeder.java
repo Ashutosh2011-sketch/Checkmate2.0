@@ -93,18 +93,18 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // 3. Re-hash ALL user passwords on every startup to fix any corruption
-        for (AppUser user : appUserRepository.findAll()) {
-            String plainPassword;
-            if ("ADMIN".equals(user.getRole())) {
-                plainPassword = "admin123";
-            } else {
-                String name = user.getEmail().split("@")[0];
-                plainPassword = name + "234";
-            }
-            user.setPassword(passwordEncoder.encode(plainPassword));
-            appUserRepository.save(user);
-            System.out.println("Password re-hashed for: " + user.getEmail() + " -> " + plainPassword);
-        }
+        // for (AppUser user : appUserRepository.findAll()) {
+        //     String plainPassword;
+        //     if ("ADMIN".equals(user.getRole())) {
+        //         plainPassword = "admin123";
+        //     } else {
+        //         String name = user.getEmail().split("@")[0];
+        //         plainPassword = name + "234";
+        //     }
+        //     user.setPassword(passwordEncoder.encode(plainPassword));
+        //     appUserRepository.save(user);
+        //     System.out.println("Password re-hashed for: " + user.getEmail() + " -> " + plainPassword);
+        // }
 
         // 4. Sync: Ensure every User record has a matching designation in AppUser
         for (User user : userRepository.findAll()) {
