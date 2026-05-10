@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.transaction.Transactional; // ✅ FIX: Required for PostgreSQL @Lob / oid streaming
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,7 +36,7 @@ public class CollaborationController {
     // ==================== COMMENTS ====================
 
     @GetMapping("/tasks/{taskId}/comments")
-    @Transactional // ✅ keeps JPA session open so lazy fields can be read
+    @Transactional
     public ResponseEntity<?> getComments(@PathVariable Long taskId) {
         try {
             List<TaskComment> comments = commentRepository.findByTaskIdOrderByCreatedAtDesc(taskId);
@@ -108,7 +108,7 @@ public class CollaborationController {
     // ==================== ATTACHMENTS ====================
 
     @GetMapping("/tasks/{taskId}/attachments")
-    @Transactional // THE KEY FIX — keeps lob stream accessible
+    @Transactional
     public ResponseEntity<?> getAttachments(@PathVariable Long taskId) {
         try {
             List<TaskAttachment> attachments = attachmentRepository.findByTaskId(taskId);
@@ -123,7 +123,8 @@ public class CollaborationController {
                 map.put("fileSize", a.getFileSize());
                 map.put("uploadedBy", a.getUploadedBy());
                 map.put("uploadedAt", a.getUploadedAt() != null ? a.getUploadedAt().toString() : "");
-                // ✅ fileData intentionally excluded — use /download endpoint for actual bytes
+                map.put("sourceType", a.getSourceType());
+                map.put("driveFileUrl", a.getDriveFileUrl());
                 result.add(map);
             }
 
@@ -135,6 +136,7 @@ public class CollaborationController {
         }
     }
 
+    // ── Local file upload (existing) ──────────────────────────────────────────
     @PostMapping("/tasks/{taskId}/attachments")
     @Transactional
     public ResponseEntity<?> uploadAttachment(@PathVariable Long taskId,
@@ -158,20 +160,49 @@ public class CollaborationController {
             attachment.setFileType(file.getContentType());
             attachment.setFileSize(file.getSize());
             attachment.setFileData(file.getBytes());
+            attachment.setSourceType("LOCAL");
             attachment.setUploadedBy(uploadedBy);
             attachment.setUploadedAt(LocalDateTime.now());
             attachment = attachmentRepository.save(attachment);
 
-            Map<String, Object> result = new LinkedHashMap<>();
-            result.put("id", attachment.getId());
-            result.put("taskId", taskId);
-            result.put("fileName", attachment.getFileName());
-            result.put("fileType", attachment.getFileType());
-            result.put("fileSize", attachment.getFileSize());
-            result.put("uploadedBy", attachment.getUploadedBy());
-            result.put("uploadedAt", attachment.getUploadedAt().toString());
+            return ResponseEntity.ok(buildAttachmentResponse(attachment, taskId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
 
-            return ResponseEntity.ok(result);
+    // ── Google Drive link save (NEW) ──────────────────────────────────────────
+    @PostMapping("/tasks/{taskId}/attachments/drive")
+    @Transactional
+    public ResponseEntity<?> saveDriveAttachment(
+            @PathVariable Long taskId,
+            @RequestBody Map<String, String> body) {
+        try {
+            Task task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
+
+            String fileName = body.get("fileName");
+            String driveUrl = body.get("driveFileUrl");
+            String uploadedBy = body.getOrDefault("uploadedBy", "Admin");
+
+            if (fileName == null || driveUrl == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "fileName and driveFileUrl are required"));
+            }
+
+            TaskAttachment attachment = new TaskAttachment();
+            attachment.setTask(task);
+            attachment.setFileName(fileName);
+            attachment.setFileType("application/google-drive");
+            attachment.setFileSize(0L);
+            attachment.setDriveFileUrl(driveUrl);
+            attachment.setSourceType("GOOGLE_DRIVE");
+            attachment.setUploadedBy(uploadedBy);
+            attachment.setUploadedAt(LocalDateTime.now());
+            attachment = attachmentRepository.save(attachment);
+
+            return ResponseEntity.ok(buildAttachmentResponse(attachment, taskId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
@@ -179,15 +210,22 @@ public class CollaborationController {
     }
 
     @GetMapping("/attachments/{attachmentId}/download")
-    @Transactional // ✅ Also needed here — lob must be streamed within transaction
+    @Transactional
     public ResponseEntity<?> downloadAttachment(@PathVariable Long attachmentId) {
         try {
             TaskAttachment attachment = attachmentRepository.findById(attachmentId)
                     .orElseThrow(() -> new RuntimeException("Attachment not found: " + attachmentId));
 
+            // Google Drive — redirect to URL
+            if ("GOOGLE_DRIVE".equals(attachment.getSourceType())) {
+                return ResponseEntity.status(302)
+                        .header(HttpHeaders.LOCATION, attachment.getDriveFileUrl())
+                        .build();
+            }
+
             byte[] data = attachment.getFileData();
             if (data == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "No file data stored for this attachment"));
+                return ResponseEntity.badRequest().body(Map.of("error", "No file data stored"));
             }
 
             String contentType = attachment.getFileType() != null
@@ -217,8 +255,6 @@ public class CollaborationController {
         }
     }
 
-    // ==================== COUNTS ====================
-
     @GetMapping("/tasks/{taskId}/counts")
     public ResponseEntity<?> getCounts(@PathVariable Long taskId) {
         try {
@@ -230,5 +266,20 @@ public class CollaborationController {
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("commentCount", 0, "attachmentCount", 0));
         }
+    }
+
+    // ── Helper ────────────────────────────────────────────────────────────────
+    private Map<String, Object> buildAttachmentResponse(TaskAttachment a, Long taskId) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("id", a.getId());
+        result.put("taskId", taskId);
+        result.put("fileName", a.getFileName());
+        result.put("fileType", a.getFileType());
+        result.put("fileSize", a.getFileSize());
+        result.put("uploadedBy", a.getUploadedBy());
+        result.put("uploadedAt", a.getUploadedAt().toString());
+        result.put("sourceType", a.getSourceType());
+        result.put("driveFileUrl", a.getDriveFileUrl());
+        return result;
     }
 }

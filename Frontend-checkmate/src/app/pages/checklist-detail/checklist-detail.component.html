@@ -150,11 +150,17 @@
                     {{ formatFileSize(att.fileSize) }} · {{ att.uploadedBy }} · {{ att.uploadedAt | date:'short' }}
                   </div>
                 </div>
-                <div class="attachment-actions">
-                  <button class="att-download-btn"
-                          (click)="downloadFile(att)"
-                          title="Download">⬇</button>
-                </div>
+               <div class="attachment-actions">
+  <a *ngIf="att.sourceType === 'GOOGLE_DRIVE'"
+     [href]="att.driveFileUrl"
+     target="_blank"
+     class="att-download-btn"
+     title="Open in Drive">🔗 Open</a>
+  <button *ngIf="att.sourceType !== 'GOOGLE_DRIVE'"
+          class="att-download-btn"
+          (click)="downloadFile(att)"
+          title="Download">⬇</button>
+</div>
               </div>
             </div>
           </div>

@@ -49,23 +49,25 @@
     </div>
 
     <div formArrayName="sections">
-      <div *ngFor="let section of sections.controls; let sIndex = index" [formGroupName]="sIndex" class="section-card">
-        
+      <div *ngFor="let section of sections.controls; let sIndex = index"
+           [formGroupName]="sIndex" class="section-card">
+
         <div class="section-header">
           <input type="text" formControlName="sectionName" class="section-title-input">
           <button type="button" class="btn-danger-sm" (click)="removeSection(sIndex)">Remove Section</button>
         </div>
 
         <div formArrayName="tasks" cdkDropList (cdkDropListDropped)="drop($event, sIndex)">
-          <div *ngFor="let task of tasks(sIndex).controls; let tIndex = index" [formGroupName]="tIndex" cdkDrag class="task-card">
-            
+          <div *ngFor="let task of tasks(sIndex).controls; let tIndex = index"
+               [formGroupName]="tIndex" cdkDrag class="task-card">
+
             <div class="task-basic">
               <div class="drag-handle" cdkDragHandle>⠿</div>
-              
+
               <div class="task-inputs">
                 <input type="text" formControlName="title" placeholder="Task Title" (blur)="updateDependenciesList()">
                 <input type="text" formControlName="description" placeholder="Short description">
-                
+
                 <select multiple formControlName="assignees" title="Hold CTRL to select multiple owners">
                   <option *ngFor="let user of availableUsers" [value]="user">{{user}}</option>
                 </select>
@@ -76,10 +78,60 @@
                   <option value="Low">🟢 Low</option>
                 </select>
 
-                 <div style="display: flex; align-items: center; gap: 5px;" title="Deadline in Days">
-                    <label style="margin: 0; font-size: 12px; color: #7f8c8d;">Due(Days):</label>
-                    <input type="number" formControlName="dueDateDays" min="1" style="width: 60px;">
+                <div style="display: flex; align-items: center; gap: 5px;" title="Deadline in Days">
+                  <label style="margin: 0; font-size: 12px; color: #7f8c8d;">Due(Days):</label>
+                  <input type="number" formControlName="dueDateDays" min="1" style="width: 60px;">
                 </div>
+
+                <!-- ── Attach Document Section ── -->
+                <div class="attach-section">
+
+                  <!-- Attach button with dropdown -->
+                  <div class="attach-dropdown-wrap">
+                    <button type="button" class="btn-attach"
+                            (click)="toggleAttachMenu(sIndex, tIndex)">
+                      📎 Attach Document
+                      <span class="attach-count"
+                            *ngIf="getAttachments(sIndex, tIndex).length > 0">
+                        ({{ getAttachments(sIndex, tIndex).length }})
+                      </span>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div class="attach-menu" *ngIf="isAttachMenuOpen(sIndex, tIndex)">
+                      <label class="attach-option">
+                        <span>💻 Upload from Device</span>
+                        <input type="file" hidden
+                               (change)="onLocalFileSelected($event, sIndex, tIndex)" />
+                      </label>
+                      <button type="button" class="attach-option"
+                              (click)="openGoogleDrivePicker(sIndex, tIndex)">
+                        <span>🔗 Upload from Google Drive</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Attached files list -->
+                  <div class="attached-files" *ngIf="getAttachments(sIndex, tIndex).length > 0">
+                    <div class="attached-file-item"
+                         *ngFor="let att of getAttachments(sIndex, tIndex); let aIndex = index">
+                      <span class="file-icon">
+                        {{ att.sourceType === 'GOOGLE_DRIVE' ? '🔗' : '📄' }}
+                      </span>
+                      <span class="file-name" [title]="att.fileName">{{ att.fileName }}</span>
+                      <span class="file-size">{{ formatFileSize(att.fileSize) }}</span>
+                      <span class="file-source"
+                            [style.color]="att.sourceType === 'GOOGLE_DRIVE' ? '#4285f4' : '#64748b'">
+                        {{ att.sourceType === 'GOOGLE_DRIVE' ? 'Drive' : 'Local' }}
+                      </span>
+                      <button type="button" class="btn-remove-file"
+                              (click)="removeAttachment(sIndex, tIndex, aIndex)">✕</button>
+                    </div>
+                  </div>
+
+                </div>
+                <!-- ── End Attach Section ── -->
+
               </div>
 
               <div class="task-actions">
@@ -93,37 +145,35 @@
                 <div>
                   <label>Depends On (Dependency)</label>
                   <select formControlName="dependsOn">
-  <option value="None">None</option>
-  <ng-container *ngFor="let dep of availableTasksForDependency">
-    <option *ngIf="dep !== task.value.title" [value]="dep">{{dep}}</option>
-  </ng-container>
-</select>
+                    <option value="None">None</option>
+                    <ng-container *ngFor="let dep of availableTasksForDependency">
+                      <option *ngIf="dep !== task.value.title" [value]="dep">{{dep}}</option>
+                    </ng-container>
+                  </select>
                 </div>
                 <div style="grid-column: span 2; background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #dfe6e9;">
-  <label style="color: #e67e22;">Show Only If (Conditional Logic) 🔀</label>
-  <div style="display: flex; gap: 10px; margin-top: 5px;">
-    
-      <select formControlName="conditionDependentOn" style="flex: 1;">
-        <option value="None">Always Show (No Condition)</option>
-        <ng-container *ngFor="let taskName of availableTasksForDependency">
-        <option *ngIf="taskName !== task.value.title" [value]="taskName">
-        IF Outcome of: {{taskName}}
-       </option>
-        </ng-container>
-      </select>
-    <select formControlName="conditionExpectedOutcome" 
-            *ngIf="task.value.conditionDependentOn !== 'None'" 
-            style="flex: 1;">
-      <option value="Pass">IS: Pass / Approved</option>
-      <option value="Fail">IS: Fail / Rejected</option>
-      <option value="WFH">IS: Remote / WFH</option>
-    </select>
-    
-  </div>
-</div>
+                  <label style="color: #e67e22;">Show Only If (Conditional Logic) 🔀</label>
+                  <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <select formControlName="conditionDependentOn" style="flex: 1;">
+                      <option value="None">Always Show (No Condition)</option>
+                      <ng-container *ngFor="let taskName of availableTasksForDependency">
+                        <option *ngIf="taskName !== task.value.title" [value]="taskName">
+                          IF Outcome of: {{taskName}}
+                        </option>
+                      </ng-container>
+                    </select>
+                    <select formControlName="conditionExpectedOutcome"
+                            *ngIf="task.value.conditionDependentOn !== 'None'"
+                            style="flex: 1;">
+                      <option value="Pass">IS: Pass / Approved</option>
+                      <option value="Fail">IS: Fail / Rejected</option>
+                      <option value="WFH">IS: Remote / WFH</option>
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label>Remind Before (Days)</label>
-                   <input type="number" formControlName="remindBefore" min="1" max="5" placeholder="1 to 5">
+                  <input type="number" formControlName="remindBefore" min="1" max="5" placeholder="1 to 5">
                 </div>
                 <div>
                   <label>Escalate To</label>
@@ -135,7 +185,7 @@
                 </div>
               </div>
             </div>
-            
+
           </div>
         </div>
 

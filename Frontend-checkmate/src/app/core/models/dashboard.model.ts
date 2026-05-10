@@ -53,6 +53,8 @@ export interface TaskAttachment {
   fileSize: number;
   uploadedBy: string;
   uploadedAt: string;
+  sourceType?: string;      // ← add karo
+  driveFileUrl?: string;    // ← add karo
 }
 
 export interface CollaborationCounts {
