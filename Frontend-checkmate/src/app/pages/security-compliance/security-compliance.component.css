@@ -333,20 +333,125 @@ input:checked + .slider:before {
 @media (max-width: 1024px) {
   .compliance-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .page-container {
+    padding: 22px 18px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header .subtitle {
+    font-size: 14px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .card h3 {
+    font-size: 16px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) and (min-width: 768px) {
+  /* Tablet: hide IP + Task / Checklist columns */
+  .access-table th:nth-child(3),
+  .access-table td:nth-child(3),
+  .access-table th:nth-child(5),
+  .access-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
   .page-container {
-    padding: 20px;
+    padding: 16px 12px;
   }
-  
-  .access-table {
-    font-size: 12px;
+
+  .page-header h1 {
+    font-size: 1.3rem;
   }
-  
-  .access-table thead th,
+
+  .setting-item,
+  .compliance-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .toggle {
+    align-self: flex-end;
+  }
+
+  /* Mobile: access logs as cards */
+  .access-table thead {
+    display: none;
+  }
+
+  .access-table tbody tr {
+    display: block;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+
   .access-table tbody td {
-    padding: 10px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 12px;
+  }
+
+  .access-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  .access-table tbody td::before {
+    font-weight: 600;
+    color: #94a3b8;
+    font-size: 10px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .access-table tbody td:nth-child(1)::before { content: "User"; }
+  .access-table tbody td:nth-child(2)::before { content: "Activity"; }
+  .access-table tbody td:nth-child(3)::before { content: "Task"; }
+  .access-table tbody td:nth-child(4)::before { content: "Time"; }
+  .access-table tbody td:nth-child(5)::before { content: "IP"; }
+
+  /* Empty / loading row: single cell */
+  .access-table tbody tr td:only-child {
+    display: block;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .access-table tbody tr td:only-child::before {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 1.15rem;
+  }
+
+  .audit-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 16px;
   }
 }

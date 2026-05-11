@@ -265,3 +265,104 @@ input:checked + .slider:before {
   border-color: #6a11cb;
   box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.1);
 }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .page-container {
+    padding: 22px 18px;
+  }
+
+  .top-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+
+  .user-list {
+    flex: 1 1 auto;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+
+  .side-panel {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-container {
+    padding: 16px 12px;
+  }
+
+  .top-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .top-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .user-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-buttons .primary-btn,
+  .form-buttons .secondary-btn {
+    width: 100%;
+    margin: 0;
+  }
+
+  .side-panel .primary-btn,
+  .side-panel .danger-btn {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 8px;
+  }
+
+  .custom-modal-card {
+    width: 100%;
+    max-width: calc(100vw - 32px);
+    margin: 16px;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-header h1 {
+    font-size: 1.15rem;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .user-row {
+    padding: 12px;
+  }
+}

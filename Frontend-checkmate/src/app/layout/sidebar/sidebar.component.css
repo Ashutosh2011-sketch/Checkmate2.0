@@ -1,23 +1,44 @@
+/* Host: collapse flex width when drawer mode so main content uses full width */
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Checkbox hack: toggled from header hamburger + scrim (no TS) */
+.sidebar-drawer-state {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+}
+
+.sidebar-drawer-scrim {
+  display: none;
+}
+
 /* ===== SIDEBAR CONTAINER ===== */
 .sidebar {
   width: 240px;
-  /* height: 100%; ki jagah 100vh taaki full screen cover ho */
-  height: 100vh; 
+  height: 100vh;
   background: linear-gradient(180deg, #1f3c88 0%, #1b2e66 100%);
   color: #cfd8ff;
   display: flex;
   flex-direction: column;
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
-  padding: 30px 15px; /* Padding thoda kam kiya taaki scroll space mile */
-  
-  /* Scroll handling for long admin menus */
+  padding: 30px 15px;
   overflow-y: auto;
   position: sticky;
   top: 0;
+  box-sizing: border-box;
 }
 
-/* Custom Scrollbar Styling (Modern look) */
 .sidebar::-webkit-scrollbar {
   width: 4px;
 }
@@ -26,161 +47,67 @@
   border-radius: 10px;
 }
 
-/* ===== MENU ===== */
 .menu {
   list-style: none;
   padding: 0;
   margin: 0;
-  flex: 1; /* Saari available jagah menu lega */
+  flex: 1;
 }
 
-/* ===== MENU ITEMS ===== */
 .menu li {
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 12px 18px; /* Padding thodi adjust ki */
-  margin-bottom: 8px; /* Margin kam kiya taaki saare admin links fit aayein */
+  padding: 12px 18px;
+  margin-bottom: 8px;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 15px; /* Thoda sa font size kam kiya for better fit */
+  font-size: 15px;
   font-weight: 500;
 }
 
-/* ===== DIVIDER (New) ===== */
 .sidebar-divider {
   border: 0;
   border-top: 1px solid rgba(207, 216, 255, 0.1);
   margin: 15px 10px;
 }
 
-/* Default icon & text colors */
-.icon, .menu-text {
+.icon,
+.menu-text {
   color: #cfd8ff;
   transition: 0.3s ease;
 }
 
-/* ===== HOVER EFFECT ===== */
 .menu li:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-.menu li:hover .icon, .menu li:hover .menu-text {
+.menu li:hover .icon,
+.menu li:hover .menu-text {
   color: #ffffff;
 }
 
-/* ===== ACTIVE ITEM ===== */
 .menu li.active {
   background: linear-gradient(90deg, #4f7df3, #2a5298);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   color: white;
 }
-.menu li.active .icon, .menu li.active .menu-text {
+.menu li.active .icon,
+.menu li.active .menu-text {
   color: white;
 }
 
-/* ===== LOGOUT SECTION (Force to bottom) ===== */
 .logout-section {
   margin-top: auto;
   padding-top: 20px;
 }
 .logout-section li {
-  color: #ffb3b3; /* Subtle red for logout */
-}
-.logout-section li:hover {
-  background: rgba(255, 79, 79, 0.1);
-}/* ===== SIDEBAR CONTAINER ===== */
-.sidebar {
-  width: 240px;
-  /* height: 100%; ki jagah 100vh taaki full screen cover ho */
-  height: 100vh; 
-  background: linear-gradient(180deg, #1f3c88 0%, #1b2e66 100%);
-  color: #cfd8ff;
-  display: flex;
-  flex-direction: column;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  padding: 30px 15px; /* Padding thoda kam kiya taaki scroll space mile */
-  
-  /* Scroll handling for long admin menus */
-  overflow-y: auto;
-  position: sticky;
-  top: 0;
-}
-
-/* Custom Scrollbar Styling (Modern look) */
-.sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-/* ===== MENU ===== */
-.menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex: 1; /* Saari available jagah menu lega */
-}
-
-/* ===== MENU ITEMS ===== */
-.menu li {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px 18px; /* Padding thodi adjust ki */
-  margin-bottom: 8px; /* Margin kam kiya taaki saare admin links fit aayein */
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 15px; /* Thoda sa font size kam kiya for better fit */
-  font-weight: 500;
-}
-
-/* ===== DIVIDER (New) ===== */
-.sidebar-divider {
-  border: 0;
-  border-top: 1px solid rgba(207, 216, 255, 0.1);
-  margin: 15px 10px;
-}
-
-/* Default icon & text colors */
-.icon, .menu-text {
-  color: #cfd8ff;
-  transition: 0.3s ease;
-}
-
-/* ===== HOVER EFFECT ===== */
-.menu li:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-.menu li:hover .icon, .menu li:hover .menu-text {
-  color: #ffffff;
-}
-
-/* ===== ACTIVE ITEM ===== */
-.menu li.active {
-  background: linear-gradient(90deg, #4f7df3, #2a5298);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  color: white;
-}
-.menu li.active .icon, .menu li.active .menu-text {
-  color: white;
-}
-
-/* ===== LOGOUT SECTION (Force to bottom) ===== */
-.logout-section {
-  margin-top: auto;
-  padding-top: 20px;
-}
-.logout-section li {
-  color: #ffb3b3; /* Subtle red for logout */
+  color: #ffb3b3;
 }
 .logout-section li:hover {
   background: rgba(255, 79, 79, 0.1);
 }
+
 .sidebar li a {
   display: flex;
   align-items: center;
@@ -197,4 +124,93 @@
 
 .sidebar li.active a {
   background: linear-gradient(90deg, #4a7cff, #2b5cff);
+}
+
+/* ----- Tablet & mobile: off-canvas drawer ----- */
+@media (max-width: 1024px) {
+  :host {
+    width: 0;
+    min-width: 0;
+    flex: 0 0 0;
+    overflow: visible;
+    align-self: stretch;
+    position: relative;
+    z-index: 1001;
+  }
+
+  .sidebar-drawer-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    margin: 0;
+  }
+
+  #checkmate-sidebar-drawer:checked ~ .sidebar-drawer-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: min(280px, 88vw);
+    max-width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 1001;
+    border-radius: 0 16px 16px 0;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  #checkmate-sidebar-drawer:checked ~ .sidebar {
+    transform: translateX(0);
+  }
+
+  .menu li {
+    font-size: 14px;
+    padding: 11px 14px;
+  }
+}
+
+/* ----- Desktop: fixed visible rail ----- */
+@media (min-width: 1025px) {
+  :host {
+    flex-shrink: 0;
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .sidebar-drawer-scrim {
+    display: none !important;
+  }
+
+  .sidebar {
+    position: sticky;
+    transform: none !important;
+    width: 240px;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu li {
+    font-size: 13px;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .icon {
+    font-size: 20px;
+  }
 }

@@ -294,3 +294,98 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 /* Overlay */
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); z-index: 90; }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 18px 16px;
+  }
+
+  .content-card {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .role-list-panel,
+  .users-panel {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    max-height: 280px;
+  }
+
+  .role-list {
+    max-height: 200px;
+  }
+
+  .users-panel {
+    max-height: 320px;
+  }
+
+  .permissions-panel {
+    padding: 20px 16px;
+    overflow: visible;
+  }
+
+  .panel-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .unsaved-changes {
+    margin-right: 0;
+    justify-content: center;
+  }
+
+  .footer-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .footer-actions .btn {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-content {
+    padding: 14px 12px;
+  }
+
+  .role-list-panel h2,
+  .users-panel h2 {
+    font-size: 14px;
+  }
+
+  .permissions-panel h2 {
+    font-size: 16px;
+  }
+
+  .permission-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .switch {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .role-list li,
+  .user-list li {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .btn {
+    font-size: 13px;
+  }
+}

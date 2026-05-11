@@ -210,3 +210,119 @@ button { cursor: pointer; padding: 8px 15px; border-radius: 5px; font-weight: bo
 }
 
 .btn-remove-file:hover { color: #dc2626; }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .builder-container {
+    padding: 16px;
+  }
+
+  .header h2 {
+    font-size: 1.35rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .col {
+    width: 100%;
+  }
+
+  .adv-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .section-title-input {
+    width: 100%;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .action-bar button {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .builder-container {
+    padding: 12px;
+  }
+
+  .header h2 {
+    font-size: 1.2rem;
+  }
+
+  .adv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-basic {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .task-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .task-inputs > * {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .task-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  button.btn-primary,
+  button.btn-secondary {
+    width: 100%;
+    max-width: none;
+  }
+
+  .btn-danger-sm {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 14px;
+  }
+
+  label {
+    font-size: 12px;
+  }
+
+  input,
+  select {
+    font-size: 13px;
+    padding: 9px;
+  }
+
+  .btn-primary {
+    font-size: 15px;
+    padding: 11px 18px;
+  }
+}

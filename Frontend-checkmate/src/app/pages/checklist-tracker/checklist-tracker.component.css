@@ -111,3 +111,68 @@
   color: #6b7280;
   text-align: right;
 }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .page {
+    padding: 20px 16px;
+  }
+
+  .page h1 {
+    font-size: 1.5rem;
+  }
+
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 12px;
+  }
+
+  .page h1 {
+    font-size: 1.3rem;
+  }
+
+  .card-container {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .user {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .page h1 {
+    font-size: 1.15rem;
+  }
+
+  .card {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .task-row {
+    align-items: flex-start;
+  }
+}

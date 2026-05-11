@@ -7,17 +7,53 @@
   align-items: center;
   padding: 0 30px;
   border-bottom: 1px solid #eee;
+  gap: 12px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .left-section {
   display: flex;
   align-items: center;
   gap: 15px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Hamburger: tablet + mobile only (paired with sidebar drawer checkbox) */
+.sidebar-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-hamburger:hover {
+  background: #e0e7ff;
+}
+
+.sidebar-hamburger .material-icons {
+  font-size: 26px;
+  line-height: 1;
 }
 
 .logo-img {
   height: 150px;
   width: auto;
+  max-height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brand {
@@ -42,6 +78,8 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .right-section input {
@@ -49,6 +87,7 @@
   border-radius: 20px;
   border: 1px solid #ddd;
   outline: none;
+  min-width: 0;
 }
 
 .bell {
@@ -56,4 +95,95 @@
   cursor: pointer;
 }
 
+.left-section h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-hamburger {
+    display: inline-flex;
+  }
+
+  .top-navbar {
+    padding: 0 16px;
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .logo-img {
+    max-height: 44px;
+  }
+
+  .left-section h2 {
+    font-size: 1.1rem;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .right-section {
+    width: 100%;
+    flex: 1 1 100%;
+    order: 3;
+    gap: 12px;
+  }
+
+  .right-section input {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .left-section {
+    gap: 10px;
+    flex: 1 1 auto;
+  }
+
+  .left-section h2 {
+    font-size: 1rem;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .logo-img {
+    max-height: 36px;
+  }
+
+  .sidebar-hamburger {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-navbar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .left-section h2 {
+    font-size: 0.95rem;
+  }
+
+  .right-section input {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+}
 

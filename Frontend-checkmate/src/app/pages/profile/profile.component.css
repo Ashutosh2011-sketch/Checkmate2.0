@@ -47,3 +47,60 @@ button.primary {
   background-color: #2563eb;
   color: white;
 }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .profile-wrapper {
+    padding: 16px;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .profile-wrapper h2 {
+    font-size: 1.35rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-wrapper h2 {
+    font-size: 1.2rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .button-group button {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-wrapper {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    font-size: 16px;
+  }
+}

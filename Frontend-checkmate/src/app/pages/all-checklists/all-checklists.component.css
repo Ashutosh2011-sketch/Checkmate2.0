@@ -170,3 +170,95 @@
   color: #334155;
   font-weight: 500;
 }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .all-checklists-page {
+    padding: 20px 18px;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .controls-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .search-box {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .all-checklists-page {
+    padding: 16px 12px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .filter-label {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .all-checklists-page {
+    padding: 12px 10px;
+  }
+
+  .header-section h2 {
+    font-size: 22px;
+  }
+
+  .filter-btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .checklist-card {
+    padding: 16px;
+  }
+
+  .label {
+    font-size: 10px;
+  }
+
+  .value {
+    font-size: 12px;
+  }
+}

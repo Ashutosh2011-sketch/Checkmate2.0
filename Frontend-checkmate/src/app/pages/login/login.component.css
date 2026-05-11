@@ -177,3 +177,81 @@ h2 {
   font-weight: bold;
   color: #1e1b4b; 
 }
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .login-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 1.25rem 1.25rem;
+  }
+
+  .login-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+
+  .login-nav a {
+    margin-left: 0;
+    font-size: 0.9rem;
+  }
+
+  .brand-logo-img {
+    max-width: 160px;
+  }
+}
+
+@media (max-width: 767px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+    margin-top: 1rem;
+    max-width: calc(100vw - 24px);
+  }
+
+  h2 {
+    font-size: 1.65rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .btn-get-started {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-header {
+    padding: 1rem;
+  }
+
+  .brand-logo-img {
+    max-width: 130px;
+  }
+
+  .login-nav a {
+    font-size: 0.85rem;
+  }
+
+  .login-card {
+    padding: 1.5rem 1.1rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .form-control {
+    font-size: 16px;
+  }
+
+  .btn-login {
+    font-size: 1rem;
+  }
+}

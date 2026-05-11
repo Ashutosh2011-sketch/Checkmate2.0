@@ -570,7 +570,7 @@
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .hero {
     min-height: min(480px, 55vh);
     padding: 8px 24px 70px;
@@ -605,6 +605,16 @@
 
   .about-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-title {
+    font-size: 1.65rem;
+  }
+
+  .btn-pricing {
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
   }
 }
 
@@ -658,6 +668,20 @@
 
   .hero-illustration {
     display: none;
+  }
+
+  .btn-cta {
+    width: 100%;
+    max-width: none;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .nav-links .btn-login {
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+    box-sizing: border-box;
   }
 
   .features {

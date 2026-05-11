@@ -494,4 +494,112 @@
 .att-delete-btn:hover {
   background: #fee2e2;
   color: #e74c3c;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 1024px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .search {
+    width: 100%;
+    max-width: none;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filters > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .filters button {
+    margin-left: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .task-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .left {
+    width: 100%;
+  }
+
+  .right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .collab-tabs {
+    flex-wrap: wrap;
+  }
+
+  .comment-input-row {
+    flex-wrap: wrap;
+  }
+
+  .comment-send-btn {
+    width: 100%;
+  }
+
+  .attachment-upload-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .top-bar h2 {
+    font-size: 1.25rem;
+  }
+
+  .section {
+    padding: 12px;
+  }
+
+  .meta {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar h2 {
+    font-size: 1.1rem;
+  }
+
+  .sub {
+    font-size: 12px;
+  }
+
+  .filters button {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .comment-body {
+    padding-left: 0;
+  }
 }

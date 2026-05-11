@@ -588,21 +588,214 @@
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 1200px) {
-  .summary-cards { grid-template-columns: repeat(2, 1fr); }
-  .charts-row    { grid-template-columns: 1fr; }
-  .insights-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 1024px) {
+  .reports-wrapper {
+    padding: 22px 18px;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .page-subtitle {
+    font-size: 12px;
+  }
+
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .bar-chart {
+    height: 140px;
+    padding-left: 36px;
+    gap: 8px;
+  }
+
+  .perf-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .perf-stats {
+    align-items: flex-start;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 
-@media (max-width: 768px) {
-  .reports-wrapper { padding: 18px 16px; }
-  .page-header     { flex-direction: column; }
-  .summary-cards   { grid-template-columns: 1fr 1fr; }
-  .header-actions  { flex-direction: column; align-items: flex-start; }
-  .filter-group    { flex-wrap: wrap; }
-  .insights-grid   { grid-template-columns: 1fr; }
+/* Tablet only: hide less important overdue table columns */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .report-table th:nth-child(3),
+  .report-table td:nth-child(3),
+  .report-table th:nth-child(5),
+  .report-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .reports-wrapper {
+    padding: 16px 12px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .filter-select,
+  .filter-date {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .btn-export {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    padding: 14px 16px;
+  }
+
+  .card-value {
+    font-size: 1.15rem;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    padding: 16px 18px;
+  }
+
+  .insight-card {
+    flex-wrap: wrap;
+  }
+
+  /* Mobile: overdue table as stacked cards */
+  .report-table thead {
+    display: none;
+  }
+
+  .report-table tbody tr {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .report-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 10px 14px;
+  }
+
+  .report-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  .report-table tbody td::before {
+    font-weight: 600;
+    color: #94a3b8;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  .report-table tbody td:nth-child(1)::before { content: "Task"; }
+  .report-table tbody td:nth-child(2)::before { content: "Owner"; }
+  .report-table tbody td:nth-child(3)::before { content: "Dept"; }
+  .report-table tbody td:nth-child(4)::before { content: "Due"; }
+  .report-table tbody td:nth-child(5)::before { content: "Overdue"; }
+  .report-table tbody td:nth-child(6)::before { content: "Status"; }
+
+  .report-table tbody tr td:only-child {
+    display: block;
+    text-align: center;
+  }
+
+  .report-table tbody tr td:only-child::before {
+    display: none;
+  }
+
+  .owner-cell {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .perf-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .perf-stats {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .summary-cards { grid-template-columns: 1fr; }
+  .page-title {
+    font-size: 1.1rem;
+  }
+
+  .chart-title {
+    font-size: 14px;
+  }
+
+  .bar-label {
+    font-size: 9px;
+  }
+
+  .summary-card {
+    flex-wrap: wrap;
+  }
+
+  .card-trend {
+    width: 100%;
+    text-align: right;
+  }
 }
