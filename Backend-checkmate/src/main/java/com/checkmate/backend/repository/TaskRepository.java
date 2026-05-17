@@ -49,7 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             """, nativeQuery = true)
     List<Object[]> findFullTasksByUserName(@Param("userName") String userName);
 
-    // ðŸ”¥ NEW â†’ THIS FIXES YOUR USER TASK API (USE THIS IN CONTROLLER)
+    // User-side tracker task payload.
     @Query(value = """
                 SELECT
                     t.id,
@@ -60,13 +60,25 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                     t.completed,
                     s.section_name,
                     STRING_AGG(ta.assignee, ',') as assignees,
-                    t.depends_on   -- ✅ ADD THIS
+                    t.depends_on,
+                    c.id as checklist_id,
+                    c.checklist_name,
+                    COALESCE(c.department, 'Unassigned') as department,
+                    c.visibility,
+                    c.workflow_type,
+                    t.condition_dependent_on,
+                    t.condition_expected_outcome,
+                    COALESCE(t.sort_order, 0) as sort_order
                 FROM tasks t
                 JOIN sections s ON t.section_id = s.id
+                JOIN checklists c ON s.checklist_id = c.id
                 JOIN task_assignees ta ON ta.task_id = t.id
-                WHERE LOWER(ta.assignee) = LOWER(:username)
+                WHERE LOWER(TRIM(SPLIT_PART(ta.assignee, '(', 1))) = LOWER(TRIM(:username))
                 GROUP BY t.id, t.title, t.description, t.priority,
-                         t.due_date_days, t.completed, s.section_name, t.depends_on
+                         t.due_date_days, t.completed, s.section_name, t.depends_on,
+                         c.id, c.checklist_name, c.department, c.visibility, c.workflow_type,
+                         t.condition_dependent_on, t.condition_expected_outcome, t.sort_order
+                ORDER BY c.checklist_name, COALESCE(t.sort_order, 0), t.id
             """, nativeQuery = true)
     List<Object[]> findTasksByExactUser(@Param("username") String username);
 

@@ -2,13 +2,17 @@ package com.checkmate.backend.controller;
 
 import com.checkmate.backend.entity.Task;
 import com.checkmate.backend.repository.TaskRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,34 +29,9 @@ public class TaskController {
 
         List<Task> tasks = taskRepository.findBySection_Checklist_Id(checklistId);
 
-        return tasks.stream().map(task -> {
-            TaskResponse dto = new TaskResponse();
-
-            dto.id = task.getId();
-            dto.title = task.getTitle();
-            dto.description = task.getDescription();
-            dto.priority = task.getPriority();
-            dto.dueDateDays = task.getDueDateDays();
-            dto.status = task.isCompleted() ? "Completed" : "Pending";
-
-            dto.sectionName = task.getSection() != null
-                    ? task.getSection().getSectionName()
-                    : "General";
-
-            dto.assignees = task.getAssignees() != null
-                    ? task.getAssignees()
-                    : List.of();
-
-            dto.dependsOn = task.getDependsOn();
-            dto.conditionDependentOn = task.getConditionDependentOn();
-            dto.conditionExpectedOutcome = task.getConditionExpectedOutcome();
-            dto.sortOrder = task.getSortOrder();
-            dto.workflowType = "SEQUENTIAL";
-            dto.completedAt = task.getCompletedAt();
-            dto.completedBy = task.getCompletedBy();
-
-            return dto;
-        }).collect(Collectors.toList());
+        return tasks.stream()
+                .map(this::toTaskResponse)
+                .collect(Collectors.toList());
     }
 
     // ✅ GET TASKS BY USER
@@ -94,6 +73,40 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{taskId}/claim")
+    @Transactional
+    public ResponseEntity<?> claimTask(@PathVariable Long taskId, @RequestBody Map<String, String> body) {
+
+        String userName = body.getOrDefault("userName", "").trim();
+        if (userName.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User name is required"));
+        }
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        String visibility = task.getSection() != null && task.getSection().getChecklist() != null
+                ? task.getSection().getChecklist().getVisibility()
+                : "";
+
+        if (!"Public".equalsIgnoreCase(visibility)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Only public checklist tasks can be claimed"));
+        }
+
+        if (!isUnassigned(task)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Task is already assigned"));
+        }
+
+        List<String> assignees = new ArrayList<>();
+        assignees.add(userName);
+        task.setAssignees(assignees);
+
+        Task savedTask = taskRepository.save(task);
+        return ResponseEntity.ok(toTaskResponse(savedTask));
+    }
+
 
     // 🔥 TOGGLE TASK (MAIN FIX)
     @PutMapping("/toggle/{taskId}")
@@ -121,6 +134,48 @@ public class TaskController {
     }
 
     // 📦 DTO
+    private TaskResponse toTaskResponse(Task task) {
+        TaskResponse dto = new TaskResponse();
+
+        dto.id = task.getId();
+        dto.title = task.getTitle();
+        dto.description = task.getDescription();
+        dto.priority = task.getPriority();
+        dto.dueDateDays = task.getDueDateDays();
+        dto.status = task.getStatus();
+
+        dto.sectionName = task.getSection() != null
+                ? task.getSection().getSectionName()
+                : "General";
+
+        dto.assignees = task.getAssignees() != null
+                ? task.getAssignees()
+                : List.of();
+
+        if (task.getSection() != null && task.getSection().getChecklist() != null) {
+            dto.checklistId = task.getSection().getChecklist().getId();
+            dto.checklistName = task.getSection().getChecklist().getChecklistName();
+            dto.department = task.getSection().getChecklist().getDepartment();
+            dto.visibility = task.getSection().getChecklist().getVisibility();
+            dto.workflowType = task.getSection().getChecklist().getWorkflowType();
+        }
+
+        dto.dependsOn = task.getDependsOn();
+        dto.conditionDependentOn = task.getConditionDependentOn();
+        dto.conditionExpectedOutcome = task.getConditionExpectedOutcome();
+        dto.sortOrder = task.getSortOrder();
+        dto.completedAt = task.getCompletedAt();
+        dto.completedBy = task.getCompletedBy();
+
+        return dto;
+    }
+
+    private boolean isUnassigned(Task task) {
+        return task.getAssignees() == null || task.getAssignees().stream()
+                .map(assignee -> assignee == null ? "" : assignee.trim())
+                .allMatch(assignee -> assignee.isBlank() || "Unassigned".equalsIgnoreCase(assignee));
+    }
+
     static class TaskResponse {
         public Long id;
         public String title;

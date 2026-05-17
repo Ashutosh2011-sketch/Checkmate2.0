@@ -68,6 +68,7 @@ public class SecurityConfig {
                         // User-side tracker APIs
                         .requestMatchers(HttpMethod.GET, "/api/tasks/user/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/tasks/toggle/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/claim").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/checklist/**").authenticated()
 
                         // User-side checklist listing

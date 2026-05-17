@@ -35,6 +35,7 @@ export class ChecklistDetailComponent implements OnInit {
   loadingAttachments: boolean = false;
   newCommentText: string = '';
   userName: string = '';
+  claimingTaskIds = new Set<number>();
 
   // Counts cache
   collabCounts: Map<number, { commentCount: number; attachmentCount: number }> = new Map();
@@ -178,6 +179,35 @@ export class ChecklistDetailComponent implements OnInit {
     this.activeStatus = 'All';
     this.activePriority = 'All';
     this.applyFilters();
+  }
+
+  canClaimTask(task: any): boolean {
+    return this.isPublicTask(task) && this.isTaskUnassigned(task);
+  }
+
+  getAssigneeLabel(task: any): string {
+    const assignees = this.getCleanAssignees(task);
+    return assignees.length ? assignees.join(', ') : 'Unassigned';
+  }
+
+  claimTask(task: any): void {
+    if (!this.canClaimTask(task) || this.claimingTaskIds.has(task.id)) {
+      return;
+    }
+
+    this.claimingTaskIds.add(task.id);
+
+    this.checklistService.claimTask(task.id, this.userName).subscribe({
+      next: (updatedTask) => {
+        this.replaceTask(updatedTask);
+        this.claimingTaskIds.delete(task.id);
+      },
+      error: (err) => {
+        console.error('Error claiming task:', err);
+        this.claimingTaskIds.delete(task.id);
+        alert(err?.error?.error || 'Unable to claim this task.');
+      }
+    });
   }
 
   // ==================== COLLABORATION ====================
@@ -349,5 +379,29 @@ export class ChecklistDetailComponent implements OnInit {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  private isPublicTask(task: any): boolean {
+    return String(task?.visibility || '').toLowerCase() === 'public';
+  }
+
+  private isTaskUnassigned(task: any): boolean {
+    const assignees = this.getCleanAssignees(task);
+    return assignees.length === 0 || assignees.every(assignee => assignee.toLowerCase() === 'unassigned');
+  }
+
+  private getCleanAssignees(task: any): string[] {
+    const assignees = Array.isArray(task?.assignees) ? task.assignees : [];
+    return assignees
+      .map((assignee: any) => String(assignee || '').trim())
+      .filter(Boolean);
+  }
+
+  private replaceTask(updatedTask: any): void {
+    this.tasks = this.tasks.map(task =>
+      task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+    );
+    this.applyFilters();
+    this.calculateProgress();
   }
 }

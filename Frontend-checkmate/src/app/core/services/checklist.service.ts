@@ -28,4 +28,8 @@ export class ChecklistService extends ApiService {
   getTasksByChecklist(id: number): Observable<any[]> {
     return this.get<any[]>(`/tasks/checklist/${id}`);
   }
+
+  claimTask(taskId: number, userName: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/tasks/${taskId}/claim`, { userName });
+  }
 }
