@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TaskService } from '../../services/task.service';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 type WorkflowType = 'Sequential' | 'Parallel';
 type Priority = 'High' | 'Medium' | 'Low';

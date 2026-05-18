@@ -1,6 +1,4 @@
-// IMPORTANT: Replace YOUR_BACKEND_RENDER_URL with your actual Render backend service URL
-// e.g. https://checkmate-backend.onrender.com
 export const environment = {
   production: true,
-  apiUrl: 'https://checkmate-backend-fewm.onrender.com'
+  apiUrl: 'https://checkmate-backend-fewm.onrender.com/api'
 };
