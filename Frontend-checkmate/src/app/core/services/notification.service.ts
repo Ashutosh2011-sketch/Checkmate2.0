@@ -1,50 +1,28 @@
-
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private baseUrl = 'http://localhost:8080';
 
-  constructor(private http: HttpClient) { }
+  private baseUrl = environment.apiUrl;
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  constructor(private http: HttpClient) {}
 
   getNotifications(): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.baseUrl}/api/notifications/me`, 
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any[]>(`${this.baseUrl}/notifications/me`);
   }
 
   markAsRead(id: number): Observable<void> {
-    return this.http.put<void>(
-      `${this.baseUrl}/api/notifications/${id}/read`, 
-      {}, 
-      { headers: this.getHeaders() }
-    );
+    return this.http.put<void>(`${this.baseUrl}/notifications/${id}/read`, {});
   }
 
   getAdminNotifications(): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.baseUrl}/api/notifications/admin`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any[]>(`${this.baseUrl}/notifications/admin`);
   }
 
   markAllAdminRead(): Observable<void> {
-    return this.http.put<void>(
-      `${this.baseUrl}/api/notifications/admin/mark-all-read`, 
-      {}, 
-      { headers: this.getHeaders() }
-    );
+    return this.http.put<void>(`${this.baseUrl}/notifications/admin/mark-all-read`, {});
   }
 }

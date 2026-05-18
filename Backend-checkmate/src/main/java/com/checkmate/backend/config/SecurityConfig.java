@@ -26,9 +26,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${app.cors.allowed-origin:http://localhost:4200}")
+    private String allowedOrigin;
 
     @Autowired
     private JwtFilter jwtFilter;
@@ -68,6 +72,7 @@ public class SecurityConfig {
                         // User-side tracker APIs
                         .requestMatchers(HttpMethod.GET, "/api/tasks/user/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/tasks/toggle/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/claim").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/checklist/**").authenticated()
 
                         // User-side checklist listing
@@ -102,7 +107,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedOrigins(List.of(allowedOrigin));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

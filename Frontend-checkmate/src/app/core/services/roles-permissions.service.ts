@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Role, Permission } from '../models/roles-permissions.model';
+import { environment } from '../../../environments/environment';
 
 export interface UserPermissionInfo {
   userId: number;
@@ -11,12 +12,10 @@ export interface UserPermissionInfo {
   permissions: Permission[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class RolesPermissionsService {
 
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -46,12 +45,10 @@ export class RolesPermissionsService {
   }
 
   // ===== USER-LEVEL =====
-  // Uses /api/role-users/{roleName} to get users by role
   getUsersByRole(roleName: string): Observable<UserPermissionInfo[]> {
     return this.http.get<UserPermissionInfo[]>(`${this.apiUrl}/role-users/${roleName}`);
   }
 
-  // Uses /api/user-permissions/{userId} — NEW path to avoid conflict with /api/users
   getUserPermissions(userId: number): Observable<UserPermissionInfo> {
     return this.http.get<UserPermissionInfo>(`${this.apiUrl}/user-permissions/${userId}`);
   }

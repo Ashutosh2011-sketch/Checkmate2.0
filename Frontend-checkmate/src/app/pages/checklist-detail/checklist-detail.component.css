@@ -123,6 +123,30 @@
 .status-progress { background: #3b82f6; }
 .status-pending { background: #6b7280; }
 
+.claim-task-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.claim-task-btn:hover {
+  background: #1d4ed8;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22);
+}
+
+.claim-task-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .empty {
   text-align: center;
   margin-top: 40px;
@@ -602,4 +626,4 @@
   .comment-body {
     padding-left: 0;
   }
-}
+}

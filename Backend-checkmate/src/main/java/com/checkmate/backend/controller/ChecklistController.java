@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/checklists")
-@CrossOrigin(origins = "http://localhost:4200") 
+@CrossOrigin(origins = "${app.cors.allowed-origin:http://localhost:4200}") 
 public class ChecklistController {
 
     private final ChecklistService checklistService;

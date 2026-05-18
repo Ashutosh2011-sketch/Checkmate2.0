@@ -18,4 +18,4 @@ Checkmate/*.log
 Thumbs.db
 .vscode/
 
-Backend-checkmate/src/main/resources/application.properties
+# application.properties is committed (no secrets — all secrets come from env vars)

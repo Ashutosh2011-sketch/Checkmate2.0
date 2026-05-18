@@ -61,14 +61,14 @@
       <div *ngFor="let task of section.value"
            class="task-card-wrapper">
 
-        <div class="task-card" [class.locked]="isTaskLocked(task)">
+        <div class="task-card" [class.locked]="isTaskLocked(task) && !canClaimTask(task)">
 
           <div class="left">
             <h4>{{ task.title }}</h4>
             <p>{{ task.description }}</p>
 
             <div class="meta">
-              <span>👤 {{ task.assignees?.join(', ') }}</span>
+              <span>👤 {{ getAssigneeLabel(task) }}</span>
               <span>⏱ {{ formatDays(task.dueDateDays) }}</span>
             </div>
           </div>
@@ -81,6 +81,14 @@
             <span class="badge" [ngClass]="getStatusClass(task.status)">
               {{ task.status }}
             </span>
+
+            <button *ngIf="canClaimTask(task)"
+                    class="claim-task-btn"
+                    type="button"
+                    [disabled]="claimingTaskIds.has(task.id)"
+                    (click)="claimTask(task); $event.stopPropagation()">
+              {{ claimingTaskIds.has(task.id) ? 'Claiming...' : 'Claim Task' }}
+            </button>
 
             <!-- Collaboration Toggle -->
             <button class="collab-toggle-btn"
