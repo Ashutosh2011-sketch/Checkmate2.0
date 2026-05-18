@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TaskService } from '../../services/task.service';
+import { environment } from '../../../../environments/environment';
 
 type WorkflowType = 'Sequential' | 'Parallel';
 type Priority = 'High' | 'Medium' | 'Low';
@@ -138,7 +139,7 @@ export class ChecklistTrackerComponent {
 
     task.completed = !task.completed;
 
-    fetch(`http://localhost:8080/api/tasks/toggle/${task.id}`, {
+    fetch(`${environment.apiUrl}/tasks/toggle/${task.id}`, {
       method: 'PUT'
     }).catch(() => {
       task.completed = !task.completed;

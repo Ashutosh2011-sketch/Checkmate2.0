@@ -5,14 +5,15 @@ import {
   AdminDashboardSummary, Dashboard, TaskInfo,
   TaskComment, TaskAttachment, CollaborationCounts
 } from '../models/dashboard.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
 
-  private api = 'http://localhost:8080/api/dashboard';
-  private collabApi = 'http://localhost:8080/api/collaboration';
+  private api = `${environment.apiUrl}/dashboard`;
+  private collabApi = `${environment.apiUrl}/collaboration`;
 
   constructor(private http: HttpClient) {}
 
@@ -24,24 +25,20 @@ export class DashboardService {
     return this.http.get<AdminDashboardSummary>(`${this.api}/admin/summary`);
   }
 
-  // Update task completion percentage
   updateTaskStatus(taskId: number, completionPercent: number): Observable<TaskInfo> {
     return this.http.put<TaskInfo>(`${this.api}/tasks/${taskId}/status`, { completionPercent });
   }
 
-  // Mark a single task as completed (100%)
   markTaskComplete(taskId: number): Observable<TaskInfo> {
     return this.http.put<TaskInfo>(`${this.api}/tasks/${taskId}/complete`, {});
   }
 
-  // Mark entire checklist as completed
   markChecklistComplete(checklistId: number): Observable<any> {
     return this.http.put(`${this.api}/checklists/${checklistId}/complete`, {});
   }
 
   // ==================== COLLABORATION ====================
 
-  // Comments
   getComments(taskId: number): Observable<TaskComment[]> {
     return this.http.get<TaskComment[]>(`${this.collabApi}/tasks/${taskId}/comments`);
   }
@@ -56,7 +53,6 @@ export class DashboardService {
     return this.http.delete(`${this.collabApi}/comments/${commentId}`);
   }
 
-  // Attachments
   getAttachments(taskId: number): Observable<TaskAttachment[]> {
     return this.http.get<TaskAttachment[]>(`${this.collabApi}/tasks/${taskId}/attachments`);
   }
@@ -78,7 +74,6 @@ export class DashboardService {
     return this.http.delete(`${this.collabApi}/attachments/${attachmentId}`);
   }
 
-  // Counts for badges
   getCollaborationCounts(taskId: number): Observable<CollaborationCounts> {
     return this.http.get<CollaborationCounts>(`${this.collabApi}/tasks/${taskId}/counts`);
   }

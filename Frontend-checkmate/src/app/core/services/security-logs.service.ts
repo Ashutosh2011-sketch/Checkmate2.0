@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AccessLogEntry {
   username: string;
@@ -12,7 +13,7 @@ export interface AccessLogEntry {
 
 @Injectable({ providedIn: 'root' })
 export class SecurityLogsService {
-  private readonly api = 'http://localhost:8080/api/security';
+  private readonly api = `${environment.apiUrl}/security`;
 
   constructor(private http: HttpClient) {}
 
