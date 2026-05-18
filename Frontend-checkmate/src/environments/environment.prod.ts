@@ -2,5 +2,5 @@
 // e.g. https://checkmate-backend.onrender.com
 export const environment = {
   production: true,
-  apiUrl: 'https://YOUR_BACKEND_RENDER_URL/api'
+  apiUrl: 'https://checkmate-backend-fewm.onrender.com'
 };
